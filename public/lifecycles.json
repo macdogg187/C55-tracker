@@ -1,0 +1,2086 @@
+{
+  "generated_at": "2026-05-07T03:50:49.222137+00:00",
+  "equipment": [
+    {
+      "equipment_id": "0938",
+      "display_name": "C55 Equipment 0938"
+    },
+    {
+      "equipment_id": "0091",
+      "display_name": "C55 Equipment 0091"
+    },
+    {
+      "equipment_id": "0198",
+      "display_name": "C55 Equipment 0198"
+    }
+  ],
+  "slots": [
+    {
+      "installation_id": "0938_H1",
+      "equipment_id": "0938",
+      "part_code": "HVB",
+      "zone": "homogenizer",
+      "orientation": "center",
+      "slot_index": 1,
+      "sequence_order": 401
+    },
+    {
+      "installation_id": "0938_MC2",
+      "equipment_id": "0938",
+      "part_code": "HPT",
+      "zone": "cluster",
+      "orientation": "middle",
+      "slot_index": 2,
+      "sequence_order": 112
+    },
+    {
+      "installation_id": "0938_MP2",
+      "equipment_id": "0938",
+      "part_code": "BUS",
+      "zone": "pump",
+      "orientation": "middle",
+      "slot_index": 2,
+      "sequence_order": 212
+    },
+    {
+      "installation_id": "0938_RP3",
+      "equipment_id": "0938",
+      "part_code": "PB",
+      "zone": "pump",
+      "orientation": "right",
+      "slot_index": 3,
+      "sequence_order": 223
+    },
+    {
+      "installation_id": "0091_H4",
+      "equipment_id": "0091",
+      "part_code": "CSTEM",
+      "zone": "homogenizer",
+      "orientation": "center",
+      "slot_index": 4,
+      "sequence_order": 404
+    },
+    {
+      "installation_id": "0091_H3",
+      "equipment_id": "0091",
+      "part_code": "IR",
+      "zone": "homogenizer",
+      "orientation": "center",
+      "slot_index": 3,
+      "sequence_order": 403
+    },
+    {
+      "installation_id": "0938_LC2",
+      "equipment_id": "0938",
+      "part_code": "HPT",
+      "zone": "cluster",
+      "orientation": "left",
+      "slot_index": 2,
+      "sequence_order": 102
+    },
+    {
+      "installation_id": "0091_MP3",
+      "equipment_id": "0091",
+      "part_code": "PB",
+      "zone": "pump",
+      "orientation": "middle",
+      "slot_index": 3,
+      "sequence_order": 213
+    },
+    {
+      "installation_id": "0938_MC1",
+      "equipment_id": "0938",
+      "part_code": "ICVB",
+      "zone": "cluster",
+      "orientation": "middle",
+      "slot_index": 1,
+      "sequence_order": 111
+    },
+    {
+      "installation_id": "0938_LC1",
+      "equipment_id": "0938",
+      "part_code": "ICVB",
+      "zone": "cluster",
+      "orientation": "left",
+      "slot_index": 1,
+      "sequence_order": 101
+    },
+    {
+      "installation_id": "0938_RC2",
+      "equipment_id": "0938",
+      "part_code": "HPT",
+      "zone": "cluster",
+      "orientation": "right",
+      "slot_index": 2,
+      "sequence_order": 122
+    },
+    {
+      "installation_id": "0198_H4",
+      "equipment_id": "0198",
+      "part_code": "CSTEM",
+      "zone": "homogenizer",
+      "orientation": "center",
+      "slot_index": 4,
+      "sequence_order": 404
+    },
+    {
+      "installation_id": "0198_H1",
+      "equipment_id": "0198",
+      "part_code": "HVB",
+      "zone": "homogenizer",
+      "orientation": "center",
+      "slot_index": 1,
+      "sequence_order": 401
+    },
+    {
+      "installation_id": "0198_H3",
+      "equipment_id": "0198",
+      "part_code": "IR",
+      "zone": "homogenizer",
+      "orientation": "center",
+      "slot_index": 3,
+      "sequence_order": 403
+    },
+    {
+      "installation_id": "0198_MC3",
+      "equipment_id": "0198",
+      "part_code": "OCVB",
+      "zone": "cluster",
+      "orientation": "middle",
+      "slot_index": 3,
+      "sequence_order": 113
+    },
+    {
+      "installation_id": "0198_MC1",
+      "equipment_id": "0198",
+      "part_code": "ICVB",
+      "zone": "cluster",
+      "orientation": "middle",
+      "slot_index": 1,
+      "sequence_order": 111
+    },
+    {
+      "installation_id": "0198_MC4",
+      "equipment_id": "0198",
+      "part_code": "ICVBS",
+      "zone": "cluster",
+      "orientation": "middle",
+      "slot_index": 4,
+      "sequence_order": 114
+    },
+    {
+      "installation_id": "0938_LC3",
+      "equipment_id": "0938",
+      "part_code": "OCVB",
+      "zone": "cluster",
+      "orientation": "left",
+      "slot_index": 3,
+      "sequence_order": 103
+    },
+    {
+      "installation_id": "0198_LC4",
+      "equipment_id": "0198",
+      "part_code": "ICVBS",
+      "zone": "cluster",
+      "orientation": "left",
+      "slot_index": 4,
+      "sequence_order": 104
+    },
+    {
+      "installation_id": "0198_LC5",
+      "equipment_id": "0198",
+      "part_code": "OCVBS",
+      "zone": "cluster",
+      "orientation": "left",
+      "slot_index": 5,
+      "sequence_order": 105
+    },
+    {
+      "installation_id": "0198_LP2",
+      "equipment_id": "0198",
+      "part_code": "BUS",
+      "zone": "pump",
+      "orientation": "left",
+      "slot_index": 2,
+      "sequence_order": 202
+    },
+    {
+      "installation_id": "0091_H1",
+      "equipment_id": "0091",
+      "part_code": "HVB",
+      "zone": "homogenizer",
+      "orientation": "center",
+      "slot_index": 1,
+      "sequence_order": 401
+    },
+    {
+      "installation_id": "0198_MC5",
+      "equipment_id": "0198",
+      "part_code": "OCVBS",
+      "zone": "cluster",
+      "orientation": "middle",
+      "slot_index": 5,
+      "sequence_order": 115
+    },
+    {
+      "installation_id": "0198_MP2",
+      "equipment_id": "0198",
+      "part_code": "BUS",
+      "zone": "pump",
+      "orientation": "middle",
+      "slot_index": 2,
+      "sequence_order": 212
+    },
+    {
+      "installation_id": "0091_LP3",
+      "equipment_id": "0091",
+      "part_code": "PB",
+      "zone": "pump",
+      "orientation": "left",
+      "slot_index": 3,
+      "sequence_order": 203
+    },
+    {
+      "installation_id": "0198_O",
+      "equipment_id": "0198",
+      "part_code": "OM",
+      "zone": "manifold",
+      "orientation": "center",
+      "slot_index": null,
+      "sequence_order": 300
+    },
+    {
+      "installation_id": "0938_RC3",
+      "equipment_id": "0938",
+      "part_code": "OCVB",
+      "zone": "cluster",
+      "orientation": "right",
+      "slot_index": 3,
+      "sequence_order": 123
+    },
+    {
+      "installation_id": "0938_MC3",
+      "equipment_id": "0938",
+      "part_code": "OCVB",
+      "zone": "cluster",
+      "orientation": "middle",
+      "slot_index": 3,
+      "sequence_order": 113
+    },
+    {
+      "installation_id": "0198_RC4",
+      "equipment_id": "0198",
+      "part_code": "ICVBS",
+      "zone": "cluster",
+      "orientation": "right",
+      "slot_index": 4,
+      "sequence_order": 124
+    },
+    {
+      "installation_id": "0198_RC5",
+      "equipment_id": "0198",
+      "part_code": "OCVBS",
+      "zone": "cluster",
+      "orientation": "right",
+      "slot_index": 5,
+      "sequence_order": 125
+    },
+    {
+      "installation_id": "0198_RP2",
+      "equipment_id": "0198",
+      "part_code": "BUS",
+      "zone": "pump",
+      "orientation": "right",
+      "slot_index": 2,
+      "sequence_order": 222
+    },
+    {
+      "installation_id": "0938_H4",
+      "equipment_id": "0938",
+      "part_code": "CSTEM",
+      "zone": "homogenizer",
+      "orientation": "center",
+      "slot_index": 4,
+      "sequence_order": 404
+    },
+    {
+      "installation_id": "0938_H3",
+      "equipment_id": "0938",
+      "part_code": "IR",
+      "zone": "homogenizer",
+      "orientation": "center",
+      "slot_index": 3,
+      "sequence_order": 403
+    },
+    {
+      "installation_id": "0091_RP3",
+      "equipment_id": "0091",
+      "part_code": "PB",
+      "zone": "pump",
+      "orientation": "right",
+      "slot_index": 3,
+      "sequence_order": 223
+    },
+    {
+      "installation_id": "0938_MP4",
+      "equipment_id": "0938",
+      "part_code": "CVBSPB",
+      "zone": "pump",
+      "orientation": "middle",
+      "slot_index": 4,
+      "sequence_order": 214
+    },
+    {
+      "installation_id": "0198_LP3",
+      "equipment_id": "0198",
+      "part_code": "PB",
+      "zone": "pump",
+      "orientation": "left",
+      "slot_index": 3,
+      "sequence_order": 203
+    },
+    {
+      "installation_id": "0091_RC1",
+      "equipment_id": "0091",
+      "part_code": "ICVB",
+      "zone": "cluster",
+      "orientation": "right",
+      "slot_index": 1,
+      "sequence_order": 121
+    },
+    {
+      "installation_id": "0198_MP3",
+      "equipment_id": "0198",
+      "part_code": "PB",
+      "zone": "pump",
+      "orientation": "middle",
+      "slot_index": 3,
+      "sequence_order": 213
+    },
+    {
+      "installation_id": "0198_LC1",
+      "equipment_id": "0198",
+      "part_code": "ICVB",
+      "zone": "cluster",
+      "orientation": "left",
+      "slot_index": 1,
+      "sequence_order": 101
+    },
+    {
+      "installation_id": "0198_LC3",
+      "equipment_id": "0198",
+      "part_code": "OCVB",
+      "zone": "cluster",
+      "orientation": "left",
+      "slot_index": 3,
+      "sequence_order": 103
+    },
+    {
+      "installation_id": "0091_LC1",
+      "equipment_id": "0091",
+      "part_code": "ICVB",
+      "zone": "cluster",
+      "orientation": "left",
+      "slot_index": 1,
+      "sequence_order": 101
+    },
+    {
+      "installation_id": "0938_H2",
+      "equipment_id": "0938",
+      "part_code": "CSEAT",
+      "zone": "homogenizer",
+      "orientation": "center",
+      "slot_index": 2,
+      "sequence_order": 402
+    },
+    {
+      "installation_id": "0938_LP2",
+      "equipment_id": "0938",
+      "part_code": "BUS",
+      "zone": "pump",
+      "orientation": "left",
+      "slot_index": 2,
+      "sequence_order": 202
+    },
+    {
+      "installation_id": "0938_RP2",
+      "equipment_id": "0938",
+      "part_code": "BUS",
+      "zone": "pump",
+      "orientation": "right",
+      "slot_index": 2,
+      "sequence_order": 222
+    },
+    {
+      "installation_id": "0198_RC1",
+      "equipment_id": "0198",
+      "part_code": "ICVB",
+      "zone": "cluster",
+      "orientation": "right",
+      "slot_index": 1,
+      "sequence_order": 121
+    },
+    {
+      "installation_id": "0198_RC3",
+      "equipment_id": "0198",
+      "part_code": "OCVB",
+      "zone": "cluster",
+      "orientation": "right",
+      "slot_index": 3,
+      "sequence_order": 123
+    },
+    {
+      "installation_id": "0938_LC4",
+      "equipment_id": "0938",
+      "part_code": "ICVBS",
+      "zone": "cluster",
+      "orientation": "left",
+      "slot_index": 4,
+      "sequence_order": 104
+    },
+    {
+      "installation_id": "0938_LC5",
+      "equipment_id": "0938",
+      "part_code": "OCVBS",
+      "zone": "cluster",
+      "orientation": "left",
+      "slot_index": 5,
+      "sequence_order": 105
+    },
+    {
+      "installation_id": "0938_RC4",
+      "equipment_id": "0938",
+      "part_code": "ICVBS",
+      "zone": "cluster",
+      "orientation": "right",
+      "slot_index": 4,
+      "sequence_order": 124
+    },
+    {
+      "installation_id": "0938_RC5",
+      "equipment_id": "0938",
+      "part_code": "OCVBS",
+      "zone": "cluster",
+      "orientation": "right",
+      "slot_index": 5,
+      "sequence_order": 125
+    },
+    {
+      "installation_id": "0091_RC2",
+      "equipment_id": "0091",
+      "part_code": "HPT",
+      "zone": "cluster",
+      "orientation": "right",
+      "slot_index": 2,
+      "sequence_order": 122
+    },
+    {
+      "installation_id": "0091_MC2",
+      "equipment_id": "0091",
+      "part_code": "HPT",
+      "zone": "cluster",
+      "orientation": "middle",
+      "slot_index": 2,
+      "sequence_order": 112
+    },
+    {
+      "installation_id": "0091_LC2",
+      "equipment_id": "0091",
+      "part_code": "HPT",
+      "zone": "cluster",
+      "orientation": "left",
+      "slot_index": 2,
+      "sequence_order": 102
+    },
+    {
+      "installation_id": "0938_MC5",
+      "equipment_id": "0938",
+      "part_code": "OCVBS",
+      "zone": "cluster",
+      "orientation": "middle",
+      "slot_index": 5,
+      "sequence_order": 115
+    },
+    {
+      "installation_id": "0091_LP1",
+      "equipment_id": "0091",
+      "part_code": "PLG",
+      "zone": "pump",
+      "orientation": "left",
+      "slot_index": 1,
+      "sequence_order": 201
+    },
+    {
+      "installation_id": "0091_MP1",
+      "equipment_id": "0091",
+      "part_code": "PLG",
+      "zone": "pump",
+      "orientation": "middle",
+      "slot_index": 1,
+      "sequence_order": 211
+    },
+    {
+      "installation_id": "0091_LC3",
+      "equipment_id": "0091",
+      "part_code": "OCVB",
+      "zone": "cluster",
+      "orientation": "left",
+      "slot_index": 3,
+      "sequence_order": 103
+    },
+    {
+      "installation_id": "0091_MC1",
+      "equipment_id": "0091",
+      "part_code": "ICVB",
+      "zone": "cluster",
+      "orientation": "middle",
+      "slot_index": 1,
+      "sequence_order": 111
+    },
+    {
+      "installation_id": "0091_RP1",
+      "equipment_id": "0091",
+      "part_code": "PLG",
+      "zone": "pump",
+      "orientation": "right",
+      "slot_index": 1,
+      "sequence_order": 221
+    },
+    {
+      "installation_id": "0091_H2",
+      "equipment_id": "0091",
+      "part_code": "CSEAT",
+      "zone": "homogenizer",
+      "orientation": "center",
+      "slot_index": 2,
+      "sequence_order": 402
+    },
+    {
+      "installation_id": "0198_RP3",
+      "equipment_id": "0198",
+      "part_code": "PB",
+      "zone": "pump",
+      "orientation": "right",
+      "slot_index": 3,
+      "sequence_order": 223
+    },
+    {
+      "installation_id": "0938_RC1",
+      "equipment_id": "0938",
+      "part_code": "ICVB",
+      "zone": "cluster",
+      "orientation": "right",
+      "slot_index": 1,
+      "sequence_order": 121
+    },
+    {
+      "installation_id": "0091_LC4",
+      "equipment_id": "0091",
+      "part_code": "ICVBS",
+      "zone": "cluster",
+      "orientation": "left",
+      "slot_index": 4,
+      "sequence_order": 104
+    },
+    {
+      "installation_id": "0091_RC4",
+      "equipment_id": "0091",
+      "part_code": "ICVBS",
+      "zone": "cluster",
+      "orientation": "right",
+      "slot_index": 4,
+      "sequence_order": 124
+    },
+    {
+      "installation_id": "0938_MP1",
+      "equipment_id": "0938",
+      "part_code": "PLG",
+      "zone": "pump",
+      "orientation": "middle",
+      "slot_index": 1,
+      "sequence_order": 211
+    },
+    {
+      "installation_id": "0938_MP3",
+      "equipment_id": "0938",
+      "part_code": "PB",
+      "zone": "pump",
+      "orientation": "middle",
+      "slot_index": 3,
+      "sequence_order": 213
+    },
+    {
+      "installation_id": "0198_MC2",
+      "equipment_id": "0198",
+      "part_code": "HPT",
+      "zone": "cluster",
+      "orientation": "middle",
+      "slot_index": 2,
+      "sequence_order": 112
+    },
+    {
+      "installation_id": "0938_LP3",
+      "equipment_id": "0938",
+      "part_code": "PB",
+      "zone": "pump",
+      "orientation": "left",
+      "slot_index": 3,
+      "sequence_order": 203
+    },
+    {
+      "installation_id": "0091_RC3",
+      "equipment_id": "0091",
+      "part_code": "OCVB",
+      "zone": "cluster",
+      "orientation": "right",
+      "slot_index": 3,
+      "sequence_order": 123
+    },
+    {
+      "installation_id": "0091_MC3",
+      "equipment_id": "0091",
+      "part_code": "OCVB",
+      "zone": "cluster",
+      "orientation": "middle",
+      "slot_index": 3,
+      "sequence_order": 113
+    },
+    {
+      "installation_id": "0198_LC2",
+      "equipment_id": "0198",
+      "part_code": "HPT",
+      "zone": "cluster",
+      "orientation": "left",
+      "slot_index": 2,
+      "sequence_order": 102
+    },
+    {
+      "installation_id": "0198_RC2",
+      "equipment_id": "0198",
+      "part_code": "HPT",
+      "zone": "cluster",
+      "orientation": "right",
+      "slot_index": 2,
+      "sequence_order": 122
+    }
+  ],
+  "lifecycles": [
+    {
+      "installation_id": "0938_H1",
+      "serial_number": "X6523-E1-8005",
+      "is_refurb": false,
+      "installation_date": "2025-02-20T00:00:00+00:00",
+      "removal_date": "2025-06-23T00:00:00+00:00",
+      "failure_mode": "fracture (body)",
+      "failure_notes": "Fracture went through inside cone where bushing and parts sit all the way through to port connection with transducer",
+      "runtime_minutes_legacy": 9760,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_MC2",
+      "serial_number": "%3198-E-8844",
+      "is_refurb": false,
+      "installation_date": "2025-09-08T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_MP2",
+      "serial_number": "X8623-E1-8012",
+      "is_refurb": false,
+      "installation_date": "2025-03-21T00:00:00+00:00",
+      "removal_date": "2025-08-14T00:00:00+00:00",
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": 10960,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_RP3",
+      "serial_number": "X7223-E1-8226",
+      "is_refurb": false,
+      "installation_date": "2025-03-21T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0091_H4",
+      "serial_number": "CT141-086-V8621-E1-7883",
+      "is_refurb": false,
+      "installation_date": "2025-04-04T00:00:00+00:00",
+      "removal_date": "2025-05-09T00:00:00+00:00",
+      "failure_mode": "scratches",
+      "failure_notes": "High P02 noted (54psi). Scraping discovered on stem/bushing",
+      "runtime_minutes_legacy": 3200,
+      "work_order": null
+    },
+    {
+      "installation_id": "0091_H3",
+      "serial_number": "X5223-E3-8311",
+      "is_refurb": false,
+      "installation_date": "2025-04-04T00:00:00+00:00",
+      "removal_date": "2025-05-09T00:00:00+00:00",
+      "failure_mode": "normal wear",
+      "failure_notes": "High P02 noted (54psi). Scraping discovered on stem/bushing",
+      "runtime_minutes_legacy": 3200,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_LC2",
+      "serial_number": "Z1825-E1-9214",
+      "is_refurb": false,
+      "installation_date": "2026-04-09T00:00:00+00:00",
+      "removal_date": "2026-04-30T00:00:00+00:00",
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0091_MP3",
+      "serial_number": "X7223-E1-8229",
+      "is_refurb": false,
+      "installation_date": "2025-04-04T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_MC1",
+      "serial_number": "X8223-E1-8185",
+      "is_refurb": false,
+      "installation_date": "2025-04-07T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": "Switched to middle as of 10NOV25 (possibly on 06nov25)",
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_LC1",
+      "serial_number": "X8223-E1-8186",
+      "is_refurb": false,
+      "installation_date": "2025-04-14T00:00:00+00:00",
+      "removal_date": "2025-06-20T00:00:00+00:00",
+      "failure_mode": "fracture (port)",
+      "failure_notes": "51781994: (previous failure, same location): Leak was observed after pass #3.Check Valve body was replaced due to hairline fracture.\n51811889: fracture observed from inside port where check valve ball seat sits, leaked through to cone",
+      "runtime_minutes_legacy": 5600,
+      "work_order": "51811889.0"
+    },
+    {
+      "installation_id": "0938_RC2",
+      "serial_number": "Z1825-E1-9213",
+      "is_refurb": false,
+      "installation_date": "2026-04-09T00:00:00+00:00",
+      "removal_date": "2026-04-17T00:00:00+00:00",
+      "failure_mode": "fracture (port)",
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_LC2",
+      "serial_number": "V6421-E3-6828",
+      "is_refurb": false,
+      "installation_date": "2025-11-06T00:00:00+00:00",
+      "removal_date": "2026-04-09T00:00:00+00:00",
+      "failure_mode": "fracture (port)",
+      "failure_notes": "Leak from lower weephole",
+      "runtime_minutes_legacy": 8400,
+      "work_order": null
+    },
+    {
+      "installation_id": "0198_H4",
+      "serial_number": "V4421-E2-7892",
+      "is_refurb": false,
+      "installation_date": "2025-05-08T00:00:00+00:00",
+      "removal_date": "2025-06-23T00:00:00+00:00",
+      "failure_mode": "other",
+      "failure_notes": "Part removed from 0198 and installed on 0938",
+      "runtime_minutes_legacy": 0,
+      "work_order": null
+    },
+    {
+      "installation_id": "0198_H1",
+      "serial_number": "W4022-E3-7107",
+      "is_refurb": false,
+      "installation_date": "2025-05-08T00:00:00+00:00",
+      "removal_date": "2025-06-23T00:00:00+00:00",
+      "failure_mode": "other",
+      "failure_notes": "Part removed from 0198 and installed on 0938",
+      "runtime_minutes_legacy": 0,
+      "work_order": null
+    },
+    {
+      "installation_id": "0198_H3",
+      "serial_number": "X5223-E3-8313",
+      "is_refurb": false,
+      "installation_date": "2025-05-08T00:00:00+00:00",
+      "removal_date": "2025-06-23T00:00:00+00:00",
+      "failure_mode": "other",
+      "failure_notes": "Part removed from 0198 and installed on 0938",
+      "runtime_minutes_legacy": 0,
+      "work_order": null
+    },
+    {
+      "installation_id": "0198_MC3",
+      "serial_number": "V4221-E1-6244",
+      "is_refurb": false,
+      "installation_date": "2025-05-08T00:00:00+00:00",
+      "removal_date": "2025-06-27T00:00:00+00:00",
+      "failure_mode": "other",
+      "failure_notes": "Part removed from 0198 and installed on 0091",
+      "runtime_minutes_legacy": 0,
+      "work_order": null
+    },
+    {
+      "installation_id": "0198_MC1",
+      "serial_number": "X9324-E3-8199",
+      "is_refurb": false,
+      "installation_date": "2025-05-08T00:00:00+00:00",
+      "removal_date": "2025-07-15T00:00:00+00:00",
+      "failure_mode": "other",
+      "failure_notes": "Part removed from 0198 and ???",
+      "runtime_minutes_legacy": 0,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_RC2",
+      "serial_number": "Z1825-xx-xxxx",
+      "is_refurb": false,
+      "installation_date": "2026-04-02T00:00:00+00:00",
+      "removal_date": "2026-04-09T00:00:00+00:00",
+      "failure_mode": "fracture (port)",
+      "failure_notes": "Leak from middle weephole. Failed in conjunction with left tee. Possibly related to flow issues",
+      "runtime_minutes_legacy": 1200,
+      "work_order": null
+    },
+    {
+      "installation_id": "0198_MC4",
+      "serial_number": "V4221-E1-6243",
+      "is_refurb": false,
+      "installation_date": "2025-05-08T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": 0,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_LC1",
+      "serial_number": "Y4024-E1-8727",
+      "is_refurb": false,
+      "installation_date": "2025-08-15T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_RC2",
+      "serial_number": "Y6325-E2-9057",
+      "is_refurb": false,
+      "installation_date": "2026-02-25T00:00:00+00:00",
+      "removal_date": "2026-04-02T00:00:00+00:00",
+      "failure_mode": "fracture (port)",
+      "failure_notes": null,
+      "runtime_minutes_legacy": 3600,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_LC3",
+      "serial_number": "Y4024-E1-8718",
+      "is_refurb": false,
+      "installation_date": "2025-08-19T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": "Switched to middle as of 10NOV2025 (possibly on 06nov25)",
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0198_LC4",
+      "serial_number": "W5922-W1-7289",
+      "is_refurb": false,
+      "installation_date": "2025-05-08T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0198_LC5",
+      "serial_number": "V1220-E1-5748",
+      "is_refurb": false,
+      "installation_date": "2025-05-08T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0198_LP2",
+      "serial_number": "X8623-E1-8018",
+      "is_refurb": false,
+      "installation_date": "2025-05-08T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0091_H1",
+      "serial_number": "X9624-E3-8298",
+      "is_refurb": false,
+      "installation_date": "2025-04-04T00:00:00+00:00",
+      "removal_date": "2026-01-29T00:00:00+00:00",
+      "failure_mode": "scratches",
+      "failure_notes": "Rougness noted where ceramic seat makes contact with inside bore of HV, and scratches leading to product outlet hole.",
+      "runtime_minutes_legacy": 20800,
+      "work_order": "51921156.0"
+    },
+    {
+      "installation_id": "0198_MC5",
+      "serial_number": "X9324-E3-8200",
+      "is_refurb": false,
+      "installation_date": "2025-05-08T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0198_MP2",
+      "serial_number": "X8623-E4-8303",
+      "is_refurb": false,
+      "installation_date": "2025-05-08T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0198_O",
+      "serial_number": "X5023-E1-8470",
+      "is_refurb": false,
+      "installation_date": "2025-05-08T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_RC3",
+      "serial_number": "Y4024-E1-8716",
+      "is_refurb": false,
+      "installation_date": "2026-01-16T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_MC2",
+      "serial_number": "Y6325-E2-9044",
+      "is_refurb": false,
+      "installation_date": "2026-01-30T00:00:00+00:00",
+      "removal_date": "2026-03-13T00:00:00+00:00",
+      "failure_mode": "fracture (port)",
+      "failure_notes": "Failed at same time as outlet manifold (revised). Theorized due to P01 fluctuations caused by abnormal HV internals",
+      "runtime_minutes_legacy": 2800,
+      "work_order": null
+    },
+    {
+      "installation_id": "0198_RC4",
+      "serial_number": "X9324-E3-8190",
+      "is_refurb": false,
+      "installation_date": "2025-05-08T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0198_RC5",
+      "serial_number": "X9324-E3-8193",
+      "is_refurb": false,
+      "installation_date": "2025-05-08T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0198_RP2",
+      "serial_number": "X8623-E4-8301",
+      "is_refurb": false,
+      "installation_date": "2025-05-08T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_RC2",
+      "serial_number": "T1418-E4-5147",
+      "is_refurb": false,
+      "installation_date": "2026-01-16T00:00:00+00:00",
+      "removal_date": "2026-02-25T00:00:00+00:00",
+      "failure_mode": "fracture (port)",
+      "failure_notes": "Used tee. 3200 run time PRIOR to installation. Finally discovered failed when flow issues were observed, dried emulsion found all around port and on ball seat cone/gland nut/ferrule. Very miniscule fracture observed on port",
+      "runtime_minutes_legacy": 2400,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_H4",
+      "serial_number": "CT147-013-V8621-E1-7954",
+      "is_refurb": false,
+      "installation_date": "2025-05-09T00:00:00+00:00",
+      "removal_date": "2025-06-23T00:00:00+00:00",
+      "failure_mode": "normal wear",
+      "failure_notes": "HV body failed, stem replaced",
+      "runtime_minutes_legacy": 3200,
+      "work_order": "51811892.0"
+    },
+    {
+      "installation_id": "0938_H3",
+      "serial_number": "X5223-E3-8312",
+      "is_refurb": false,
+      "installation_date": "2025-05-09T00:00:00+00:00",
+      "removal_date": "2025-06-23T00:00:00+00:00",
+      "failure_mode": "normal wear",
+      "failure_notes": "HV body failed, stem replaced",
+      "runtime_minutes_legacy": 3200,
+      "work_order": "51811892.0"
+    },
+    {
+      "installation_id": "0091_RP3",
+      "serial_number": "X7223-E3-8666",
+      "is_refurb": false,
+      "installation_date": "2026-02-06T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_MP4",
+      "serial_number": "X9324-E3-3202",
+      "is_refurb": false,
+      "installation_date": "2025-06-03T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_LC2",
+      "serial_number": "X7423-E2-8323",
+      "is_refurb": false,
+      "installation_date": "2025-10-21T00:00:00+00:00",
+      "removal_date": "2025-11-06T00:00:00+00:00",
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": 2000,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_RC2",
+      "serial_number": "%3198-E-8846",
+      "is_refurb": false,
+      "installation_date": "2025-10-16T00:00:00+00:00",
+      "removal_date": "2025-10-24T00:00:00+00:00",
+      "failure_mode": "other",
+      "failure_notes": null,
+      "runtime_minutes_legacy": 1200,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_LC2",
+      "serial_number": "%3198-E-8843",
+      "is_refurb": false,
+      "installation_date": "2025-09-26T00:00:00+00:00",
+      "removal_date": "2025-10-21T00:00:00+00:00",
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": 2400,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_H4",
+      "serial_number": "V4421-E2-7892",
+      "is_refurb": false,
+      "installation_date": "2025-06-23T00:00:00+00:00",
+      "removal_date": "2025-08-14T00:00:00+00:00",
+      "failure_mode": null,
+      "failure_notes": "Scraping on stem noted",
+      "runtime_minutes_legacy": 3600,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_H3",
+      "serial_number": "X5223-E3-8313",
+      "is_refurb": false,
+      "installation_date": "2025-06-23T00:00:00+00:00",
+      "removal_date": "2025-08-14T00:00:00+00:00",
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": 3600,
+      "work_order": null
+    },
+    {
+      "installation_id": "0198_LP3",
+      "serial_number": "K3613-E1-XXXX",
+      "is_refurb": false,
+      "installation_date": "2025-05-08T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_RC2",
+      "serial_number": "%3198-E-8845",
+      "is_refurb": false,
+      "installation_date": "2025-09-24T00:00:00+00:00",
+      "removal_date": "2025-10-16T00:00:00+00:00",
+      "failure_mode": "fracture (body)",
+      "failure_notes": null,
+      "runtime_minutes_legacy": 2400,
+      "work_order": null
+    },
+    {
+      "installation_id": "0091_RC1",
+      "serial_number": "V4221-E1-6244",
+      "is_refurb": false,
+      "installation_date": "2025-06-27T00:00:00+00:00",
+      "removal_date": "2025-09-10T00:00:00+00:00",
+      "failure_mode": "fracture (port)",
+      "failure_notes": null,
+      "runtime_minutes_legacy": 5200,
+      "work_order": "51851098.0"
+    },
+    {
+      "installation_id": "0938_LC2",
+      "serial_number": "%3198-E-8842",
+      "is_refurb": false,
+      "installation_date": "2025-09-08T00:00:00+00:00",
+      "removal_date": "2025-09-26T00:00:00+00:00",
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": 2400,
+      "work_order": null
+    },
+    {
+      "installation_id": "0198_MP3",
+      "serial_number": "P0215-E1-3631",
+      "is_refurb": false,
+      "installation_date": "2025-05-08T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0198_LC1",
+      "serial_number": "X6423-E1-7601",
+      "is_refurb": false,
+      "installation_date": "2025-05-08T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_RC2",
+      "serial_number": "X7423-E5-8293",
+      "is_refurb": false,
+      "installation_date": "2025-09-19T00:00:00+00:00",
+      "removal_date": "2025-09-24T00:00:00+00:00",
+      "failure_mode": "other",
+      "failure_notes": "No failure: tee replaced with new design to align with other 2 check valve tees",
+      "runtime_minutes_legacy": 0,
+      "work_order": "51858416.0"
+    },
+    {
+      "installation_id": "0198_LC3",
+      "serial_number": "X6423-E1-7600",
+      "is_refurb": false,
+      "installation_date": "2025-05-08T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": "small fracture near the weep hole, deemed ok for use",
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_RC2",
+      "serial_number": "%3198-E-8847",
+      "is_refurb": false,
+      "installation_date": "2025-09-08T00:00:00+00:00",
+      "removal_date": "2025-09-19T00:00:00+00:00",
+      "failure_mode": "fracture (body)",
+      "failure_notes": "Repeat priming issues noted in that check valve assembly prior to fracture, and during previous batch. Fractured on body, where channel from pump body tees up",
+      "runtime_minutes_legacy": 2000,
+      "work_order": null
+    },
+    {
+      "installation_id": "0091_LC1",
+      "serial_number": "Y4024-E1-8721",
+      "is_refurb": false,
+      "installation_date": "2025-07-22T00:00:00+00:00",
+      "removal_date": "2025-08-11T00:00:00+00:00",
+      "failure_mode": "fracture (body)",
+      "failure_notes": null,
+      "runtime_minutes_legacy": 2000,
+      "work_order": "51836037.0"
+    },
+    {
+      "installation_id": "0938_LC2",
+      "serial_number": "T1418-E4-5147",
+      "is_refurb": false,
+      "installation_date": "2025-07-25T00:00:00+00:00",
+      "removal_date": "2025-09-05T00:00:00+00:00",
+      "failure_mode": "other",
+      "failure_notes": "Used tee was installed. Removed due to new tee design and bracket available. No failure",
+      "runtime_minutes_legacy": 3200,
+      "work_order": "51849386.0"
+    },
+    {
+      "installation_id": "0938_RC3",
+      "serial_number": "Y4024-E1-8719",
+      "is_refurb": false,
+      "installation_date": "2025-09-24T00:00:00+00:00",
+      "removal_date": "2025-10-24T00:00:00+00:00",
+      "failure_mode": "other",
+      "failure_notes": "Replaced as part of check valve assembly leak troubleshooting. Root cause is suspected to be outlet check valve ball seat (right)",
+      "runtime_minutes_legacy": 3200,
+      "work_order": "51874849.0"
+    },
+    {
+      "installation_id": "0091_LC1",
+      "serial_number": "Y4024-E1-8713",
+      "is_refurb": false,
+      "installation_date": "2025-08-11T00:00:00+00:00",
+      "removal_date": "2025-08-18T00:00:00+00:00",
+      "failure_mode": "binding (threads)",
+      "failure_notes": "Was replaced due to stuck ferrule. We thought the associated tee was replaced previous week but it was actually this inlet check valve body. So body was swapped out as well",
+      "runtime_minutes_legacy": 1200,
+      "work_order": "51840394.0"
+    },
+    {
+      "installation_id": "0938_LC2",
+      "serial_number": "X7423-E2-8325",
+      "is_refurb": false,
+      "installation_date": "2025-06-20T00:00:00+00:00",
+      "removal_date": "2025-07-25T00:00:00+00:00",
+      "failure_mode": "unknown",
+      "failure_notes": null,
+      "runtime_minutes_legacy": 2400,
+      "work_order": "51827071.0"
+    },
+    {
+      "installation_id": "0938_H2",
+      "serial_number": "CT143-016B",
+      "is_refurb": false,
+      "installation_date": "2025-08-14T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_H3",
+      "serial_number": "X5223-E2-7880",
+      "is_refurb": false,
+      "installation_date": "2025-08-14T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_H4",
+      "serial_number": "CT144-053-X0922-E1-7932",
+      "is_refurb": false,
+      "installation_date": "2025-08-14T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_LP2",
+      "serial_number": "Y5324-E1-8749",
+      "is_refurb": false,
+      "installation_date": "2025-08-14T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_MP2",
+      "serial_number": "Y5324-E1-8753",
+      "is_refurb": false,
+      "installation_date": "2025-08-14T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_RP2",
+      "serial_number": "Y5324-E1-8751",
+      "is_refurb": false,
+      "installation_date": "2025-08-14T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0198_RC1",
+      "serial_number": "X8223-E1-8183",
+      "is_refurb": false,
+      "installation_date": "2025-05-08T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_LC2",
+      "serial_number": "X7423-E4-8286",
+      "is_refurb": false,
+      "installation_date": "2025-05-16T00:00:00+00:00",
+      "removal_date": "2025-06-20T00:00:00+00:00",
+      "failure_mode": "unknown",
+      "failure_notes": null,
+      "runtime_minutes_legacy": 2400,
+      "work_order": "51811889.0"
+    },
+    {
+      "installation_id": "0938_LC2",
+      "serial_number": "X7423-E2-8326",
+      "is_refurb": false,
+      "installation_date": "2025-04-28T00:00:00+00:00",
+      "removal_date": "2025-05-16T00:00:00+00:00",
+      "failure_mode": "unknown",
+      "failure_notes": null,
+      "runtime_minutes_legacy": 2000,
+      "work_order": "51794795.0"
+    },
+    {
+      "installation_id": "0198_RC3",
+      "serial_number": "X8223-E1-8189",
+      "is_refurb": false,
+      "installation_date": "2025-05-08T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0198_MC1",
+      "serial_number": "L7214-E4-2393",
+      "is_refurb": false,
+      "installation_date": "2025-07-07T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": "Used part at time of installation",
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_LC2",
+      "serial_number": "X7423-E4-8288",
+      "is_refurb": false,
+      "installation_date": "2025-03-21T00:00:00+00:00",
+      "removal_date": "2025-04-28T00:00:00+00:00",
+      "failure_mode": "fracture (port)",
+      "failure_notes": "small fracture was observed on the port connecting the Tee to the Inlet Check Valve",
+      "runtime_minutes_legacy": 3360,
+      "work_order": "51781990.0"
+    },
+    {
+      "installation_id": "0938_LC4",
+      "serial_number": "nan",
+      "is_refurb": false,
+      "installation_date": "2025-08-26T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_LC5",
+      "serial_number": "nan",
+      "is_refurb": false,
+      "installation_date": "2025-08-26T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_RC4",
+      "serial_number": "nan",
+      "is_refurb": false,
+      "installation_date": "2025-08-26T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_MC2",
+      "serial_number": "Y6325-E2-9055",
+      "is_refurb": false,
+      "installation_date": "2026-03-13T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_MC1",
+      "serial_number": "X9324-E3-8199",
+      "is_refurb": false,
+      "installation_date": "2025-06-24T00:00:00+00:00",
+      "removal_date": "2025-08-15T00:00:00+00:00",
+      "failure_mode": "normal wear",
+      "failure_notes": "Annual PM",
+      "runtime_minutes_legacy": 3600,
+      "work_order": "51789946.0"
+    },
+    {
+      "installation_id": "0938_LC1",
+      "serial_number": "X8223-E1-8187",
+      "is_refurb": false,
+      "installation_date": "2025-06-20T00:00:00+00:00",
+      "removal_date": "2025-08-15T00:00:00+00:00",
+      "failure_mode": "normal wear",
+      "failure_notes": "Annual PM",
+      "runtime_minutes_legacy": 4000,
+      "work_order": "51789946.0"
+    },
+    {
+      "installation_id": "0938_RC5",
+      "serial_number": "nan",
+      "is_refurb": false,
+      "installation_date": "2025-08-26T00:00:00+00:00",
+      "removal_date": "2025-10-24T00:00:00+00:00",
+      "failure_mode": "fracture (body)",
+      "failure_notes": null,
+      "runtime_minutes_legacy": 6000,
+      "work_order": "51874849.0"
+    },
+    {
+      "installation_id": "0938_RC3",
+      "serial_number": "Y4024-E1-8712",
+      "is_refurb": false,
+      "installation_date": "2025-10-24T00:00:00+00:00",
+      "removal_date": "2026-01-16T00:00:00+00:00",
+      "failure_mode": "other",
+      "failure_notes": "Gland nut bound to stem",
+      "runtime_minutes_legacy": 2800,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_RC2",
+      "serial_number": "Z1825-E1-9218",
+      "is_refurb": false,
+      "installation_date": "2026-04-17T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_RC2",
+      "serial_number": "Z1825-E1-9216",
+      "is_refurb": false,
+      "installation_date": "2026-04-30T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0091_RC2",
+      "serial_number": "%3210-E-9144",
+      "is_refurb": false,
+      "installation_date": "2026-01-09T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0091_RC2",
+      "serial_number": "X7423-E5-8297",
+      "is_refurb": false,
+      "installation_date": "2025-10-20T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0091_H1",
+      "serial_number": "W4022-E3-6881-E4-7146",
+      "is_refurb": false,
+      "installation_date": "2026-01-29T00:00:00+00:00",
+      "removal_date": "2026-02-16T00:00:00+00:00",
+      "failure_mode": "fracture (port)",
+      "failure_notes": "Port on the high pressure plug fractured. Was a refurb, actual run time longer than displayed value",
+      "runtime_minutes_legacy": 1600,
+      "work_order": null
+    },
+    {
+      "installation_id": "0091_MC2",
+      "serial_number": "%3210-E-9141",
+      "is_refurb": false,
+      "installation_date": "2026-01-09T00:00:00+00:00",
+      "removal_date": "2026-04-28T00:00:00+00:00",
+      "failure_mode": "fracture (body)",
+      "failure_notes": "Middle and left got swapped at some point. This fractured as a left tee.",
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0091_LC2",
+      "serial_number": "%3210-E-9143",
+      "is_refurb": false,
+      "installation_date": "2026-01-09T00:00:00+00:00",
+      "removal_date": "2026-04-14T00:00:00+00:00",
+      "failure_mode": "fracture (body)",
+      "failure_notes": "First autoclave tee fracture",
+      "runtime_minutes_legacy": 8400,
+      "work_order": null
+    },
+    {
+      "installation_id": "0091_RC1",
+      "serial_number": "Y4024-E1-8730",
+      "is_refurb": false,
+      "installation_date": "2025-09-10T00:00:00+00:00",
+      "removal_date": "2025-10-28T00:00:00+00:00",
+      "failure_mode": "fracture (body)",
+      "failure_notes": "Major fracture from inside surface leading to weephole on opposite side of body??",
+      "runtime_minutes_legacy": 4800,
+      "work_order": "51876560.0"
+    },
+    {
+      "installation_id": "0091_LC2",
+      "serial_number": "X7423-E4-8289",
+      "is_refurb": false,
+      "installation_date": "2025-10-31T00:00:00+00:00",
+      "removal_date": "2026-01-08T00:00:00+00:00",
+      "failure_mode": "other",
+      "failure_notes": "No failure: tee replaced with Autoclave design during annual PM",
+      "runtime_minutes_legacy": 2000,
+      "work_order": null
+    },
+    {
+      "installation_id": "0091_MC2",
+      "serial_number": "X7423-E5-8295",
+      "is_refurb": false,
+      "installation_date": "2025-11-12T00:00:00+00:00",
+      "removal_date": "2026-01-08T00:00:00+00:00",
+      "failure_mode": "other",
+      "failure_notes": "Being replaced with autoclave. May have failed though, was filled with emulsion (dried). Weephole was filled",
+      "runtime_minutes_legacy": 800,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_RC5",
+      "serial_number": "nan",
+      "is_refurb": false,
+      "installation_date": "2025-10-24T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0091_MC2",
+      "serial_number": "X7423-E5-8293",
+      "is_refurb": false,
+      "installation_date": "2025-10-07T00:00:00+00:00",
+      "removal_date": "2025-11-12T00:00:00+00:00",
+      "failure_mode": "unknown",
+      "failure_notes": "Used part at time of installation (replaced by autoclave tees)",
+      "runtime_minutes_legacy": 4000,
+      "work_order": "51884739.0"
+    },
+    {
+      "installation_id": "0091_LC2",
+      "serial_number": "Y3324-E4-8736",
+      "is_refurb": false,
+      "installation_date": "2025-09-23T00:00:00+00:00",
+      "removal_date": "2025-10-31T00:00:00+00:00",
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": 4400,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_MC5",
+      "serial_number": "nan",
+      "is_refurb": false,
+      "installation_date": "2025-11-03T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0091_RC2",
+      "serial_number": "Y3324-E4-8733",
+      "is_refurb": false,
+      "installation_date": "2025-08-18T00:00:00+00:00",
+      "removal_date": "2025-10-20T00:00:00+00:00",
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": 6000,
+      "work_order": "51873037.0"
+    },
+    {
+      "installation_id": "0091_RC1",
+      "serial_number": "Y4024-E1-8730",
+      "is_refurb": false,
+      "installation_date": "2025-10-28T00:00:00+00:00",
+      "removal_date": "2026-01-08T00:00:00+00:00",
+      "failure_mode": "normal wear",
+      "failure_notes": "Replaced during annual PM",
+      "runtime_minutes_legacy": 2400,
+      "work_order": null
+    },
+    {
+      "installation_id": "0091_MC2",
+      "serial_number": "X7423-E4-8285",
+      "is_refurb": false,
+      "installation_date": "2025-09-23T00:00:00+00:00",
+      "removal_date": "2025-10-07T00:00:00+00:00",
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": 2000,
+      "work_order": null
+    },
+    {
+      "installation_id": "0198_MC3",
+      "serial_number": "W4222-E2-7022",
+      "is_refurb": false,
+      "installation_date": "2025-07-07T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": "Used part at time of installation",
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0091_LP1",
+      "serial_number": "CT145-016-8028",
+      "is_refurb": false,
+      "installation_date": "2026-01-09T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0091_LC1",
+      "serial_number": "Y4024-E1-8724",
+      "is_refurb": false,
+      "installation_date": "2025-08-18T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0091_LC2",
+      "serial_number": "X7423-E4-8290",
+      "is_refurb": false,
+      "installation_date": "2025-08-18T00:00:00+00:00",
+      "removal_date": "2025-09-23T00:00:00+00:00",
+      "failure_mode": "fracture (port)",
+      "failure_notes": null,
+      "runtime_minutes_legacy": 3200,
+      "work_order": "51858319.0"
+    },
+    {
+      "installation_id": "0091_MP1",
+      "serial_number": "CT145-019-8031",
+      "is_refurb": false,
+      "installation_date": "2026-01-09T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0091_LC3",
+      "serial_number": "Q7617-E1-5149",
+      "is_refurb": false,
+      "installation_date": "2026-01-09T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0091_MC2",
+      "serial_number": "X7423-E2-8324",
+      "is_refurb": false,
+      "installation_date": "2025-08-29T00:00:00+00:00",
+      "removal_date": "2025-09-23T00:00:00+00:00",
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": 2400,
+      "work_order": "51858340.0"
+    },
+    {
+      "installation_id": "0091_MC1",
+      "serial_number": "Y4024-E1-8714",
+      "is_refurb": false,
+      "installation_date": "2026-01-09T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0091_RP1",
+      "serial_number": "CT141-146-7344-8631",
+      "is_refurb": false,
+      "installation_date": "2026-01-09T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0091_MC2",
+      "serial_number": "Y3324-E4-8738",
+      "is_refurb": false,
+      "installation_date": "2025-08-14T00:00:00+00:00",
+      "removal_date": "2025-08-29T00:00:00+00:00",
+      "failure_mode": "fracture (port)",
+      "failure_notes": null,
+      "runtime_minutes_legacy": 1600,
+      "work_order": "51845080.0"
+    },
+    {
+      "installation_id": "0091_RC1",
+      "serial_number": "Y4024-E1-8723",
+      "is_refurb": false,
+      "installation_date": "2026-01-09T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0091_H2",
+      "serial_number": "CT131-056-V2020-E1-5815-8615",
+      "is_refurb": false,
+      "installation_date": "2026-01-29T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0198_RP3",
+      "serial_number": "K3613-E1-XXXX",
+      "is_refurb": false,
+      "installation_date": "2025-05-08T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0091_LC2",
+      "serial_number": "Y3324-E4-8737",
+      "is_refurb": false,
+      "installation_date": "2025-07-15T00:00:00+00:00",
+      "removal_date": "2025-08-18T00:00:00+00:00",
+      "failure_mode": "fracture (port)",
+      "failure_notes": null,
+      "runtime_minutes_legacy": 3600,
+      "work_order": "51840394.0"
+    },
+    {
+      "installation_id": "0091_LC4",
+      "serial_number": "Y4624-E4-8741",
+      "is_refurb": false,
+      "installation_date": "2025-07-22T00:00:00+00:00",
+      "removal_date": "2026-01-09T00:00:00+00:00",
+      "failure_mode": "normal wear",
+      "failure_notes": null,
+      "runtime_minutes_legacy": 11600,
+      "work_order": null
+    },
+    {
+      "installation_id": "0091_RC4",
+      "serial_number": "X9324-E3-8200",
+      "is_refurb": false,
+      "installation_date": "2025-06-27T00:00:00+00:00",
+      "removal_date": "2026-01-09T00:00:00+00:00",
+      "failure_mode": "normal wear",
+      "failure_notes": null,
+      "runtime_minutes_legacy": 12400,
+      "work_order": null
+    },
+    {
+      "installation_id": "0091_RC2",
+      "serial_number": "Y3324-E4-8735",
+      "is_refurb": false,
+      "installation_date": "2025-07-22T00:00:00+00:00",
+      "removal_date": "2025-08-18T00:00:00+00:00",
+      "failure_mode": "fracture (port)",
+      "failure_notes": null,
+      "runtime_minutes_legacy": 2800,
+      "work_order": "51839822.0"
+    },
+    {
+      "installation_id": "0091_MC2",
+      "serial_number": "Y3324-E4-8734",
+      "is_refurb": false,
+      "installation_date": "2025-07-22T00:00:00+00:00",
+      "removal_date": "2025-08-14T00:00:00+00:00",
+      "failure_mode": "fracture (port)",
+      "failure_notes": "Looked like this fracture might be on the port to the pump body",
+      "runtime_minutes_legacy": 2400,
+      "work_order": null
+    },
+    {
+      "installation_id": "0091_RC2",
+      "serial_number": "X7423-E5-8296",
+      "is_refurb": false,
+      "installation_date": "2025-06-23T00:00:00+00:00",
+      "removal_date": "2025-07-22T00:00:00+00:00",
+      "failure_mode": "unknown",
+      "failure_notes": "Leaked from middle weephole, occurred at same time as left inlet check valve body fracture",
+      "runtime_minutes_legacy": 2000,
+      "work_order": "51825763.0"
+    },
+    {
+      "installation_id": "0091_LC2",
+      "serial_number": "X7423-E4-8287",
+      "is_refurb": false,
+      "installation_date": "2025-05-29T00:00:00+00:00",
+      "removal_date": "2025-07-15T00:00:00+00:00",
+      "failure_mode": "scratches",
+      "failure_notes": null,
+      "runtime_minutes_legacy": 3200,
+      "work_order": "51822484.0"
+    },
+    {
+      "installation_id": "0198_MC2",
+      "serial_number": "T1418-E4-5147",
+      "is_refurb": false,
+      "installation_date": "2025-05-08T00:00:00+00:00",
+      "removal_date": "2025-07-15T00:00:00+00:00",
+      "failure_mode": "other",
+      "failure_notes": "Part removed from 0198 and sitting in toolbox",
+      "runtime_minutes_legacy": 0,
+      "work_order": null
+    },
+    {
+      "installation_id": "0091_RC2",
+      "serial_number": "X7423-E5-8292",
+      "is_refurb": false,
+      "installation_date": "2025-05-05T00:00:00+00:00",
+      "removal_date": "2025-06-23T00:00:00+00:00",
+      "failure_mode": "unknown",
+      "failure_notes": null,
+      "runtime_minutes_legacy": 4400,
+      "work_order": "51812348.0"
+    },
+    {
+      "installation_id": "0938_LP3",
+      "serial_number": "X7223-E1-8227",
+      "is_refurb": false,
+      "installation_date": "2025-06-03T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0091_RC3",
+      "serial_number": "Y4024-E1-8726",
+      "is_refurb": false,
+      "installation_date": "2026-01-09T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_H1",
+      "serial_number": "W4022-E3-7107",
+      "is_refurb": false,
+      "installation_date": "2025-06-23T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0198_H1",
+      "serial_number": "X1822-E1-7613-8607",
+      "is_refurb": false,
+      "installation_date": "2025-07-07T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0091_H1",
+      "serial_number": "?",
+      "is_refurb": false,
+      "installation_date": "2026-02-16T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0938_H1",
+      "serial_number": "X9624-E3-8298",
+      "is_refurb": false,
+      "installation_date": "2026-03-13T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": "NOTE: this was previously in use on 0091, pulled for evaluation of scratches. Search above for combined run time",
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0091_MC2",
+      "serial_number": "%3210-E-9140",
+      "is_refurb": false,
+      "installation_date": "2026-04-14T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0091_LC2",
+      "serial_number": "%3210-E-9142",
+      "is_refurb": false,
+      "installation_date": "2026-04-28T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0198_LC2",
+      "serial_number": "X3623-E2-7599",
+      "is_refurb": false,
+      "installation_date": "2025-05-08T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0198_RC2",
+      "serial_number": "X7423-E5-8294",
+      "is_refurb": false,
+      "installation_date": "2025-05-08T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": null,
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    },
+    {
+      "installation_id": "0198_MC2",
+      "serial_number": "W7422-E3-7035",
+      "is_refurb": false,
+      "installation_date": "2025-07-07T00:00:00+00:00",
+      "removal_date": null,
+      "failure_mode": null,
+      "failure_notes": "Used part at time of installation",
+      "runtime_minutes_legacy": null,
+      "work_order": null
+    }
+  ],
+  "report": {
+    "rows_total": 493,
+    "lifecycles_imported": 128,
+    "skipped_no_install": 325,
+    "skipped_bad_id": 0,
+    "name_mismatches": 1,
+    "unknown_failure_modes": 0,
+    "warning_count": 41
+  }
+}
