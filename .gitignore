@@ -43,7 +43,9 @@ next-env.d.ts
 # csv watcher state
 /.csv_watch_state.json
 /inbox/*.csv
+/inbox/*.txt
 /archive/*.csv
+/archive/*.txt
 
 # local-first lifecycle store (mutable copy of the JSON snapshot)
 /data/lifecycles.json
@@ -51,6 +53,9 @@ next-env.d.ts
 # raw source data (kept local; regenerate or pull from your own source of truth)
 /MTBF Tracker_cursor.xlsx
 /vantagepoint_sensor.csv
+
+# trained model artefacts (regenerate via scripts/train_failure_model.py)
+/models/
 
 # python
 __pycache__/

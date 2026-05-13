@@ -6,11 +6,16 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "node --import tsx --test lib/__tests__/*.test.ts",
+    "stream:mock": "node --import tsx scripts/stream_worker.ts --adapter mock --equipment 0091"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.105.3",
+    "@types/papaparse": "^5.5.2",
+    "exceljs": "^4.4.0",
     "next": "16.2.4",
+    "papaparse": "^5.5.3",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },
@@ -22,6 +27,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
     "tailwindcss": "^4",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   }
 }

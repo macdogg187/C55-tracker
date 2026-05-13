@@ -108,11 +108,11 @@ export function MaintenanceLogPanel({
       ) : (
         <ul className="divide-y divide-zinc-900 rounded-xl border border-zinc-800">
           {filtered.map((e, i) => (
-            <li key={e.id ?? `${e.detected_at}-${i}`} className="grid gap-1 p-3 text-xs sm:grid-cols-[120px_120px_1fr] sm:gap-3">
+            <li key={e.id ?? `${e.detected_at}-${i}`} className="grid gap-1 p-3 text-xs sm:grid-cols-[120px_140px_1fr] sm:gap-3">
               <span className="font-mono text-zinc-400">
                 {new Date(e.detected_at).toLocaleString()}
               </span>
-              <span className="font-medium text-cyan-300">
+              <span className={`font-medium ${eventTypeColor(e.event_type)}`}>
                 {e.event_type}
                 {e.failure_mode && (
                   <span className="ml-1 text-amber-300">· {e.failure_mode}</span>
@@ -128,4 +128,26 @@ export function MaintenanceLogPanel({
       )}
     </section>
   );
+}
+
+function eventTypeColor(t: string): string {
+  switch (t) {
+    case "replace":
+    case "failure_alert":
+      return "text-rose-300";
+    case "failure_observation":
+      return "text-amber-300";
+    case "data_integrity_alert":
+      return "text-orange-300";
+    case "inspection_alert":
+      return "text-amber-200";
+    case "high_stress_window":
+      return "text-amber-300";
+    case "off_maintenance":
+      return "text-zinc-300";
+    case "pass_detected":
+      return "text-emerald-300";
+    default:
+      return "text-cyan-300";
+  }
 }

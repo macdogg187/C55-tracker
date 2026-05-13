@@ -98,15 +98,32 @@ create index if not exists part_lifecycle_active_idx
 -- 3. TELEMETRY
 -- -----------------------------------------------------------------------------
 
--- Raw 1-minute samples for the 7 supported trends. We store the signal name
--- rather than wide columns so adding an 8th trend is a config change.
+-- Raw 1-minute samples for the supported trends. We store the signal name
+-- rather than wide columns so adding an Nth trend is a config change.
+--
+-- Canonical signal taxonomy (the soft check below documents it but stays
+-- permissive so unknown signals are dropped, not rejected):
+--
+--   P01   Homogenizing pressure (transducer at outlet manifold), kpsi
+--   P02   Applied gas pressure at homogenizing body valve, kpsi
+--   T01   Seal-flush temperature, left   (downstream of pump body)
+--   T02   Seal-flush temperature, middle (downstream of pump body)
+--   T03   Seal-flush temperature, right  (downstream of pump body)
+--   T04   Product loop temperature, pre-heat-exchanger
+--   T05   Product loop temperature, post-heat-exchanger
+--   FLOW  Product flow rate (lpm | gpm — store native, normalise downstream)
+--   RPM   Motor / drive speed
+--   VIB   Vibration (g-rms or ips)
 create table if not exists public.sensor_sample (
     ts            timestamptz not null,
     equipment_id  text not null references public.equipment,
-    signal        text not null,                            -- 'P01','P02','T01',
+    signal        text not null,                            -- see taxonomy above
     value_kpsi    numeric,                                  -- pressure trends
     value_other   numeric,                                  -- temp / flow / etc
-    primary key (equipment_id, signal, ts)
+    primary key (equipment_id, signal, ts),
+    constraint sensor_sample_signal_known check (
+        signal in ('P01','P02','T01','T02','T03','T04','T05','FLOW','RPM','VIB')
+    )
 );
 
 -- 10-minute rolling windows: pre-computed by the pipeline so the dashboard
@@ -137,7 +154,16 @@ create table if not exists public.maintenance_event (
         check (event_type in (
             'replace','inspect','clean','reset',
             'off_maintenance','high_stress_window',
-            'inspection_alert','failure_alert'
+            'inspection_alert','failure_alert',
+            -- "failure_observation": operator-logged failure WITHOUT archiving
+            -- the lifecycle (part is staying installed, e.g. minor scratches).
+            'failure_observation',
+            -- emitted by the run-validation engine when the biweekly pass
+            -- cadence (10 or 6 passes per run) is violated.
+            'data_integrity_alert',
+            -- emitted per detected pass for traceability (the rollups live in
+            -- pass_event / production_run; this is just an audit breadcrumb).
+            'pass_detected'
         )),
     failure_mode    text,
     detected_at     timestamptz not null,
@@ -161,6 +187,51 @@ create table if not exists public.csv_ingest_log (
     last_ts         timestamptz,
     ingested_at     timestamptz default now()
 );
+
+-- -----------------------------------------------------------------------------
+-- 3b. PRODUCTION RUNS & PASS EVENTS
+--
+-- A "pass" is a contiguous P01 excursion into the active band (19..26 kpsi)
+-- lasting ~36..40 minutes. Multiple passes (typically 6 or 10) make up a
+-- production "run" — the operations cadence is 6 out of 7 runs = 10-pass and
+-- 1 out of 7 = 6-pass over a rolling 14-day window.
+-- -----------------------------------------------------------------------------
+
+create table if not exists public.production_run (
+    id                    uuid primary key default gen_random_uuid(),
+    equipment_id          text not null references public.equipment,
+    started_at            timestamptz not null,
+    ended_at              timestamptz not null,
+    expected_pass_count   integer,                          -- 10 or 6
+    actual_pass_count     integer not null,
+    status                text not null
+        check (status in ('conforming','short','long','unknown_schedule')),
+    notes                 text,
+    created_at            timestamptz default now(),
+    constraint production_run_unique unique (equipment_id, started_at)
+);
+
+create index if not exists production_run_eq_started_idx
+    on public.production_run (equipment_id, started_at desc);
+
+create table if not exists public.pass_event (
+    id              uuid primary key default gen_random_uuid(),
+    run_id          uuid references public.production_run on delete cascade,
+    equipment_id    text not null references public.equipment,
+    pass_index      smallint not null,                      -- 1..N within run
+    started_at      timestamptz not null,
+    ended_at        timestamptz not null,
+    duration_min    numeric not null,
+    peak_p01_kpsi   numeric,
+    avg_p01_kpsi    numeric,
+    status          text not null
+        check (status in ('valid','short','long')),
+    created_at      timestamptz default now(),
+    constraint pass_event_unique unique (equipment_id, started_at)
+);
+
+create index if not exists pass_event_run_idx
+    on public.pass_event (run_id, pass_index);
 
 -- -----------------------------------------------------------------------------
 -- 4. VIEWS — read models for the dashboard
@@ -243,13 +314,16 @@ alter table public.sensor_sample       enable row level security;
 alter table public.sensor_window_10m   enable row level security;
 alter table public.maintenance_event   enable row level security;
 alter table public.csv_ingest_log      enable row level security;
+alter table public.production_run      enable row level security;
+alter table public.pass_event          enable row level security;
 
 do $$
 declare t text;
 begin
     foreach t in array array[
         'equipment','part_catalog','installation_slot','part_lifecycle',
-        'sensor_sample','sensor_window_10m','maintenance_event','csv_ingest_log'
+        'sensor_sample','sensor_window_10m','maintenance_event','csv_ingest_log',
+        'production_run','pass_event'
     ] loop
         execute format(
             'drop policy if exists "anon read %1$s" on public.%1$s;

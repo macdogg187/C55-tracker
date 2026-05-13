@@ -18,6 +18,9 @@ const ALLOWED_EVENT_TYPES: MaintenanceEvent["event_type"][] = [
   "high_stress_window",
   "inspection_alert",
   "failure_alert",
+  "failure_observation",
+  "data_integrity_alert",
+  "pass_detected",
 ];
 
 function isFailureMode(v: unknown): v is FailureMode {

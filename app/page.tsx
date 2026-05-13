@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   buildSeedPartStatuses,
   type PartStatus,
@@ -21,6 +21,8 @@ import { FatigueChart } from "./components/FatigueChart";
 import { PartCard } from "./components/PartCard";
 import { ReplacePartDialog } from "./components/ReplacePartDialog";
 import { MaintenanceLogPanel } from "./components/MaintenanceLogPanel";
+import { DataIngestPanel } from "./components/DataIngestPanel";
+import { FailurePredictionPanel } from "./components/FailurePredictionPanel";
 
 type LifecycleSnapshot = {
   installation_id: string;
@@ -63,13 +65,6 @@ type SnapshotResponse = {
     source: string | null;
     notes: string | null;
   }[];
-};
-
-type IngestSummary = {
-  fileName: string;
-  rowCount: number;
-  headers: string[];
-  inferredOffWindows: number;
 };
 
 // Merge the snapshot's slots+active-lifecycles into the canonical seed list
@@ -188,9 +183,11 @@ export default function Home() {
   const [pipelinePayload, setPipelinePayload] = useState<PipelinePayload | null>(null);
   const [pipelineLoaded, setPipelineLoaded] = useState(false);
   const [selectedPartId, setSelectedPartId] = useState<string>("");
-  const [ingestSummary, setIngestSummary] = useState<IngestSummary | null>(null);
   const [replaceOpen, setReplaceOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
   const [replaceError, setReplaceError] = useState<string | null>(null);
+  const [reportError, setReportError] = useState<string | null>(null);
+  const [predictionRefreshKey, setPredictionRefreshKey] = useState(0);
 
   // Pipeline.json (analytics) — refreshes whenever the watcher rewrites it.
   useEffect(() => {
@@ -243,20 +240,18 @@ export default function Home() {
     return parts.find((p) => p.serialNumber) ?? parts[0];
   }, [parts, selectedPartId]);
 
-  function handleCsvUpload(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const raw = String(reader.result ?? "");
-      const lines = raw.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
-      if (!lines.length) return;
-      const headers = lines[0].split(",").map((h) => h.trim());
-      const rows = lines.slice(1);
-      const inferredOffWindows = rows.filter((r) => r.includes(",,") || r.includes("NaN")).length;
-      setIngestSummary({ fileName: file.name, headers, rowCount: rows.length, inferredOffWindows });
-    };
-    reader.readAsText(file);
+  async function handleIngest() {
+    await live.refresh();
+    setPredictionRefreshKey((k) => k + 1);
+    try {
+      const res = await fetch("/pipeline.json", { cache: "no-store" });
+      if (res.ok) {
+        setPipelinePayload((await res.json()) as PipelinePayload);
+        setPipelineLoaded(true);
+      }
+    } catch {
+      // Pipeline refresh is best-effort.
+    }
   }
 
   async function handleReplace(entry: {
@@ -287,6 +282,35 @@ export default function Home() {
       await live.refresh();
     } catch (err) {
       setReplaceError((err as Error).message);
+    }
+  }
+
+  async function handleReportFailure(entry: {
+    installationId: string;
+    failureMode: FailureMode;
+    notes: string;
+    timestamp: string;
+  }) {
+    setReportError(null);
+    try {
+      const res = await fetch("/api/failure/log", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          installation_id: entry.installationId,
+          failure_mode: entry.failureMode,
+          notes: entry.notes || undefined,
+          timestamp: entry.timestamp,
+        }),
+      });
+      if (!res.ok) {
+        const body = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(body.error ?? `HTTP ${res.status}`);
+      }
+      setReportOpen(false);
+      await live.refresh();
+    } catch (err) {
+      setReportError((err as Error).message);
     }
   }
 
@@ -327,8 +351,9 @@ export default function Home() {
           pipelineLoaded={pipelineLoaded}
           generatedAt={pipelinePayload?.generated_at ?? null}
           snapshotAt={live.lastUpdatedAt}
-          onCsvUpload={handleCsvUpload}
         />
+
+        <DataIngestPanel onIngest={handleIngest} />
 
         {summary && <SummaryStrip summary={summary} />}
 
@@ -356,25 +381,12 @@ export default function Home() {
           <FatigueChart series={fatigue} highStress={highStress} offWindows={offWindows} />
         </section>
 
-        {ingestSummary && (
-          <section className="rounded-2xl border border-emerald-900/45 bg-emerald-950/20 p-4 text-sm">
-            <p className="font-medium text-emerald-300">
-              CSV Ingestion Preview · {ingestSummary.fileName}
-            </p>
-            <p className="mt-1 text-emerald-100">
-              Parsed {ingestSummary.rowCount} rows · {ingestSummary.headers.length} columns ·{" "}
-              {ingestSummary.inferredOffWindows} suspected off-window rows.
-            </p>
-            <p className="mt-1 text-emerald-200/90">
-              Detected: {ingestSummary.headers.join(", ")}
-            </p>
-            <p className="mt-1 text-emerald-300/80">
-              Drop the file into the watched <code className="font-mono">inbox/</code> folder
-              (or run <code className="font-mono">python data_pipeline.py</code>) to fully merge
-              into the database.
-            </p>
-          </section>
-        )}
+        <FailurePredictionPanel
+          equipmentId={equipmentId}
+          refreshKey={predictionRefreshKey}
+          onSelect={setSelectedPartId}
+          selectedId={selectedPart?.installationId ?? null}
+        />
 
         {selectedPart && (
           <section className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-5">
@@ -390,25 +402,51 @@ export default function Home() {
                 {replaceError && (
                   <p className="mt-1 text-xs text-rose-300">Replace failed: {replaceError}</p>
                 )}
+                {reportError && (
+                  <p className="mt-1 text-xs text-rose-300">Report failed: {reportError}</p>
+                )}
               </div>
-              <button
-                onClick={() => setReplaceOpen(true)}
-                disabled={!selectedPart.serialNumber}
-                title={
-                  selectedPart.serialNumber
-                    ? "Archive the current lifecycle and reset the odometer"
-                    : "Slot is empty — replace requires an active lifecycle"
-                }
-                className="rounded-md border border-cyan-600 bg-cyan-700/30 px-3 py-1.5 text-xs font-semibold text-cyan-100 transition hover:bg-cyan-700/50 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                Replace Part
-              </button>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  onClick={() => setReportOpen(true)}
+                  disabled={!selectedPart.serialNumber}
+                  title={
+                    selectedPart.serialNumber
+                      ? "Log an observed failure WITHOUT archiving the lifecycle"
+                      : "Slot is empty — failure logging requires an active lifecycle"
+                  }
+                  className="rounded-md border border-amber-600 bg-amber-700/30 px-3 py-1.5 text-xs font-semibold text-amber-100 transition hover:bg-amber-700/50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Report Failure
+                </button>
+                <button
+                  onClick={() => setReplaceOpen(true)}
+                  disabled={!selectedPart.serialNumber}
+                  title={
+                    selectedPart.serialNumber
+                      ? "Archive the current lifecycle and reset the odometer"
+                      : "Slot is empty — replace requires an active lifecycle"
+                  }
+                  className="rounded-md border border-cyan-600 bg-cyan-700/30 px-3 py-1.5 text-xs font-semibold text-cyan-100 transition hover:bg-cyan-700/50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Replace Part
+                </button>
+              </div>
             </div>
             <ReplacePartDialog
               part={selectedPart}
               open={replaceOpen}
+              mode="replace"
               onClose={() => setReplaceOpen(false)}
               onSubmit={handleReplace}
+            />
+            <ReplacePartDialog
+              part={selectedPart}
+              open={reportOpen}
+              mode="report"
+              onClose={() => setReportOpen(false)}
+              onSubmit={handleReplace}
+              onReport={handleReportFailure}
             />
           </section>
         )}
@@ -470,7 +508,6 @@ function Header({
   pipelineLoaded,
   generatedAt,
   snapshotAt,
-  onCsvUpload,
 }: {
   equipmentId: string;
   equipmentList: { equipment_id: string; display_name: string }[];
@@ -479,7 +516,6 @@ function Header({
   pipelineLoaded: boolean;
   generatedAt: string | null;
   snapshotAt: string | null;
-  onCsvUpload: (e: ChangeEvent<HTMLInputElement>) => void;
 }) {
   const equipmentOptions =
     equipmentList.length > 0
@@ -527,10 +563,6 @@ function Header({
               </option>
             ))}
           </select>
-          <label className="inline-flex cursor-pointer items-center gap-3 rounded-lg border border-cyan-800/60 bg-cyan-900/20 px-4 py-2 text-sm font-medium text-cyan-100 transition hover:bg-cyan-800/25">
-            <input type="file" accept=".csv,text/csv" className="hidden" onChange={onCsvUpload} />
-            Drop VantagePoint CSV
-          </label>
         </div>
       </div>
     </section>

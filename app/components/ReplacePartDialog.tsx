@@ -4,57 +4,112 @@ import { useState } from "react";
 import type { PartStatus } from "@/lib/dashboard-data";
 import { FAILURE_MODES, type FailureMode } from "@/lib/parts-catalog";
 
+export type ReplacePartEntry = {
+  installationId: string;
+  newSerial: string;
+  failureMode: FailureMode;
+  notes: string;
+  timestamp: string;
+};
+
+export type ReportFailureEntry = {
+  installationId: string;
+  failureMode: FailureMode;
+  notes: string;
+  timestamp: string;
+};
+
 type Props = {
   part: PartStatus;
   open: boolean;
+  // "replace": archive the current lifecycle and reset the odometer.
+  // "report":  log a failure observation without archiving (part stays in).
+  mode?: "replace" | "report";
   onClose: () => void;
-  onSubmit: (entry: {
-    installationId: string;
-    newSerial: string;
-    failureMode: FailureMode;
-    notes: string;
-    timestamp: string;
-  }) => void;
+  onSubmit: (entry: ReplacePartEntry) => void;
+  onReport?: (entry: ReportFailureEntry) => void;
 };
 
-// "Replace Part" archives the previous lifecycle, captures the timestamp + the
+// "Replace" archives the previous lifecycle, captures the timestamp + the
 // failure mode, and resets the runtime odometer for that installation_id.
-export function ReplacePartDialog({ part, open, onClose, onSubmit }: Props) {
+// "Report" logs a failure_observation maintenance event for the same slot
+// without archiving — useful for early warnings, observed scratches, etc.
+export function ReplacePartDialog({
+  part,
+  open,
+  mode = "replace",
+  onClose,
+  onSubmit,
+  onReport,
+}: Props) {
   const [newSerial, setNewSerial] = useState("");
   const [failureMode, setFailureMode] = useState<FailureMode>("normal wear");
   const [notes, setNotes] = useState("");
 
   if (!open) return null;
 
+  const isReport = mode === "report";
+
+  function submit(e: React.FormEvent) {
+    e.preventDefault();
+    const timestamp = new Date().toISOString();
+    if (isReport) {
+      onReport?.({
+        installationId: part.installationId,
+        failureMode,
+        notes: notes.trim(),
+        timestamp,
+      });
+    } else {
+      onSubmit({
+        installationId: part.installationId,
+        newSerial: newSerial.trim(),
+        failureMode,
+        notes: notes.trim(),
+        timestamp,
+      });
+    }
+    setNewSerial("");
+    setNotes("");
+    setFailureMode("normal wear");
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
       <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          onSubmit({
-            installationId: part.installationId,
-            newSerial: newSerial.trim(),
-            failureMode,
-            notes: notes.trim(),
-            timestamp: new Date().toISOString(),
-          });
-          setNewSerial("");
-          setNotes("");
-          setFailureMode("normal wear");
-        }}
+        onSubmit={submit}
         className="w-full max-w-lg space-y-4 rounded-2xl border border-cyan-800/40 bg-[#040a14] p-6 shadow-[0_0_60px_rgba(6,182,212,0.18)]"
       >
         <header>
-          <h3 className="text-lg font-semibold text-zinc-100">Replace Part</h3>
+          <h3 className="text-lg font-semibold text-zinc-100">
+            {isReport ? "Report Failure" : "Replace Part"}
+          </h3>
           <p className="text-xs text-zinc-400">
-            Archives the current lifecycle and resets the odometer for{" "}
-            <span className="font-mono text-cyan-300">{part.installationId}</span>.
+            {isReport ? (
+              <>
+                Logs a failure observation for{" "}
+                <span className="font-mono text-amber-300">
+                  {part.installationId}
+                </span>{" "}
+                without archiving the lifecycle.
+              </>
+            ) : (
+              <>
+                Archives the current lifecycle and resets the odometer for{" "}
+                <span className="font-mono text-cyan-300">
+                  {part.installationId}
+                </span>
+                .
+              </>
+            )}
           </p>
         </header>
 
         <div className="grid gap-3 text-xs">
           <Row label="Outgoing serial number">
-            <span className="font-mono text-zinc-300">{part.serialNumber || "—"}</span>
+            <span className="font-mono text-zinc-300">
+              {part.serialNumber || "—"}
+            </span>
           </Row>
           <Row label="Active runtime captured">
             <span className="font-mono text-zinc-300">
@@ -82,16 +137,18 @@ export function ReplacePartDialog({ part, open, onClose, onSubmit }: Props) {
             </select>
           </label>
 
-          <label className="flex flex-col gap-1">
-            <span className="text-zinc-400">New serial number</span>
-            <input
-              required
-              value={newSerial}
-              onChange={(e) => setNewSerial(e.target.value)}
-              placeholder="e.g. HPT-26-014"
-              className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1.5 font-mono text-zinc-100"
-            />
-          </label>
+          {!isReport && (
+            <label className="flex flex-col gap-1">
+              <span className="text-zinc-400">New serial number</span>
+              <input
+                required
+                value={newSerial}
+                onChange={(e) => setNewSerial(e.target.value)}
+                placeholder="e.g. HPT-26-014"
+                className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1.5 font-mono text-zinc-100"
+              />
+            </label>
+          )}
 
           <label className="flex flex-col gap-1">
             <span className="text-zinc-400">Notes</span>
@@ -99,7 +156,11 @@ export function ReplacePartDialog({ part, open, onClose, onSubmit }: Props) {
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
-              placeholder="Weephole leak observed at the HP thread root."
+              placeholder={
+                isReport
+                  ? "Weephole weep observed at left HP thread root; will monitor before replace."
+                  : "Weephole leak observed at the HP thread root."
+              }
               className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-zinc-100"
             />
           </label>
@@ -115,9 +176,13 @@ export function ReplacePartDialog({ part, open, onClose, onSubmit }: Props) {
           </button>
           <button
             type="submit"
-            className="rounded-md border border-cyan-600 bg-cyan-700/40 px-3 py-1.5 text-xs font-semibold text-cyan-100 hover:bg-cyan-700/60"
+            className={
+              isReport
+                ? "rounded-md border border-amber-600 bg-amber-700/40 px-3 py-1.5 text-xs font-semibold text-amber-100 hover:bg-amber-700/60"
+                : "rounded-md border border-cyan-600 bg-cyan-700/40 px-3 py-1.5 text-xs font-semibold text-cyan-100 hover:bg-cyan-700/60"
+            }
           >
-            Archive & Reset Odometer
+            {isReport ? "Log Failure Observation" : "Archive & Reset Odometer"}
           </button>
         </div>
       </form>
