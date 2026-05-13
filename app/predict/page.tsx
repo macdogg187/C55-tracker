@@ -46,7 +46,6 @@ export default function PredictPage() {
     () => pipelinePayload?.high_stress_windows ?? [],
     [pipelinePayload],
   );
-
   return (
     <main className="min-h-screen bg-[#030711] text-zinc-100">
       <div className="mx-auto flex w-full max-w-[1500px] flex-col gap-6 px-5 py-6 lg:px-8">
