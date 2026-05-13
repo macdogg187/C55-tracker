@@ -38,6 +38,8 @@ type Props = {
   refreshKey: number;
   onSelect: (installationId: string) => void;
   selectedId?: string | null;
+  /** When provided, renders a "Replace →" link on each card using this function. */
+  replaceHref?: (installationId: string) => string;
 };
 
 const BAND_STYLE: Record<Prediction["band"], string> = {
@@ -59,6 +61,7 @@ export function FailurePredictionPanel({
   refreshKey,
   onSelect,
   selectedId,
+  replaceHref,
 }: Props) {
   const [data, setData] = useState<Response | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -222,9 +225,20 @@ export function FailurePredictionPanel({
                     {p.part_name}
                   </p>
                 </div>
-                <span className="rounded-md bg-black/30 px-2 py-1 text-[10px] font-bold uppercase tracking-wider">
-                  {p.band}
-                </span>
+                <div className="flex shrink-0 flex-col items-end gap-1.5">
+                  <span className="rounded-md bg-black/30 px-2 py-1 text-[10px] font-bold uppercase tracking-wider">
+                    {p.band}
+                  </span>
+                  {replaceHref && (
+                    <a
+                      href={replaceHref(p.installation_id)}
+                      onClick={(e) => e.stopPropagation()}
+                      className="rounded-md border border-cyan-700/60 bg-cyan-900/30 px-2 py-0.5 text-[10px] font-semibold text-cyan-300 hover:bg-cyan-800/40"
+                    >
+                      Replace →
+                    </a>
+                  )}
+                </div>
               </div>
               <div className="mb-2 h-1.5 w-full overflow-hidden rounded-full bg-black/30">
                 <div

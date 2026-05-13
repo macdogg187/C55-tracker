@@ -1,14 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   buildSeedPartStatuses,
   type PartStatus,
 } from "@/lib/dashboard-data";
-import {
-  PART_CATALOG,
-  type FailureMode,
-} from "@/lib/parts-catalog";
+import { PART_CATALOG } from "@/lib/parts-catalog";
 import type {
   FatigueSample,
   PartRecord,
@@ -18,11 +16,10 @@ import type {
 import { useLiveLifecycles } from "@/lib/use-live-lifecycles";
 import { SequentialFlowchart } from "./components/SequentialFlowchart";
 import { FatigueChart } from "./components/FatigueChart";
-import { PartCard } from "./components/PartCard";
-import { ReplacePartDialog } from "./components/ReplacePartDialog";
 import { MaintenanceLogPanel } from "./components/MaintenanceLogPanel";
 import { DataIngestPanel } from "./components/DataIngestPanel";
-import { FailurePredictionPanel } from "./components/FailurePredictionPanel";
+import { SubassemblyGrid } from "./components/SubassemblyGrid";
+import Link from "next/link";
 
 type LifecycleSnapshot = {
   installation_id: string;
@@ -67,8 +64,6 @@ type SnapshotResponse = {
   }[];
 };
 
-// Merge the snapshot's slots+active-lifecycles into the canonical seed list
-// so unfilled slots still render. Then layer the pipeline.json analytics on top.
 function buildPartStatuses(
   equipmentId: string,
   snapshot: SnapshotResponse | null,
@@ -77,8 +72,6 @@ function buildPartStatuses(
   const seedFromCatalog = buildSeedPartStatuses(equipmentId);
   const seedById = new Map(seedFromCatalog.map((p) => [p.installationId, p]));
 
-  // Add slots that exist in the snapshot but aren't in the local catalog
-  // (e.g. equipment 0938 / 0198 if the user switches lines).
   if (snapshot) {
     for (const slot of snapshot.slots) {
       if (slot.equipment_id !== equipmentId) continue;
@@ -92,10 +85,10 @@ function buildPartStatuses(
         partCode: slot.part_code,
         partName: catalog.displayName,
         category: catalog.category,
-      isConsumable: catalog.isConsumable,
-      isStructural: catalog.isStructural,
-      isSerialized: catalog.isSerialized ?? false,
-      zone: slot.zone,
+        isConsumable: catalog.isConsumable,
+        isStructural: catalog.isStructural,
+        isSerialized: catalog.isSerialized ?? false,
+        zone: slot.zone,
         orientation: slot.orientation,
         sequenceOrder: slot.sequence_order,
         serialNumber: "",
@@ -113,7 +106,6 @@ function buildPartStatuses(
     }
   }
 
-  // Index active lifecycles + pipeline records by installation_id
   const lifecycleById = new Map<string, LifecycleSnapshot>();
   for (const lc of snapshot?.lifecycles ?? []) {
     if (lc.removal_date || lc.archived_at) continue;
@@ -127,13 +119,9 @@ function buildPartStatuses(
 
     const serial = lc?.serial_number || pp?.serial_number || seed.serialNumber;
     const installationDate = lc?.installation_date ?? pp?.installation_date;
-    const runtime = pp?.active_runtime_minutes
-      ?? lc?.active_runtime_minutes
-      ?? seed.granularRuntimeMinutes;
+    const runtime = pp?.active_runtime_minutes ?? lc?.active_runtime_minutes ?? seed.granularRuntimeMinutes;
     const stress = pp?.high_stress_minutes ?? lc?.high_stress_minutes ?? seed.highStressMinutes;
-    const cumStress = pp?.cumulative_pressure_stress
-      ?? lc?.cumulative_pressure_stress
-      ?? seed.cumulativePressureStress;
+    const cumStress = pp?.cumulative_pressure_stress ?? lc?.cumulative_pressure_stress ?? seed.cumulativePressureStress;
     const mtbf = pp?.expected_mtbf_minutes || seed.expectedMtbfMinutes;
     const inspection = pp?.inspection_threshold_min ?? seed.inspectionThresholdMin;
     const failure = pp?.failure_threshold_min ?? seed.failureThresholdMin;
@@ -178,19 +166,15 @@ function buildPartStatuses(
 const DEFAULT_EQUIPMENT = "0091";
 
 export default function Home() {
+  const searchParams = useSearchParams();
+  const equipmentId = searchParams.get("eq") ?? DEFAULT_EQUIPMENT;
+
   const live = useLiveLifecycles();
 
-  const [equipmentId, setEquipmentId] = useState(DEFAULT_EQUIPMENT);
   const [pipelinePayload, setPipelinePayload] = useState<PipelinePayload | null>(null);
   const [pipelineLoaded, setPipelineLoaded] = useState(false);
   const [selectedPartId, setSelectedPartId] = useState<string>("");
-  const [replaceOpen, setReplaceOpen] = useState(false);
-  const [reportOpen, setReportOpen] = useState(false);
-  const [replaceError, setReplaceError] = useState<string | null>(null);
-  const [reportError, setReportError] = useState<string | null>(null);
-  const [predictionRefreshKey, setPredictionRefreshKey] = useState(0);
 
-  // Pipeline.json (analytics) — refreshes whenever the watcher rewrites it.
   useEffect(() => {
     let cancelled = false;
     async function load() {
@@ -202,7 +186,7 @@ export default function Home() {
         setPipelinePayload(json);
         setPipelineLoaded(true);
       } catch {
-        // No pipeline yet — that's OK, we still render slots from the snapshot.
+        // No pipeline yet — slots still render from snapshot.
       }
     }
     void load();
@@ -223,16 +207,12 @@ export default function Home() {
   const highStress: WindowSpan[] = pipelinePayload?.high_stress_windows ?? [];
   const summary = pipelinePayload?.summary ?? null;
   const events = snapshot?.events ?? [];
-  const equipmentList = snapshot?.equipment ?? [];
 
   const parts = useMemo(
     () => buildPartStatuses(equipmentId, snapshot, pipelineParts),
     [equipmentId, snapshot, pipelineParts],
   );
 
-  // Effective selection: user pick if it still exists, otherwise first
-  // installed part, otherwise first slot. Computed (no setState) so we don't
-  // trigger cascading renders from an effect.
   const selectedPart = useMemo(() => {
     if (selectedPartId) {
       const explicit = parts.find((p) => p.id === selectedPartId);
@@ -243,7 +223,6 @@ export default function Home() {
 
   async function handleIngest() {
     await live.refresh();
-    setPredictionRefreshKey((k) => k + 1);
     try {
       const res = await fetch("/pipeline.json", { cache: "no-store" });
       if (res.ok) {
@@ -252,66 +231,6 @@ export default function Home() {
       }
     } catch {
       // Pipeline refresh is best-effort.
-    }
-  }
-
-  async function handleReplace(entry: {
-    installationId: string;
-    newSerial: string;
-    failureMode: FailureMode;
-    notes: string;
-    timestamp: string;
-  }) {
-    setReplaceError(null);
-    try {
-      const res = await fetch("/api/lifecycle/replace", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          installation_id: entry.installationId,
-          new_serial: entry.newSerial,
-          failure_mode: entry.failureMode,
-          notes: entry.notes || undefined,
-          timestamp: entry.timestamp,
-        }),
-      });
-      if (!res.ok) {
-        const body = (await res.json().catch(() => ({}))) as { error?: string };
-        throw new Error(body.error ?? `HTTP ${res.status}`);
-      }
-      setReplaceOpen(false);
-      await live.refresh();
-    } catch (err) {
-      setReplaceError((err as Error).message);
-    }
-  }
-
-  async function handleReportFailure(entry: {
-    installationId: string;
-    failureMode: FailureMode;
-    notes: string;
-    timestamp: string;
-  }) {
-    setReportError(null);
-    try {
-      const res = await fetch("/api/failure/log", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          installation_id: entry.installationId,
-          failure_mode: entry.failureMode,
-          notes: entry.notes || undefined,
-          timestamp: entry.timestamp,
-        }),
-      });
-      if (!res.ok) {
-        const body = (await res.json().catch(() => ({}))) as { error?: string };
-        throw new Error(body.error ?? `HTTP ${res.status}`);
-      }
-      setReportOpen(false);
-      await live.refresh();
-    } catch (err) {
-      setReportError((err as Error).message);
     }
   }
 
@@ -337,22 +256,28 @@ export default function Home() {
     await live.refresh();
   }
 
-  // Serialized parts without a serial number are "missing" — shown as a checklist.
-  // Non-serialized parts are always considered installed (no serial required).
   const missingParts = parts.filter((p) => p.isSerialized && !p.serialNumber);
   const installedParts = parts.filter((p) =>
     p.isSerialized ? !!p.serialNumber : true,
   );
-  const consumables = installedParts.filter((p) => p.isConsumable);
-  const structural = installedParts.filter((p) => p.isStructural);
+
+  // Structural odometers — sorted by wear % (highest → lowest)
+  const structuralParts = installedParts.filter((p) => p.isStructural);
+
+  // All non-structural installed parts for the components grid
+  const componentParts = installedParts.filter((p) => !p.isStructural);
+
+  // Count parts that need attention
+  const needsAttention = installedParts.filter(
+    (p) => p.health === "critical" || p.alert === "failure",
+  );
 
   return (
     <main className="min-h-screen bg-[#030711] text-zinc-100">
       <div className="mx-auto flex w-full max-w-[1500px] flex-col gap-6 px-5 py-6 lg:px-8">
-        <Header
-          equipmentId={equipmentId}
-          equipmentList={equipmentList}
-          onEquipmentChange={setEquipmentId}
+
+        {/* Status bar */}
+        <StatusBar
           backend={live.backend}
           pipelineLoaded={pipelineLoaded}
           generatedAt={pipelinePayload?.generated_at ?? null}
@@ -363,6 +288,39 @@ export default function Home() {
 
         {summary && <SummaryStrip summary={summary} />}
 
+        {/* Parts needing attention banner */}
+        {needsAttention.length > 0 && (
+          <div className="flex items-center justify-between gap-4 rounded-2xl border border-rose-800/50 bg-rose-950/20 px-5 py-3.5">
+            <p className="text-sm text-rose-200">
+              <span className="font-semibold">{needsAttention.length} part{needsAttention.length > 1 ? "s" : ""}</span>
+              {" "}need{needsAttention.length === 1 ? "s" : ""} immediate attention.
+            </p>
+            <Link
+              href={`/replace?eq=${equipmentId}`}
+              className="shrink-0 rounded-md border border-rose-600 bg-rose-700/40 px-4 py-1.5 text-sm font-semibold text-rose-100 transition hover:bg-rose-700/60"
+            >
+              Replace Part →
+            </Link>
+          </div>
+        )}
+
+        {/* Missing components banner */}
+        {missingParts.length > 0 && (
+          <div className="flex items-center justify-between gap-4 rounded-2xl border border-amber-800/50 bg-amber-950/20 px-5 py-3.5">
+            <p className="text-sm text-amber-200">
+              <span className="font-semibold">{missingParts.length} slot{missingParts.length > 1 ? "s" : ""}</span>
+              {" "}missing installed part{missingParts.length > 1 ? "s" : ""}.
+            </p>
+            <Link
+              href={`/replace?eq=${equipmentId}`}
+              className="shrink-0 rounded-md border border-amber-600 bg-amber-700/40 px-4 py-1.5 text-sm font-semibold text-amber-100 transition hover:bg-amber-700/60"
+            >
+              Install Part →
+            </Link>
+          </div>
+        )}
+
+        {/* Process flow */}
         <section className="rounded-2xl border border-cyan-900/40 bg-gradient-to-b from-slate-900 to-[#04080f] p-5">
           <h2 className="mb-3 text-base font-semibold text-zinc-100">
             C55 Sequential Process Flow
@@ -374,216 +332,93 @@ export default function Home() {
           />
         </section>
 
+        {/* Sensor / fatigue chart */}
         <section className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-5">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-base font-semibold text-zinc-100">
               Fatigue Visualization
             </h2>
             <p className="text-xs text-zinc-400">
-              Cumulative runtime overlay vs rolling stdev of P01 — highlights
-              the correlation between high pulsation and HP-thread weephole risk.
+              P01 pressure + rolling 10-min σ — correlates high pulsation with HP-thread weephole risk.
             </p>
           </div>
           <FatigueChart series={fatigue} highStress={highStress} offWindows={offWindows} />
         </section>
 
-        <FailurePredictionPanel
-          equipmentId={equipmentId}
-          refreshKey={predictionRefreshKey}
-          onSelect={setSelectedPartId}
-          selectedId={selectedPart?.installationId ?? null}
-        />
-
-        {selectedPart && (
-          <section className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-5">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <p className="text-xs uppercase tracking-widest text-cyan-400">Focused</p>
-                <h2 className="text-lg font-semibold text-zinc-100">
-                  {selectedPart.partName}{" "}
-                  <span className="font-mono text-sm text-zinc-500">
-                    {selectedPart.installationId}
-                  </span>
-                </h2>
-                {replaceError && (
-                  <p className="mt-1 text-xs text-rose-300">Replace failed: {replaceError}</p>
-                )}
-                {reportError && (
-                  <p className="mt-1 text-xs text-rose-300">Report failed: {reportError}</p>
-                )}
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  onClick={() => setReportOpen(true)}
-                  disabled={!selectedPart.serialNumber}
-                  title={
-                    selectedPart.serialNumber
-                      ? "Log an observed failure WITHOUT archiving the lifecycle"
-                      : "Slot is empty — failure logging requires an active lifecycle"
-                  }
-                  className="rounded-md border border-amber-600 bg-amber-700/30 px-3 py-1.5 text-xs font-semibold text-amber-100 transition hover:bg-amber-700/50 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  Report Failure
-                </button>
-                <button
-                  onClick={() => setReplaceOpen(true)}
-                  disabled={!selectedPart.isSerialized && !selectedPart.serialNumber}
-                  title={
-                    selectedPart.serialNumber
-                      ? "Archive the current lifecycle and reset the odometer"
-                      : selectedPart.isSerialized
-                        ? "Log installation of this serialized part"
-                        : "Non-serialized slot — no lifecycle to archive"
-                  }
-                  className="rounded-md border border-cyan-600 bg-cyan-700/30 px-3 py-1.5 text-xs font-semibold text-cyan-100 transition hover:bg-cyan-700/50 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {selectedPart.serialNumber ? "Replace Part" : "Install Part"}
-                </button>
-              </div>
-            </div>
-            <ReplacePartDialog
-              part={selectedPart}
-              open={replaceOpen}
-              mode="replace"
-              onClose={() => setReplaceOpen(false)}
-              onSubmit={handleReplace}
-            />
-            <ReplacePartDialog
-              part={selectedPart}
-              open={reportOpen}
-              mode="report"
-              onClose={() => setReportOpen(false)}
-              onSubmit={handleReplace}
-              onReport={handleReportFailure}
-            />
-          </section>
+        {/* Structural Odometers — sorted highest % → lowest */}
+        {structuralParts.length > 0 && (
+          <SubassemblyGrid
+            title="Structural Odometers"
+            subtitle="Sorted highest wear % → lowest · click row to log maintenance"
+            parts={structuralParts}
+            selectedId={selectedPart?.id ?? ""}
+            onSelect={setSelectedPartId}
+            sortByPct
+          />
         )}
 
+        {/* All sub-components by zone / type / orientation */}
+        {componentParts.length > 0 && (
+          <SubassemblyGrid
+            title="Sub-components"
+            subtitle="Cluster · Pump · Homogenizer · Manifold"
+            parts={componentParts}
+            selectedId={selectedPart?.id ?? ""}
+            onSelect={setSelectedPartId}
+          />
+        )}
+
+        {/* Maintenance log */}
         <MaintenanceLogPanel
           events={events}
           selectedInstallationId={selectedPart?.installationId ?? null}
           onLog={handleLogMaintenance}
         />
 
-        {missingParts.length > 0 && (
-          <MissingPartsChecklist
-            parts={missingParts}
-            onInstall={(id) => {
-              setSelectedPartId(id);
-              setReplaceOpen(true);
-            }}
-          />
-        )}
-
-        {structural.length > 0 && (
-          <PartGrid title="Structural Odometers" subtitle="Cumulative active runtime · alert tiers">
-            {structural.map((p) => (
-              <PartCard
-                key={p.id}
-                part={p}
-                selected={selectedPart?.id === p.id}
-                onSelect={() => setSelectedPartId(p.id)}
-              />
-            ))}
-          </PartGrid>
-        )}
-
-        {consumables.length > 0 && (
-          <PartGrid title="Consumables" subtitle="Seals · Ball Seats · CV Balls · Springs · 800–1200 min life">
-            {consumables.map((p) => (
-              <PartCard
-                key={p.id}
-                part={p}
-                selected={selectedPart?.id === p.id}
-                onSelect={() => setSelectedPartId(p.id)}
-              />
-            ))}
-          </PartGrid>
-        )}
-
-        {installedParts.length > 0 && (
-          <PartGrid title="All Installed Parts" subtitle="Granular runtime vs MTBF / failure thresholds">
-            {installedParts.map((p) => (
-              <PartCard
-                key={p.id}
-                part={p}
-                selected={selectedPart?.id === p.id}
-                onSelect={() => setSelectedPartId(p.id)}
-              />
-            ))}
-          </PartGrid>
-        )}
       </div>
     </main>
   );
 }
 
-function Header({
-  equipmentId,
-  equipmentList,
-  onEquipmentChange,
+function StatusBar({
   backend,
   pipelineLoaded,
   generatedAt,
   snapshotAt,
 }: {
-  equipmentId: string;
-  equipmentList: { equipment_id: string; display_name: string }[];
-  onEquipmentChange: (id: string) => void;
   backend: "supabase" | "local-json" | null;
   pipelineLoaded: boolean;
   generatedAt: string | null;
   snapshotAt: string | null;
 }) {
-  const equipmentOptions =
-    equipmentList.length > 0
-      ? equipmentList
-      : [
-          { equipment_id: "0091", display_name: "C55 Equipment 0091" },
-          { equipment_id: "0938", display_name: "C55 Equipment 0938" },
-          { equipment_id: "0198", display_name: "C55 Equipment 0198" },
-        ];
-
   const backendLabel =
     backend === "supabase"
       ? "Supabase (live)"
       : backend === "local-json"
-        ? "Local JSON (file-watched)"
-        : "loading…";
+        ? "Local JSON"
+        : "connecting…";
 
   return (
-    <section className="rounded-2xl border border-cyan-900/40 bg-gradient-to-b from-slate-900 to-[#04080f] p-6 shadow-[0_0_40px_rgba(6,182,212,0.15)]">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <p className="text-xs uppercase tracking-[0.24em] text-cyan-400">
-            Predictive Maintenance Cockpit
-          </p>
-          <h1 className="text-2xl font-semibold text-zinc-100 lg:text-3xl">
-            C55 Homogenizer · Unified Tracker
-          </h1>
-          <p className="mt-1 text-xs text-zinc-500">
-            Backend: <span className="text-zinc-300">{backendLabel}</span>
-            {snapshotAt && <> · snapshot {new Date(snapshotAt).toLocaleTimeString()}</>}
-            {pipelineLoaded && generatedAt && (
-              <> · pipeline {new Date(generatedAt).toLocaleTimeString()}</>
-            )}
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <select
-            value={equipmentId}
-            onChange={(e) => onEquipmentChange(e.target.value)}
-            className="rounded-md border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100"
-          >
-            {equipmentOptions.map((e) => (
-              <option key={e.equipment_id} value={e.equipment_id}>
-                {e.display_name}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-    </section>
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-xl border border-zinc-800/60 bg-zinc-900/30 px-4 py-2.5 text-xs text-zinc-500">
+      <span>
+        Backend:{" "}
+        <span className={backend === "supabase" ? "text-emerald-300" : "text-zinc-300"}>
+          {backendLabel}
+        </span>
+      </span>
+      {snapshotAt && (
+        <span>
+          Snapshot:{" "}
+          <span className="text-zinc-300">{new Date(snapshotAt).toLocaleTimeString()}</span>
+        </span>
+      )}
+      {pipelineLoaded && generatedAt && (
+        <span>
+          Pipeline:{" "}
+          <span className="text-zinc-300">{new Date(generatedAt).toLocaleTimeString()}</span>
+        </span>
+      )}
+    </div>
   );
 }
 
@@ -604,70 +439,5 @@ function KPI({ label, value, accent }: { label: string; value: string; accent: s
       <p className="text-[10px] uppercase tracking-widest text-zinc-500">{label}</p>
       <p className={`mt-1 text-xl font-semibold ${accent}`}>{value}</p>
     </div>
-  );
-}
-
-function PartGrid({
-  title,
-  subtitle,
-  children,
-}: {
-  title: string;
-  subtitle: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section>
-      <div className="mb-3 flex items-end justify-between">
-        <h2 className="text-base font-semibold text-zinc-100">{title}</h2>
-        <p className="text-xs text-zinc-500">{subtitle}</p>
-      </div>
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{children}</div>
-    </section>
-  );
-}
-
-function MissingPartsChecklist({
-  parts,
-  onInstall,
-}: {
-  parts: PartStatus[];
-  onInstall: (id: string) => void;
-}) {
-  return (
-    <section className="rounded-2xl border border-zinc-700/50 bg-zinc-900/20 p-5">
-      <div className="mb-3 flex items-end justify-between">
-        <div>
-          <h2 className="text-base font-semibold text-zinc-100">
-            Missing Components
-          </h2>
-          <p className="mt-0.5 text-xs text-zinc-500">
-            Serialized parts not yet installed · click to log installation
-          </p>
-        </div>
-        <span className="rounded-full border border-zinc-700 bg-zinc-900 px-2.5 py-0.5 text-[11px] text-zinc-400">
-          {parts.length} uninstalled
-        </span>
-      </div>
-      <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
-        {parts.map((p) => (
-          <button
-            key={p.id}
-            onClick={() => onInstall(p.id)}
-            className="flex items-center gap-3 rounded-lg border border-zinc-700/60 bg-zinc-950/40 px-3 py-2.5 text-left transition hover:border-cyan-700/60 hover:bg-cyan-950/20"
-          >
-            <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-sm border border-zinc-600 bg-zinc-900" />
-            <div className="min-w-0">
-              <p className="truncate text-xs font-medium text-zinc-300">
-                {p.partName}
-              </p>
-              <p className="font-mono text-[10px] text-zinc-500">
-                {p.installationId}
-              </p>
-            </div>
-          </button>
-        ))}
-      </div>
-    </section>
   );
 }
