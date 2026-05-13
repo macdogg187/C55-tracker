@@ -193,7 +193,7 @@ Set on `MaintenanceEvent.event_type`:
 | `inspect` / `clean` | maintenance route | Operator-logged routine maintenance. |
 | `off_maintenance` | trends ingest | Detected inter-sample gap > 5 min. |
 | `high_stress_window` | trends ingest | Rolling σ(P01) > 2 kpsi window. |
-| `pass_detected` | trends ingest | 36–40 min valid pass observed. |
+| `pass_detected` | trends ingest | 34–40 min valid pass observed. |
 | `inspection_alert` | scheduler (TBD) | Lifecycle crossed inspection threshold. |
 | `failure_alert` | scheduler (TBD) | Lifecycle crossed failure threshold. |
 | `failure_observation` | `/api/failure/log` | Operator reported failure without replacing. |

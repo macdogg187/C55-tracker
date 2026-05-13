@@ -1,4 +1,5 @@
 import type { Pass } from "@/lib/pass-detect";
+import { loadLogicParams } from "@/lib/logic-params";
 
 // =============================================================================
 // Production-Run Validation
@@ -40,12 +41,14 @@ export type RunValidationConfig = {
   expected_short_runs_per_period: number; // 1
 };
 
+const _rv = loadLogicParams().run_validation;
+
 export const DEFAULT_RUN_CONFIG: RunValidationConfig = {
-  inter_run_gap_min: 4 * 60,        // 4 h
-  long_pass_count: 10,
-  short_pass_count: 6,
-  expected_runs_per_period: 7,
-  expected_short_runs_per_period: 1,
+  inter_run_gap_min: _rv.inter_run_gap_min,
+  long_pass_count: _rv.long_pass_count,
+  short_pass_count: _rv.short_pass_count,
+  expected_runs_per_period: _rv.expected_runs_per_period,
+  expected_short_runs_per_period: _rv.expected_short_runs_per_period,
 };
 
 /**

@@ -1,13 +1,21 @@
 // Client-side analytics matching data_pipeline.py exactly.
 // Used to recompute Logic Doc tags when the operator tweaks thresholds in the UI
 // without forcing a full pipeline re-run.
+//
+// LOGIC is populated at startup from config/logic-params.json (server) or from
+// the hard-coded defaults (browser). Use loadLogicParams() when you need the
+// full params object; use LOGIC when you only need the five core constants.
+
+import { loadLogicParams } from "@/lib/logic-params";
+
+const _p = loadLogicParams();
 
 export const LOGIC = {
-  ACTIVE_BAND_LOW_KPSI: 19.0,
-  ACTIVE_BAND_HIGH_KPSI: 26.0,
-  PULSATION_STDEV_KPSI: 2.0,
-  ROLLING_WINDOW_MIN: 10,
-  GAP_OFF_MIN: 5,
+  ACTIVE_BAND_LOW_KPSI: _p.active_band_low_kpsi,
+  ACTIVE_BAND_HIGH_KPSI: _p.active_band_high_kpsi,
+  PULSATION_STDEV_KPSI: _p.pulsation_stdev_kpsi,
+  ROLLING_WINDOW_MIN: _p.rolling_window_min,
+  GAP_OFF_MIN: _p.gap_off_min,
 } as const;
 
 export type SampleStatus =

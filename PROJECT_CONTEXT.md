@@ -63,7 +63,7 @@ Bands: `low < 35 ≤ moderate < 60 ≤ high < 80 ≤ critical`.
 | Pulsation (high stress) | rolling 10-min σ(P01) > 2 kpsi |
 | Off / maintenance | inter-sample gap > 5 min |
 | Out-of-band | P01 > 26 kpsi |
-| Valid pass | contiguous P01 in band, 36–40 min |
+| Valid pass | contiguous P01 in band, 34–40 min |
 | Production run | ≥ 1 pass with < 4 h gaps |
 | Biweekly cadence (14d) | 6 of 7 runs = 10-pass, 1 of 7 = 6-pass |
 

@@ -96,7 +96,7 @@ Unique key: `(equipment_id, started_at)`.
   equipment_id: string;
   pass_index: number;
   started_at: string; ended_at: string;
-  duration_min: number;                 // 36–40 = valid
+  duration_min: number;                 // 34–40 = valid
   peak_p01_kpsi: number; avg_p01_kpsi: number;
   status: "valid" | "short" | "long";
   created_at?: string;

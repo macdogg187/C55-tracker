@@ -1,10 +1,11 @@
 import { LOGIC } from "@/lib/analytics";
+import { loadLogicParams } from "@/lib/logic-params";
 
 // =============================================================================
 // C55 Pass Detection Engine
 //
 // A "pass" is a contiguous P01 excursion into the active band (19..26 kpsi)
-// that lasts approximately 36..40 minutes. The Logic Doc constants are
+// that lasts approximately 34..40 minutes. The Logic Doc constants are
 // re-used here so a band tweak stays in one place.
 //
 // Why two-pass detection lives outside trends-ingest:
@@ -40,16 +41,18 @@ export type PassDetectionConfig = {
   intra_pass_gap_min: number;
 };
 
+const _pd = loadLogicParams().pass_detection;
+
 export const DEFAULT_PASS_CONFIG: PassDetectionConfig = {
-  active_band_low_kpsi: LOGIC.ACTIVE_BAND_LOW_KPSI,   // 19 kpsi
-  active_band_high_kpsi: LOGIC.ACTIVE_BAND_HIGH_KPSI, // 26 kpsi
-  min_duration_min: 36,
-  max_duration_min: 40,
-  intra_pass_gap_min: 2,
+  active_band_low_kpsi: LOGIC.ACTIVE_BAND_LOW_KPSI,
+  active_band_high_kpsi: LOGIC.ACTIVE_BAND_HIGH_KPSI,
+  min_duration_min: _pd.min_duration_min,
+  max_duration_min: _pd.max_duration_min,
+  intra_pass_gap_min: _pd.intra_pass_gap_min,
 };
 
 /**
- * Detect 36–40 minute "passes" in a P01 stream.
+ * Detect 34–40 minute "passes" in a P01 stream.
  *
  * @param times unix-ms timestamps, assumed monotonically non-decreasing
  * @param p01   P01 readings in kpsi, parallel array to `times`

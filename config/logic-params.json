@@ -1,0 +1,68 @@
+{
+  "_comment": "C55 Tracker — tunable logic parameters. Edit via PUT /api/logic-params or the agent tuner. See docs/GLOSSARY.md for full definitions.",
+
+  "active_band_low_kpsi": 19.0,
+  "active_band_high_kpsi": 26.0,
+  "pulsation_stdev_kpsi": 2.0,
+  "rolling_window_min": 10,
+  "gap_off_min": 5,
+
+  "pass_detection": {
+    "min_duration_min": 34,
+    "max_duration_min": 40,
+    "intra_pass_gap_min": 2
+  },
+
+  "run_validation": {
+    "inter_run_gap_min": 240,
+    "long_pass_count": 10,
+    "short_pass_count": 6,
+    "expected_runs_per_period": 7,
+    "expected_short_runs_per_period": 1
+  },
+
+  "risk_score": {
+    "composite_max_factor_weight": 0.6,
+    "composite_mean_factor_weight": 0.4,
+    "inspection_proximity_multiplier": 0.6,
+    "high_stress_exposure_multiplier": 1.0,
+    "pressure_intensity_multiplier": 0.7,
+    "pressure_intensity_ceiling_kpsi_per_min": 4.0,
+    "inferred_failures_multiplier": 0.5,
+    "inferred_failures_normalizer": 5,
+    "overlife_boost_points": 8
+  },
+
+  "risk_bands": {
+    "critical_min": 80,
+    "high_min": 60,
+    "moderate_min": 35
+  },
+
+  "health_thresholds": {
+    "critical_mtbf_pct": 0.85,
+    "watch_mtbf_pct": 0.60
+  },
+
+  "parts": {
+    "ICVB":   { "expected_mtbf_minutes": 10000 },
+    "HPT":    { "expected_mtbf_minutes": 9000,  "inspection_threshold_min": 2000,  "failure_threshold_min": 2400  },
+    "OCVB":   { "expected_mtbf_minutes": 11000 },
+    "ICVBS":  { "seal_life_low_min": 800,  "seal_life_high_min": 1200 },
+    "OCVBS":  { "seal_life_low_min": 800,  "seal_life_high_min": 1200 },
+    "CVBALL": { "seal_life_low_min": 800,  "seal_life_high_min": 1200 },
+    "PLG":    { "expected_mtbf_minutes": 8000 },
+    "BUS":    { "seal_life_low_min": 800,  "seal_life_high_min": 1200 },
+    "PB":     { "expected_mtbf_minutes": 15000, "inspection_threshold_min": 12000, "failure_threshold_min": 14500 },
+    "CVBSPB": { "seal_life_low_min": 800,  "seal_life_high_min": 1200 },
+    "SPRING": { "seal_life_low_min": 800,  "seal_life_high_min": 1200 },
+    "HVB":    { "expected_mtbf_minutes": 12000 },
+    "CSEAT":  { "expected_mtbf_minutes": 6000 },
+    "IR":     { "expected_mtbf_minutes": 6000 },
+    "CSTEM":  { "expected_mtbf_minutes": 6000 },
+    "OM":     { "expected_mtbf_minutes": 18000, "inspection_threshold_min": 14000, "failure_threshold_min": 17000 },
+    "TR":     { "expected_mtbf_minutes": 20000 }
+  },
+
+  "default_mtbf_fallback_minutes": 12000
+}

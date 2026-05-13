@@ -640,7 +640,7 @@ export function computeTrendsMetrics(
 
   // Pass detection + run validation. The pass cumulative-runtime number is
   // more conservative than the sample-count-based active_minutes_total (it
-  // only counts samples that lie inside a 36-40 min contiguous excursion)
+  // only counts samples that lie inside a 34-40 min contiguous excursion)
   // — exposing both keeps backwards compatibility with the existing
   // dashboard while making the run/pass-aware metric available downstream.
   const passes = detectPasses(times, p01, DEFAULT_PASS_CONFIG);

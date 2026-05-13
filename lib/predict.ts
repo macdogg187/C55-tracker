@@ -1,4 +1,5 @@
 import { PART_CATALOG } from "@/lib/parts-catalog";
+import { loadLogicParams } from "@/lib/logic-params";
 
 // =============================================================================
 // Failure-risk scoring — combines the lifecycle odometer with trend-derived
@@ -50,9 +51,10 @@ function clamp01(x: number): number {
 }
 
 function band(score: number): RiskBand {
-  if (score >= 80) return "critical";
-  if (score >= 60) return "high";
-  if (score >= 35) return "moderate";
+  const rb = loadLogicParams().risk_bands;
+  if (score >= rb.critical_min) return "critical";
+  if (score >= rb.high_min) return "high";
+  if (score >= rb.moderate_min) return "moderate";
   return "low";
 }
 
@@ -90,23 +92,25 @@ export function predictForPart(input: PredictInput): Prediction {
     });
   }
 
+  const rs = loadLogicParams().risk_score;
+
   // (2) Inspection-threshold proximity — early warning even before MTBF.
   if (inspectionMin && inspectionMin > 0) {
     const ratio = clamp01(runtime / inspectionMin);
     factors.push({
       label: "Approaching inspection threshold",
-      weight: ratio * 0.6,
+      weight: ratio * rs.inspection_proximity_multiplier,
       detail: `${Math.round(runtime).toLocaleString()} min / ${inspectionMin.toLocaleString()} min`,
     });
   }
 
-  // (3) High-stress exposure ratio — pulsation σ > 2 kpsi is the dominant
+  // (3) High-stress exposure ratio — pulsation σ > threshold is the dominant
   // weephole-leak driver per the Logic Doc.
   if (runtime > 0) {
     const stressRatio = clamp01(stressMin / runtime);
     factors.push({
       label: "High-stress exposure",
-      weight: stressRatio,
+      weight: stressRatio * rs.high_stress_exposure_multiplier,
       detail: `${stressMin.toLocaleString()} of ${Math.round(runtime).toLocaleString()} min (${(stressRatio * 100).toFixed(0)}%)`,
     });
   }
@@ -114,12 +118,10 @@ export function predictForPart(input: PredictInput): Prediction {
   // (4) Cumulative pressure-stress per minute of life (proxy for fatigue).
   if (runtime > 0) {
     const perMin = cumStress / runtime;
-    // 4.0 (kpsi-min per min, i.e. average kpsi above the active floor) is
-    // the upper end of a typical mid-pressure cycle. Normalize against that.
-    const ratio = clamp01(perMin / 4);
+    const ratio = clamp01(perMin / rs.pressure_intensity_ceiling_kpsi_per_min);
     factors.push({
       label: "Cumulative pressure intensity",
-      weight: ratio * 0.7,
+      weight: ratio * rs.pressure_intensity_multiplier,
       detail: `${perMin.toFixed(2)} kpsi-min/min avg above floor`,
     });
   }
@@ -127,11 +129,11 @@ export function predictForPart(input: PredictInput): Prediction {
   // (5) Inferred off-window failures — every gap inside this lifecycle is
   // suggestive of an unscheduled maintenance event.
   if (input.inferred_failures > 0) {
-    const ratio = clamp01(input.inferred_failures / 5);
+    const ratio = clamp01(input.inferred_failures / rs.inferred_failures_normalizer);
     factors.push({
       label: "Inferred off-maintenance windows",
-      weight: ratio * 0.5,
-      detail: `${input.inferred_failures} gap(s) > 5 min`,
+      weight: ratio * rs.inferred_failures_multiplier,
+      detail: `${input.inferred_failures} gap(s) > ${loadLogicParams().gap_off_min} min`,
     });
   }
 
@@ -154,12 +156,14 @@ export function predictForPart(input: PredictInput): Prediction {
 
   const factorWeights = factors.reduce((a, f) => a + f.weight, 0);
   const maxFactor = Math.max(...factors.map((f) => f.weight));
-  // 60% of the score = strongest single factor (we want to flag a part that's
-  // bad at any one thing), 40% = average of the rest.
-  const composite = clamp01(0.6 * maxFactor + 0.4 * (factorWeights / factors.length));
-  // Boost by 8 pts whenever runtime ratio exceeds 1.0 to make critical truly
-  // pop on the dashboard.
-  const score = Math.min(100, Math.round(composite * 100 + (runtimeRatio > 1 ? 8 : 0)));
+  const composite = clamp01(
+    rs.composite_max_factor_weight * maxFactor +
+    rs.composite_mean_factor_weight * (factorWeights / factors.length),
+  );
+  const score = Math.min(
+    100,
+    Math.round(composite * 100 + (runtimeRatio > 1 ? rs.overlife_boost_points : 0)),
+  );
 
   // ETA-to-failure (minutes): based on the failure threshold or MTBF. Subtract
   // accumulated runtime; if already past it, null = "service immediately".
