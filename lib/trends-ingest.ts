@@ -170,7 +170,7 @@ export type TrendsIngestResult = {
   };
   off_windows: WindowSpan[];
   high_stress_windows: WindowSpan[];
-  fatigue_series: { ts: string; p01: number; stdev: number; status: string }[];
+  fatigue_series: { ts: string; p01: number; stdev: number; status: string; t01: number | null; t02: number | null; t03: number | null }[];
   lifecycle_metrics: LifecycleMetrics[];
   passes: PassSummary[];
   runs: RunSummary[];
@@ -433,20 +433,38 @@ function toWindowSpan(pair: [number, number]): WindowSpan {
  * maxPoints raised to 3000 from the old 1500 so the fatigue chart renders
  * ~15× more detail during run time on the next upload/pipeline run.
  */
+type ThinRow = {
+  ts: string;
+  p01: number;
+  stdev: number;
+  status: string;
+  t01: number | null;
+  t02: number | null;
+  t03: number | null;
+};
+
 function thinSeries(
   times: number[],
   p01: number[],
   stdev: number[],
   status: SensorSample["status"][],
+  temps: { T01?: number[]; T02?: number[]; T03?: number[] },
   maxPoints = 3000,
-): { ts: string; p01: number; stdev: number; status: string }[] {
-  if (times.length <= maxPoints) {
-    return times.map((t, i) => ({
-      ts: new Date(t).toISOString(),
+): ThinRow[] {
+  function makeRow(i: number): ThinRow {
+    return {
+      ts: new Date(times[i]).toISOString(),
       p01: p01[i],
       stdev: stdev[i],
       status: status[i],
-    }));
+      t01: temps.T01 ? (temps.T01[i] ?? null) : null,
+      t02: temps.T02 ? (temps.T02[i] ?? null) : null,
+      t03: temps.T03 ? (temps.T03[i] ?? null) : null,
+    };
+  }
+
+  if (times.length <= maxPoints) {
+    return times.map((_, i) => makeRow(i));
   }
 
   // Partition indices into active vs. inactive.
@@ -482,12 +500,7 @@ function thinSeries(
   // Merge back in chronological order.
   const kept = [...keptActive, ...keptInactive].sort((a, b) => a - b);
 
-  return kept.map((i) => ({
-    ts: new Date(times[i]).toISOString(),
-    p01: p01[i],
-    stdev: stdev[i],
-    status: status[i],
-  }));
+  return kept.map((i) => makeRow(i));
 }
 
 function overlapMinutes(a0: number, a1: number, b0: number, b1: number): number {
@@ -714,7 +727,11 @@ export function computeTrendsMetrics(
     },
     off_windows: offGaps.map(toWindowSpan),
     high_stress_windows: highStress.map(toWindowSpan),
-    fatigue_series: thinSeries(times, p01, stdev, status),
+    fatigue_series: thinSeries(times, p01, stdev, status, {
+      T01: signals.T01,
+      T02: signals.T02,
+      T03: signals.T03,
+    }),
     lifecycle_metrics: lifecycleMetrics,
     passes: passes.map((p) => passToSummary(p)),
     runs: runs.map((r) => runToSummary(r)),

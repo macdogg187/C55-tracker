@@ -16,6 +16,7 @@ import type {
 import { useLiveLifecycles } from "@/lib/use-live-lifecycles";
 import { SequentialFlowchart } from "./components/SequentialFlowchart";
 import { FatigueChart } from "./components/FatigueChart";
+import { TemperatureChart } from "./components/TemperatureChart";
 import { MaintenanceLogPanel } from "./components/MaintenanceLogPanel";
 import { DataIngestPanel } from "./components/DataIngestPanel";
 import { SubassemblyGrid } from "./components/SubassemblyGrid";
@@ -349,6 +350,19 @@ export default function Home() {
             parts={pipelineParts}
             runs={pipelinePayload?.runs}
           />
+        </section>
+
+        {/* Seal temperature slope */}
+        <section className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-5">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-base font-semibold text-zinc-100">
+              Seal Temperature Slope
+            </h2>
+            <p className="text-xs text-zinc-400">
+              Max dT/dt across T01–T03 · x-axis = cumulative P01 active runtime
+            </p>
+          </div>
+          <TemperatureChart series={fatigue} />
         </section>
 
         {/* Structural Odometers — sorted highest % → lowest */}

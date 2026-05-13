@@ -66,6 +66,11 @@ export type LogicParams = {
   parts: Record<string, PartParams>;
 
   default_mtbf_fallback_minutes: number;
+
+  temp_slope: {
+    warn_celsius_per_min: number;
+    crit_celsius_per_min: number;
+  };
 };
 
 export const DEFAULT_LOGIC_PARAMS: LogicParams = {
@@ -133,6 +138,11 @@ export const DEFAULT_LOGIC_PARAMS: LogicParams = {
   },
 
   default_mtbf_fallback_minutes: 12000,
+
+  temp_slope: {
+    warn_celsius_per_min: 0.5,
+    crit_celsius_per_min: 1.5,
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -180,6 +190,7 @@ function mergeWithDefaults(parsed: Partial<LogicParams>): LogicParams {
     risk_score:     { ...DEFAULT_LOGIC_PARAMS.risk_score,     ...parsed.risk_score },
     risk_bands:     { ...DEFAULT_LOGIC_PARAMS.risk_bands,     ...parsed.risk_bands },
     health_thresholds: { ...DEFAULT_LOGIC_PARAMS.health_thresholds, ...parsed.health_thresholds },
+    temp_slope: { ...DEFAULT_LOGIC_PARAMS.temp_slope, ...parsed.temp_slope },
     parts: {
       ...DEFAULT_LOGIC_PARAMS.parts,
       ...(parsed.parts ?? {}),

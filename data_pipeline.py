@@ -626,11 +626,19 @@ def thin_series_for_payload(df: pd.DataFrame, max_points: int = 3000) -> list[di
     to 80 % of the quota so the fatigue chart has maximum run-time resolution.
     The remaining 20 % is filled with uniformly-strided below_active rows to
     preserve the band-boundary context.
+
+    Temperature signals T01/T02/T03 are included when present in the DataFrame
+    so the seal-temperature slope chart can visualise them.
     """
     ACTIVE_STATUSES = {"active", "high_stress", "out_of_band"}
 
+    # Build the column list dynamically so the function works even when
+    # individual temperature signals were absent from the source CSV.
+    TEMP_COLS = [c for c in ("T01", "T02", "T03") if c in df.columns]
+    BASE_COLS = ["timestamp", "P01", "rolling_stdev", "status"] + TEMP_COLS
+
     if len(df) <= max_points:
-        sample = df[["timestamp", "P01", "rolling_stdev", "status"]].copy()
+        sample = df[BASE_COLS].copy()
     else:
         active_mask = df["status"].isin(ACTIVE_STATUSES)
         active_df = df[active_mask]
@@ -654,8 +662,18 @@ def thin_series_for_payload(df: pd.DataFrame, max_points: int = 3000) -> list[di
         sample = (
             pd.concat([kept_active, kept_inactive])
             .sort_values("timestamp")
-            [["timestamp", "P01", "rolling_stdev", "status"]]
+            [BASE_COLS]
         )
+
+    def _temp(row: object, col: str) -> float | None:
+        v = getattr(row, col, None)
+        if v is None:
+            return None
+        try:
+            f = float(v)
+            return None if (f != f) else f  # NaN → None
+        except (TypeError, ValueError):
+            return None
 
     return [
         {
@@ -663,6 +681,9 @@ def thin_series_for_payload(df: pd.DataFrame, max_points: int = 3000) -> list[di
             "p01": float(row.P01),
             "stdev": float(row.rolling_stdev),
             "status": str(row.status),
+            "t01": _temp(row, "T01"),
+            "t02": _temp(row, "T02"),
+            "t03": _temp(row, "T03"),
         }
         for row in sample.itertuples(index=False)
     ]

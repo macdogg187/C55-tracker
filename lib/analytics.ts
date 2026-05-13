@@ -16,6 +16,8 @@ export const LOGIC = {
   PULSATION_STDEV_KPSI: _p.pulsation_stdev_kpsi,
   ROLLING_WINDOW_MIN: _p.rolling_window_min,
   GAP_OFF_MIN: _p.gap_off_min,
+  TEMP_SLOPE_WARN_CPM: _p.temp_slope.warn_celsius_per_min,
+  TEMP_SLOPE_CRIT_CPM: _p.temp_slope.crit_celsius_per_min,
 } as const;
 
 export type SampleStatus =
@@ -30,6 +32,9 @@ export type FatigueSample = {
   p01: number;       // pressure in kpsi
   stdev: number;     // rolling 10-min stdev (kpsi)
   status: SampleStatus;
+  t01?: number | null;  // seal-flush temp left (°C)
+  t02?: number | null;  // seal-flush temp middle (°C)
+  t03?: number | null;  // seal-flush temp right (°C)
 };
 
 export type WindowSpan = {
@@ -118,24 +123,41 @@ export function classifySample(
 }
 
 // Bucket a downsampled fatigue series into N evenly-spaced bins for charting.
+// Peak values are used (not averages) so that markers and y-axis labels always agree:
+// a bin that contains an out-of-band spike will plot at the actual peak P01, not a
+// lower mean that would contradict the out-of-band ◯ marker shown at that time.
 export function binFatigueSeries(
   series: FatigueSample[],
   bins = 240,
-): { ts: string; p01: number; stdev: number; status: SampleStatus }[] {
+): FatigueSample[] {
   if (series.length <= bins) return series;
   const step = Math.max(1, Math.floor(series.length / bins));
   const out: FatigueSample[] = [];
   for (let i = 0; i < series.length; i += step) {
     const slice = series.slice(i, Math.min(i + step, series.length));
-    const p01 = slice.reduce((a, s) => a + s.p01, 0) / slice.length;
-    const stdev = slice.reduce((a, s) => a + s.stdev, 0) / slice.length;
-    // Worst status wins so high-stress is never hidden by averaging
+    // Use max so the plotted value matches whichever sample triggered the status marker.
+    const p01 = Math.max(...slice.map((s) => s.p01));
+    const stdev = Math.max(...slice.map((s) => s.stdev));
+    // Worst status wins so high-stress is never hidden by binning.
     const rank = { off: 0, below_active: 1, active: 2, out_of_band: 3, high_stress: 4 };
     const status = slice.reduce<SampleStatus>(
       (worst, s) => (rank[s.status] > rank[worst] ? s.status : worst),
       "off",
     );
-    out.push({ ts: slice[0].ts, p01, stdev, status });
+    // Temperature fields: keep the max non-null value per sensor across the bin.
+    const maxTemp = (key: "t01" | "t02" | "t03"): number | null => {
+      const vals = slice.map((s) => s[key]).filter((v): v is number => v != null);
+      return vals.length > 0 ? Math.max(...vals) : null;
+    };
+    out.push({
+      ts: slice[0].ts,
+      p01,
+      stdev,
+      status,
+      t01: maxTemp("t01"),
+      t02: maxTemp("t02"),
+      t03: maxTemp("t03"),
+    });
   }
   return out;
 }
