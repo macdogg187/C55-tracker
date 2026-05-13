@@ -92,9 +92,10 @@ function buildPartStatuses(
         partCode: slot.part_code,
         partName: catalog.displayName,
         category: catalog.category,
-        isConsumable: catalog.isConsumable,
-        isStructural: catalog.isStructural,
-        zone: slot.zone,
+      isConsumable: catalog.isConsumable,
+      isStructural: catalog.isStructural,
+      isSerialized: catalog.isSerialized ?? false,
+      zone: slot.zone,
         orientation: slot.orientation,
         sequenceOrder: slot.sequence_order,
         serialNumber: "",
@@ -336,7 +337,12 @@ export default function Home() {
     await live.refresh();
   }
 
-  const installedParts = parts.filter((p) => p.serialNumber);
+  // Serialized parts without a serial number are "missing" — shown as a checklist.
+  // Non-serialized parts are always considered installed (no serial required).
+  const missingParts = parts.filter((p) => p.isSerialized && !p.serialNumber);
+  const installedParts = parts.filter((p) =>
+    p.isSerialized ? !!p.serialNumber : true,
+  );
   const consumables = installedParts.filter((p) => p.isConsumable);
   const structural = installedParts.filter((p) => p.isStructural);
 
@@ -421,15 +427,17 @@ export default function Home() {
                 </button>
                 <button
                   onClick={() => setReplaceOpen(true)}
-                  disabled={!selectedPart.serialNumber}
+                  disabled={!selectedPart.isSerialized && !selectedPart.serialNumber}
                   title={
                     selectedPart.serialNumber
                       ? "Archive the current lifecycle and reset the odometer"
-                      : "Slot is empty — replace requires an active lifecycle"
+                      : selectedPart.isSerialized
+                        ? "Log installation of this serialized part"
+                        : "Non-serialized slot — no lifecycle to archive"
                   }
                   className="rounded-md border border-cyan-600 bg-cyan-700/30 px-3 py-1.5 text-xs font-semibold text-cyan-100 transition hover:bg-cyan-700/50 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  Replace Part
+                  {selectedPart.serialNumber ? "Replace Part" : "Install Part"}
                 </button>
               </div>
             </div>
@@ -456,6 +464,16 @@ export default function Home() {
           selectedInstallationId={selectedPart?.installationId ?? null}
           onLog={handleLogMaintenance}
         />
+
+        {missingParts.length > 0 && (
+          <MissingPartsChecklist
+            parts={missingParts}
+            onInstall={(id) => {
+              setSelectedPartId(id);
+              setReplaceOpen(true);
+            }}
+          />
+        )}
 
         {structural.length > 0 && (
           <PartGrid title="Structural Odometers" subtitle="Cumulative active runtime · alert tiers">
@@ -605,6 +623,51 @@ function PartGrid({
         <p className="text-xs text-zinc-500">{subtitle}</p>
       </div>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{children}</div>
+    </section>
+  );
+}
+
+function MissingPartsChecklist({
+  parts,
+  onInstall,
+}: {
+  parts: PartStatus[];
+  onInstall: (id: string) => void;
+}) {
+  return (
+    <section className="rounded-2xl border border-zinc-700/50 bg-zinc-900/20 p-5">
+      <div className="mb-3 flex items-end justify-between">
+        <div>
+          <h2 className="text-base font-semibold text-zinc-100">
+            Missing Components
+          </h2>
+          <p className="mt-0.5 text-xs text-zinc-500">
+            Serialized parts not yet installed · click to log installation
+          </p>
+        </div>
+        <span className="rounded-full border border-zinc-700 bg-zinc-900 px-2.5 py-0.5 text-[11px] text-zinc-400">
+          {parts.length} uninstalled
+        </span>
+      </div>
+      <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+        {parts.map((p) => (
+          <button
+            key={p.id}
+            onClick={() => onInstall(p.id)}
+            className="flex items-center gap-3 rounded-lg border border-zinc-700/60 bg-zinc-950/40 px-3 py-2.5 text-left transition hover:border-cyan-700/60 hover:bg-cyan-950/20"
+          >
+            <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded-sm border border-zinc-600 bg-zinc-900" />
+            <div className="min-w-0">
+              <p className="truncate text-xs font-medium text-zinc-300">
+                {p.partName}
+              </p>
+              <p className="font-mono text-[10px] text-zinc-500">
+                {p.installationId}
+              </p>
+            </div>
+          </button>
+        ))}
+      </div>
     </section>
   );
 }

@@ -16,7 +16,7 @@ const HEALTH_FILL: Record<string, string> = {
 
 // Group slots by the canonical sequential phase of the production flow.
 // Order: Cluster (3 orientations × 5 positions) → Pumps (3 × 4) → Outlet Manifold
-// → Homogenizer Head (4 stages) → Transducer.
+// → Homogenizing Valve section (HVB → Ceramic Seat → Impact Ring → Ceramic Stem → Transducer).
 function groupParts(parts: PartStatus[]) {
   const sorted = [...parts].sort((a, b) => a.sequenceOrder - b.sequenceOrder);
   const phase = (p: PartStatus) =>
@@ -26,9 +26,7 @@ function groupParts(parts: PartStatus[]) {
         ? `pump:${p.orientation}`
         : p.zone === "manifold"
           ? "manifold"
-          : p.zone === "homogenizer"
-            ? "homogenizer"
-            : "instrument";
+          : "homogenizer"; // instrument zone (Transducer) merges into homogenizer section
   const groups: { key: string; label: string; parts: PartStatus[] }[] = [];
   for (const p of sorted) {
     const k = phase(p);
@@ -38,12 +36,10 @@ function groupParts(parts: PartStatus[]) {
         k === "manifold"
           ? "Outlet Manifold"
           : k === "homogenizer"
-            ? "Homogenizer Head"
-            : k === "instrument"
-              ? "Transducer"
-              : k.startsWith("cluster")
-                ? `${cap(p.orientation)} Inlet Cluster`
-                : `${cap(p.orientation)} Pump`;
+            ? "Homogenizing Valve"
+            : k.startsWith("cluster")
+              ? `${cap(p.orientation)} Check Valve Subassembly`
+              : `${cap(p.orientation)} Pump Body`;
       g = { key: k, label, parts: [] };
       groups.push(g);
     }

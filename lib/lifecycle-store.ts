@@ -205,7 +205,7 @@ export type ReplacePartInput = {
 };
 
 export type ReplacePartResult = {
-  archived: Lifecycle;
+  archived: Lifecycle | null;   // null on a fresh install (no prior lifecycle)
   created: Lifecycle;
   event: MaintenanceEvent;
 };
@@ -336,32 +336,33 @@ class LocalJsonStore implements LifecycleStore {
           new Date(a.lc.installation_date).getTime(),
       );
 
-    if (activeIdxs.length === 0) {
-      throw new Error(
-        `No active lifecycle for installation_id ${input.installation_id}`,
-      );
-    }
+    const isFreshInstall = activeIdxs.length === 0;
 
-    const primaryIdx = activeIdxs[0].i;
-    const previous = snap.lifecycles[primaryIdx];
-    const archived: Lifecycle = {
-      ...previous,
-      removal_date: ts,
-      archived_at: ts,
-      archive_reason: "replace_part",
-      failure_mode: input.failure_mode,
-      failure_notes: input.notes ?? previous.failure_notes,
-    };
+    let archived: Lifecycle | null = null;
 
-    // Auto-close stale active rows (data hygiene).
-    for (let k = 1; k < activeIdxs.length; k++) {
-      const { i } = activeIdxs[k];
-      snap.lifecycles[i] = {
-        ...snap.lifecycles[i],
+    if (!isFreshInstall) {
+      const primaryIdx = activeIdxs[0].i;
+      const previous = snap.lifecycles[primaryIdx];
+      archived = {
+        ...previous,
         removal_date: ts,
         archived_at: ts,
-        archive_reason: "auto_closed_on_replace",
+        archive_reason: "replace_part",
+        failure_mode: input.failure_mode,
+        failure_notes: input.notes ?? previous.failure_notes,
       };
+
+      // Auto-close stale active rows (data hygiene).
+      for (let k = 1; k < activeIdxs.length; k++) {
+        const { i } = activeIdxs[k];
+        snap.lifecycles[i] = {
+          ...snap.lifecycles[i],
+          removal_date: ts,
+          archived_at: ts,
+          archive_reason: "auto_closed_on_replace",
+        };
+      }
+      snap.lifecycles[primaryIdx] = archived;
     }
 
     const created: Lifecycle = normaliseLifecycle({
@@ -386,9 +387,9 @@ class LocalJsonStore implements LifecycleStore {
         (s) => s.installation_id === input.installation_id,
       )?.equipment_id ?? null,
       installation_id: input.installation_id,
-      lifecycle_id: archived.id ?? null,
-      event_type: "replace",
-      failure_mode: input.failure_mode,
+      lifecycle_id: archived?.id ?? null,
+      event_type: isFreshInstall ? "reset" : "replace",
+      failure_mode: isFreshInstall ? null : input.failure_mode,
       detected_at: ts,
       ended_at: ts,
       duration_minutes: null,
@@ -397,7 +398,6 @@ class LocalJsonStore implements LifecycleStore {
       created_at: ts,
     };
 
-    snap.lifecycles[primaryIdx] = archived;
     snap.lifecycles.push(created);
     snap.events.push(event);
     await writeLocal(snap);
@@ -756,25 +756,26 @@ class SupabaseStore implements LifecycleStore {
       .limit(1)
       .maybeSingle();
     if (prevErr) throw new Error(prevErr.message);
-    if (!prev) {
-      throw new Error(
-        `No active lifecycle for installation_id ${input.installation_id}`,
-      );
-    }
 
-    const { data: archived, error: archErr } = await sb
-      .from("part_lifecycle")
-      .update({
-        removal_date: ts,
-        archived_at: ts,
-        archive_reason: "replace_part",
-        failure_mode: input.failure_mode,
-        failure_notes: input.notes ?? prev.failure_notes,
-      })
-      .eq("id", prev.id)
-      .select()
-      .single();
-    if (archErr) throw new Error(archErr.message);
+    const isFreshInstall = !prev;
+    let archived: Lifecycle | null = null;
+
+    if (!isFreshInstall && prev) {
+      const { data: archData, error: archErr } = await sb
+        .from("part_lifecycle")
+        .update({
+          removal_date: ts,
+          archived_at: ts,
+          archive_reason: "replace_part",
+          failure_mode: input.failure_mode,
+          failure_notes: input.notes ?? prev.failure_notes,
+        })
+        .eq("id", prev.id)
+        .select()
+        .single();
+      if (archErr) throw new Error(archErr.message);
+      archived = normaliseLifecycle(archData as Partial<Lifecycle>);
+    }
 
     const { data: created, error: insErr } = await sb
       .from("part_lifecycle")
@@ -792,9 +793,9 @@ class SupabaseStore implements LifecycleStore {
       .from("maintenance_event")
       .insert({
         installation_id: input.installation_id,
-        lifecycle_id: archived.id,
-        event_type: "replace",
-        failure_mode: input.failure_mode,
+        lifecycle_id: archived?.id ?? null,
+        event_type: isFreshInstall ? "reset" : "replace",
+        failure_mode: isFreshInstall ? null : input.failure_mode,
         detected_at: ts,
         ended_at: ts,
         source: "manual",
@@ -805,7 +806,7 @@ class SupabaseStore implements LifecycleStore {
     if (evtErr) throw new Error(evtErr.message);
 
     return {
-      archived: normaliseLifecycle(archived as Partial<Lifecycle>),
+      archived,
       created: normaliseLifecycle(created as Partial<Lifecycle>),
       event: event as MaintenanceEvent,
     };

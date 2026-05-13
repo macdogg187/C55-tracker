@@ -28,6 +28,9 @@ export type PartCatalogEntry = {
   category: PartCategory;
   isConsumable: boolean;
   isStructural: boolean;
+  // Parts requiring an individual serial number for lifecycle tracking.
+  // All others are treated as non-serialized (installed by type, not by unit).
+  isSerialized?: boolean;
   expectedMtbfMinutes?: number;
   inspectionThresholdMin?: number;
   failureThresholdMin?: number;
@@ -42,6 +45,7 @@ export const PART_CATALOG: Record<string, PartCatalogEntry> = {
     category: "cluster",
     isConsumable: false,
     isStructural: false,
+    isSerialized: true,
     expectedMtbfMinutes: 10000,
   },
   HPT: {
@@ -50,6 +54,7 @@ export const PART_CATALOG: Record<string, PartCatalogEntry> = {
     category: "cluster",
     isConsumable: false,
     isStructural: true,
+    isSerialized: true,
     expectedMtbfMinutes: 9000,
     inspectionThresholdMin: 2000,
     failureThresholdMin: 2400,
@@ -60,6 +65,7 @@ export const PART_CATALOG: Record<string, PartCatalogEntry> = {
     category: "cluster",
     isConsumable: false,
     isStructural: false,
+    isSerialized: true,
     expectedMtbfMinutes: 11000,
   },
   ICVBS: {
@@ -112,6 +118,7 @@ export const PART_CATALOG: Record<string, PartCatalogEntry> = {
     category: "pump",
     isConsumable: false,
     isStructural: true,
+    isSerialized: true,
     expectedMtbfMinutes: 15000,
     inspectionThresholdMin: 12000,
     failureThresholdMin: 14500,
@@ -140,6 +147,7 @@ export const PART_CATALOG: Record<string, PartCatalogEntry> = {
     category: "homogenizer",
     isConsumable: false,
     isStructural: false,
+    isSerialized: true,
     expectedMtbfMinutes: 12000,
   },
   CSEAT: {

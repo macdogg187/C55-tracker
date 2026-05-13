@@ -15,6 +15,9 @@ export type PartStatus = {
   category: string;
   isConsumable: boolean;
   isStructural: boolean;
+  // true → part requires an individual serial number (ICVB, HPT, OCVB, HVB, PB).
+  // false → non-serialized; tracked by type/position rather than unit serial.
+  isSerialized: boolean;
   zone: SlotDef["zone"];
   orientation: SlotDef["orientation"];
   sequenceOrder: number;
@@ -46,6 +49,7 @@ export function buildSeedPartStatuses(equipmentId: string): PartStatus[] {
       category: catalog.category,
       isConsumable: catalog.isConsumable,
       isStructural: catalog.isStructural,
+      isSerialized: catalog.isSerialized ?? false,
       zone: slot.zone,
       orientation: slot.orientation,
       sequenceOrder: slot.sequenceOrder,

@@ -30,6 +30,20 @@ type Props = {
   onReport?: (entry: ReportFailureEntry) => void;
 };
 
+function toDatetimeLocal(iso: string): string {
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return (
+    `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` +
+    `T${pad(d.getHours())}:${pad(d.getMinutes())}`
+  );
+}
+
+function fromDatetimeLocal(local: string): string {
+  const d = new Date(local);
+  return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
+}
+
 // "Replace" archives the previous lifecycle, captures the timestamp + the
 // failure mode, and resets the runtime odometer for that installation_id.
 // "Report" logs a failure_observation maintenance event for the same slot
@@ -45,14 +59,18 @@ export function ReplacePartDialog({
   const [newSerial, setNewSerial] = useState("");
   const [failureMode, setFailureMode] = useState<FailureMode>("normal wear");
   const [notes, setNotes] = useState("");
+  const [installDate, setInstallDate] = useState<string>(
+    toDatetimeLocal(new Date().toISOString()),
+  );
 
   if (!open) return null;
 
   const isReport = mode === "report";
+  const isFreshInstall = !part.serialNumber && !isReport;
 
   function submit(e: React.FormEvent) {
     e.preventDefault();
-    const timestamp = new Date().toISOString();
+    const timestamp = fromDatetimeLocal(installDate);
     if (isReport) {
       onReport?.({
         installationId: part.installationId,
@@ -72,6 +90,7 @@ export function ReplacePartDialog({
     setNewSerial("");
     setNotes("");
     setFailureMode("normal wear");
+    setInstallDate(toDatetimeLocal(new Date().toISOString()));
   }
 
   return (
@@ -82,7 +101,7 @@ export function ReplacePartDialog({
       >
         <header>
           <h3 className="text-lg font-semibold text-zinc-100">
-            {isReport ? "Report Failure" : "Replace Part"}
+            {isReport ? "Report Failure" : isFreshInstall ? "Install Part" : "Replace Part"}
           </h3>
           <p className="text-xs text-zinc-400">
             {isReport ? (
@@ -92,6 +111,14 @@ export function ReplacePartDialog({
                   {part.installationId}
                 </span>{" "}
                 without archiving the lifecycle.
+              </>
+            ) : isFreshInstall ? (
+              <>
+                Creates a new lifecycle for{" "}
+                <span className="font-mono text-cyan-300">
+                  {part.installationId}
+                </span>{" "}
+                and starts the runtime odometer.
               </>
             ) : (
               <>
@@ -106,36 +133,75 @@ export function ReplacePartDialog({
         </header>
 
         <div className="grid gap-3 text-xs">
-          <Row label="Outgoing serial number">
-            <span className="font-mono text-zinc-300">
-              {part.serialNumber || "—"}
-            </span>
-          </Row>
-          <Row label="Active runtime captured">
-            <span className="font-mono text-zinc-300">
-              {part.granularRuntimeMinutes} min
-              {part.highStressMinutes > 0 && (
-                <span className="ml-2 text-amber-300">
-                  ({part.highStressMinutes} min high-stress)
+          {!isFreshInstall && (
+            <>
+              <Row label="Outgoing serial number">
+                <span className="font-mono text-zinc-300">
+                  {part.serialNumber || "—"}
                 </span>
-              )}
-            </span>
-          </Row>
+              </Row>
+              <Row label="Active runtime captured">
+                <span className="font-mono text-zinc-300">
+                  {part.granularRuntimeMinutes} min
+                  {part.highStressMinutes > 0 && (
+                    <span className="ml-2 text-amber-300">
+                      ({part.highStressMinutes} min high-stress)
+                    </span>
+                  )}
+                </span>
+              </Row>
+            </>
+          )}
 
-          <label className="flex flex-col gap-1">
-            <span className="text-zinc-400">Failure mode</span>
-            <select
-              value={failureMode}
-              onChange={(e) => setFailureMode(e.target.value as FailureMode)}
-              className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-zinc-100"
-            >
-              {FAILURE_MODES.map((m) => (
-                <option key={m} value={m}>
-                  {m}
-                </option>
-              ))}
-            </select>
-          </label>
+          {!isReport && (
+            <label className="flex flex-col gap-1">
+              <span className="text-zinc-400">
+                {isFreshInstall ? "Installation date" : "Replacement date"}
+                <span className="ml-1.5 text-zinc-600">(defaults to now · set earlier for backfills)</span>
+              </span>
+              <input
+                type="datetime-local"
+                value={installDate}
+                max={toDatetimeLocal(new Date().toISOString())}
+                onChange={(e) => setInstallDate(e.target.value)}
+                className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1.5 font-mono text-zinc-100 [color-scheme:dark]"
+              />
+            </label>
+          )}
+
+          {!isReport && (
+            <label className="flex flex-col gap-1">
+              <span className="text-zinc-400">Failure mode</span>
+              <select
+                value={failureMode}
+                onChange={(e) => setFailureMode(e.target.value as FailureMode)}
+                className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-zinc-100"
+              >
+                {FAILURE_MODES.map((m) => (
+                  <option key={m} value={m}>
+                    {m}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+
+          {isReport && (
+            <label className="flex flex-col gap-1">
+              <span className="text-zinc-400">Failure mode</span>
+              <select
+                value={failureMode}
+                onChange={(e) => setFailureMode(e.target.value as FailureMode)}
+                className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-zinc-100"
+              >
+                {FAILURE_MODES.map((m) => (
+                  <option key={m} value={m}>
+                    {m}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
 
           {!isReport && (
             <label className="flex flex-col gap-1">
@@ -159,7 +225,9 @@ export function ReplacePartDialog({
               placeholder={
                 isReport
                   ? "Weephole weep observed at left HP thread root; will monitor before replace."
-                  : "Weephole leak observed at the HP thread root."
+                  : isFreshInstall
+                    ? "New part sourced from batch lot 26-B."
+                    : "Weephole leak observed at the HP thread root."
               }
               className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-zinc-100"
             />
@@ -182,7 +250,11 @@ export function ReplacePartDialog({
                 : "rounded-md border border-cyan-600 bg-cyan-700/40 px-3 py-1.5 text-xs font-semibold text-cyan-100 hover:bg-cyan-700/60"
             }
           >
-            {isReport ? "Log Failure Observation" : "Archive & Reset Odometer"}
+            {isReport
+              ? "Log Failure Observation"
+              : isFreshInstall
+                ? "Log Installation"
+                : "Archive & Reset Odometer"}
           </button>
         </div>
       </form>
