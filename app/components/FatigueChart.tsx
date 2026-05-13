@@ -84,31 +84,31 @@ export function FatigueChart({ series, runs, parts }: Props) {
       width: el.clientWidth,
       height: 420,
       layout: {
-        background: { color: "#040a14" },
-        textColor: "#94a3b8",
+        background: { color: "#1c1814" },
+        textColor: "#8a7a60",
         fontSize: 11,
       },
       grid: {
-        vertLines: { color: "#0d1929" },
-        horzLines: { color: "#0d1929" },
+        vertLines: { color: "#2e2820" },
+        horzLines: { color: "#2e2820" },
       },
       crosshair: {
         mode: CrosshairMode.Normal,
-        vertLine: { color: "#334155", width: 1, style: 1, labelBackgroundColor: "#1e293b" },
-        horzLine: { color: "#334155", width: 1, style: 1, labelBackgroundColor: "#1e293b" },
+        vertLine: { color: "#4a3c28", width: 1, style: 1, labelBackgroundColor: "#2e2820" },
+        horzLine: { color: "#4a3c28", width: 1, style: 1, labelBackgroundColor: "#2e2820" },
       },
       rightPriceScale: {
-        borderColor: "#1f2937",
+        borderColor: "#2e2820",
         scaleMargins: { top: 0.06, bottom: 0.06 },
       },
       leftPriceScale: {
         visible: true,
-        borderColor: "#1f2937",
+        borderColor: "#2e2820",
         // Compress sigma to the lower third of pane 0 so it doesn't crowd P01
         scaleMargins: { top: 0.65, bottom: 0.0 },
       },
       timeScale: {
-        borderColor: "#1f2937",
+        borderColor: "#2e2820",
         timeVisible: true,
         secondsVisible: false,
         fixLeftEdge: false,
@@ -122,7 +122,7 @@ export function FatigueChart({ series, runs, parts }: Props) {
     chart.panes()[0].setHeight(270);
 
     const p01S = chart.addSeries(LineSeries, {
-      color: "#22d3ee",
+      color: "#e8a020",
       lineWidth: 2,
       title: "P01",
       priceScaleId: "right",
@@ -130,12 +130,12 @@ export function FatigueChart({ series, runs, parts }: Props) {
       priceLineVisible: false,
       crosshairMarkerVisible: true,
       crosshairMarkerRadius: 4,
-      crosshairMarkerBorderColor: "#0e7490",
-      crosshairMarkerBackgroundColor: "#22d3ee",
+      crosshairMarkerBorderColor: "#a06e10",
+      crosshairMarkerBackgroundColor: "#e8a020",
     });
 
     const sigmaS = chart.addSeries(HistogramSeries, {
-      color: "rgba(251,113,133,0.75)",
+      color: "rgba(200,90,16,0.75)",
       base: 0,
       title: "σ",
       priceScaleId: "left",
@@ -146,7 +146,7 @@ export function FatigueChart({ series, runs, parts }: Props) {
     // Reference lines
     p01S.createPriceLine({
       price: LOGIC.ACTIVE_BAND_HIGH_KPSI,
-      color: "#1e4059",
+      color: "#4a3c28",
       lineWidth: 1,
       lineStyle: 2,
       axisLabelVisible: true,
@@ -154,7 +154,7 @@ export function FatigueChart({ series, runs, parts }: Props) {
     });
     p01S.createPriceLine({
       price: LOGIC.ACTIVE_BAND_LOW_KPSI,
-      color: "#1e4059",
+      color: "#4a3c28",
       lineWidth: 1,
       lineStyle: 2,
       axisLabelVisible: true,
@@ -162,7 +162,7 @@ export function FatigueChart({ series, runs, parts }: Props) {
     });
     sigmaS.createPriceLine({
       price: LOGIC.PULSATION_STDEV_KPSI,
-      color: "rgba(244,63,94,0.5)",
+      color: "rgba(200,90,16,0.6)",
       lineWidth: 1,
       lineStyle: 2,
       axisLabelVisible: true,
@@ -182,7 +182,7 @@ export function FatigueChart({ series, runs, parts }: Props) {
         markers.push({
           time: toUTC(run.started_at),
           position: "belowBar",
-          color: "#818cf8",
+          color: "#e8a020",
           shape: "arrowUp",
           text: `Run ${run.run_index + 1}`,
           size: 0.7,
@@ -195,7 +195,7 @@ export function FatigueChart({ series, runs, parts }: Props) {
         markers.push({
           time: toUTC(s.ts),
           position: "aboveBar",
-          color: "#f43f5e",
+          color: "#cc3311",
           shape: "circle",
           size: 0.5,
         });
@@ -203,7 +203,7 @@ export function FatigueChart({ series, runs, parts }: Props) {
         markers.push({
           time: toUTC(s.ts),
           position: "aboveBar",
-          color: "#f59e0b",
+          color: "#c85a10",
           shape: "circle",
           size: 0.4,
         });
@@ -221,7 +221,7 @@ export function FatigueChart({ series, runs, parts }: Props) {
         markers.push({
           time: toUTC(installDate),
           position: "belowBar",
-          color: isFallbackInstall ? "#5eead4" : "#2dd4bf",
+          color: isFallbackInstall ? "#a06e10" : "#e8a020",
           shape: "arrowUp",
           text: `${part.part_name} in`,
           size: 0.6,
@@ -242,7 +242,7 @@ export function FatigueChart({ series, runs, parts }: Props) {
           markers.push({
             time: toUTC(removalDate),
             position: "aboveBar",
-            color: "#a78bfa",
+            color: "#c85a10",
             shape: "arrowDown",
             text: `${part.part_name} out${duringRunText}`,
             size: 0.6,
@@ -260,7 +260,7 @@ export function FatigueChart({ series, runs, parts }: Props) {
     stressPane.setHeight(120);
 
     const stressSeries = stressPane.addSeries(HistogramSeries, {
-      color: "#22c55e",
+      color: "#6ab04c",
       title: "Cumul. stress",
       priceScaleId: "right",
       lastValueVisible: true,
@@ -297,16 +297,16 @@ export function FatigueChart({ series, runs, parts }: Props) {
         const thresh = pt.installation_id ? partThreshMap.get(pt.installation_id) : undefined;
         let color: string;
         if (thresh?.failKpsiMin != null && pt.value >= thresh.failKpsiMin) {
-          color = "#f43f5e";
+          color = "#cc3311";
         } else if (thresh?.inspKpsiMin != null && pt.value >= thresh.inspKpsiMin) {
-          color = "#f59e0b";
+          color = "#c85a10";
         } else if (thresh?.inspKpsiMin != null) {
-          // Threshold data available and we're below inspection — green.
-          color = "#22c55e";
+          // Threshold data available and we're below inspection — olive.
+          color = "#6ab04c";
         } else {
           // Fallback: relative-to-max colouring when no lifecycle thresholds available.
           const ratio = pt.value / maxStress;
-          color = ratio > 0.75 ? "#f43f5e" : ratio > 0.45 ? "#f59e0b" : "#22c55e";
+          color = ratio > 0.75 ? "#cc3311" : ratio > 0.45 ? "#c85a10" : "#6ab04c";
         }
         return { time: toUTC(pt.ts), value: pt.value, color };
       }),
@@ -375,31 +375,31 @@ export function FatigueChart({ series, runs, parts }: Props) {
 
       const statusBadge =
         sample.status === "high_stress"
-          ? `<span style="color:#f59e0b;font-size:9px;margin-left:4px">⚠ high-stress</span>`
+          ? `<span style="color:#c85a10;font-size:9px;margin-left:4px">⚠ HIGH-STRESS</span>`
           : sample.status === "out_of_band"
-            ? `<span style="color:#f43f5e;font-size:9px;margin-left:4px">✕ out-of-band</span>`
+            ? `<span style="color:#cc3311;font-size:9px;margin-left:4px">✕ OUT-OF-BAND</span>`
             : "";
 
       const sigmaFlag =
         sample.stdev > LOGIC.PULSATION_STDEV_KPSI
-          ? `<span style="color:#fb7185;font-size:9px;margin-left:4px">above threshold</span>`
+          ? `<span style="color:#c85a10;font-size:9px;margin-left:4px">ABOVE LIMIT</span>`
           : "";
 
       tooltip.innerHTML = `
-        <div style="color:#64748b;font-size:10px;margin-bottom:3px">${timeLabel}</div>
+        <div style="color:#5a4a38;font-size:10px;margin-bottom:3px;font-family:monospace;letter-spacing:0.1em">${timeLabel}</div>
         <div style="display:flex;align-items:center;gap:6px">
-          <span style="color:#22d3ee;font-family:monospace">P01</span>
-          <span style="color:#e2e8f0;font-family:monospace">${sample.p01.toFixed(2)} kpsi</span>
+          <span style="color:#e8a020;font-family:monospace">P01</span>
+          <span style="color:#f0dfc0;font-family:monospace">${sample.p01.toFixed(2)} kpsi</span>
           ${statusBadge}
         </div>
         <div style="display:flex;align-items:center;gap:6px">
-          <span style="color:#fb7185;font-family:monospace">&nbsp;σ&nbsp;</span>
-          <span style="color:#e2e8f0;font-family:monospace">${sample.stdev.toFixed(3)} kpsi</span>
+          <span style="color:#c85a10;font-family:monospace">&nbsp;σ&nbsp;</span>
+          <span style="color:#f0dfc0;font-family:monospace">${sample.stdev.toFixed(3)} kpsi</span>
           ${sigmaFlag}
         </div>
-        <div style="display:flex;align-items:center;gap:6px;border-top:1px solid #1e293b;margin-top:4px;padding-top:4px">
-          <span style="color:#4ade80;font-family:monospace">Σ</span>
-          <span style="color:#e2e8f0;font-family:monospace">${stress.toFixed(0)} kpsi-min</span>
+        <div style="display:flex;align-items:center;gap:6px;border-top:1px solid #2e2820;margin-top:4px;padding-top:4px">
+          <span style="color:#6ab04c;font-family:monospace">Σ</span>
+          <span style="color:#f0dfc0;font-family:monospace">${stress.toFixed(0)} kpsi-min</span>
         </div>
       `;
 
@@ -433,35 +433,35 @@ export function FatigueChart({ series, runs, parts }: Props) {
 
   if (active.length === 0 && series.length > 0) {
     return (
-      <div className="flex h-64 items-center justify-center rounded-xl border border-zinc-800 bg-zinc-950/40 text-sm text-zinc-500">
-        No active-run samples in this dataset — upload a VantagePoint CSV with P01 data.
+      <div className="flex h-64 items-center justify-center border-2 border-[#2e2820] bg-[#1c1814] font-mono text-sm text-[#5a4a38]">
+        NO ACTIVE-RUN SAMPLES — UPLOAD VANTAGEPOINT CSV WITH P01 DATA
       </div>
     );
   }
 
   return (
-    <div className="rounded-xl border border-zinc-800 bg-[#040a14] p-3">
+    <div className="border-2 border-[#2e2820] bg-[#1c1814] p-3">
       {/* Header */}
       <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-xs">
         <div>
-          <div className="font-mono uppercase tracking-[0.18em] text-cyan-400">
-            Fatigue · P01 pressure + σ pulsation
+          <div className="font-orbitron uppercase tracking-[0.18em] text-[#e8a020]">
+            Fatigue · P01 Pressure + σ Pulsation
           </div>
-          <div className="mt-0.5 text-[10px] text-zinc-500">
-            Active runs only · scroll to zoom · drag to pan · hover for crosshair details
+          <div className="mt-0.5 font-mono text-[10px] text-[#5a4a38]">
+            Active runs only · scroll to zoom · drag to pan · hover for crosshair
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-3 text-[10px] text-zinc-400">
-          <LegendSwatch color="#22d3ee" label={`P01 (right, kpsi)`} />
-          <LegendSwatch color="rgba(251,113,133,0.75)" label={`σ ${LOGIC.ROLLING_WINDOW_MIN}-min rolling (left, kpsi)`} />
-          <LegendSwatch color="#f59e0b" label="High-stress point" />
-          <LegendSwatch color="#f43f5e" label="Out-of-band" />
-          <LegendGradient label="Cumul. stress (bottom pane)" />
+        <div className="flex flex-wrap items-center gap-3 font-mono text-[10px] text-[#8a7a60]">
+          <LegendSwatch color="#e8a020" label={`P01 (right, kpsi)`} />
+          <LegendSwatch color="rgba(200,90,16,0.75)" label={`σ ${LOGIC.ROLLING_WINDOW_MIN}-min (left, kpsi)`} />
+          <LegendSwatch color="#c85a10" label="High-stress" />
+          <LegendSwatch color="#cc3311" label="Out-of-band" />
+          <LegendGradient label="Cumul. stress (lower pane)" />
         </div>
       </div>
 
       {/* Chart */}
-      <div className="relative overflow-hidden rounded-lg">
+      <div className="relative overflow-hidden">
         <div ref={containerRef} />
         <div
           ref={tooltipRef}
@@ -471,21 +471,22 @@ export function FatigueChart({ series, runs, parts }: Props) {
             minWidth: 200,
             zIndex: 10,
             pointerEvents: "none",
-            background: "rgba(15,23,42,0.95)",
-            border: "1px solid #334155",
-            borderRadius: 6,
+            background: "#0e0c0a",
+            border: "1px solid #e8a020",
+            borderRadius: 0,
             padding: "8px 10px",
             lineHeight: "1.55",
             fontSize: 11,
-            boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
+            fontFamily: "monospace",
+            boxShadow: "0 4px 16px rgba(0,0,0,0.7)",
           }}
         />
       </div>
 
       {/* Pane labels */}
-      <div className="mt-1.5 flex items-center justify-between text-[9px] text-zinc-600">
-        <span>↑ P01 (cyan, right axis) · σ pulsation (rose, left axis)</span>
-        <span>↓ Cumulative stress kpsi-min · green → amber → red</span>
+      <div className="mt-1.5 flex items-center justify-between font-mono text-[9px] text-[#4a3c28]">
+        <span>↑ P01 (amber, right) · σ pulsation (orange, left)</span>
+        <span>↓ Cumulative stress kpsi-min · olive → orange → red</span>
       </div>
     </div>
   );
@@ -495,7 +496,7 @@ function LegendSwatch({ color, label }: { color: string; label: string }) {
   return (
     <span className="inline-flex items-center gap-1.5">
       <span
-        className="inline-block h-2 w-3 rounded-sm"
+        className="inline-block h-2 w-3"
         style={{ background: color }}
       />
       {label}
@@ -507,9 +508,9 @@ function LegendGradient({ label }: { label: string }) {
   return (
     <span className="inline-flex items-center gap-1.5">
       <span
-        className="inline-block h-2 w-6 rounded-sm"
+        className="inline-block h-2 w-6"
         style={{
-          background: "linear-gradient(to right, #22c55e, #f59e0b, #f43f5e)",
+          background: "linear-gradient(to right, #6ab04c, #c85a10, #cc3311)",
         }}
       />
       {label}

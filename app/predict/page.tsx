@@ -47,15 +47,15 @@ export default function PredictPage() {
     [pipelinePayload],
   );
   return (
-    <main className="min-h-screen bg-[#030711] text-zinc-100">
+    <main className="min-h-screen bg-[#12100e] text-[#f0dfc0]">
       <div className="mx-auto flex w-full max-w-[1500px] flex-col gap-6 px-5 py-6 lg:px-8">
 
         <div>
-          <p className="text-xs uppercase tracking-widest text-cyan-400">Analysis</p>
-          <h1 className="text-2xl font-semibold text-zinc-100">Failure Prediction</h1>
-          <p className="mt-1 text-sm text-zinc-500">
+          <p className="font-orbitron text-xs uppercase tracking-widest text-[#e8a020]">Analysis</p>
+          <h1 className="mt-1 font-orbitron text-2xl font-semibold text-[#f0dfc0]">Failure Prediction</h1>
+          <p className="mt-1 font-mono text-sm text-[#5a4a38]">
             Equipment{" "}
-            <span className="font-mono text-zinc-300">{equipmentId}</span>
+            <span className="text-[#e8a020]">{equipmentId}</span>
             {" · "}Risk scores combine runtime ratio, high-stress exposure, cumulative pressure stress,
             and inferred failure windows.
           </p>
@@ -72,12 +72,12 @@ export default function PredictPage() {
         />
 
         {fatigue.length > 0 && (
-          <section className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-5">
+          <section className="border-2 border-[#2e2820] bg-[#1c1814] p-5">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-              <h2 className="text-base font-semibold text-zinc-100">
+              <h2 className="font-orbitron text-sm font-semibold uppercase tracking-widest text-[#e8a020]">
                 Sensor Fatigue Chart
               </h2>
-              <p className="text-xs text-zinc-400">
+              <p className="font-mono text-xs text-[#5a4a38]">
                 P01 pressure + rolling 10-min σ — correlation between high pulsation and HP-thread risk.
               </p>
             </div>
@@ -90,9 +90,9 @@ export default function PredictPage() {
         )}
 
         {fatigue.length === 0 && (
-          <p className="rounded-xl border border-zinc-800 bg-zinc-900/30 px-5 py-6 text-sm text-zinc-500">
+          <p className="border-2 border-[#2e2820] bg-[#1c1814] px-5 py-6 font-mono text-sm text-[#5a4a38]">
             Upload a VantagePoint CSV on the{" "}
-            <a href={`/?eq=${equipmentId}`} className="text-cyan-400 hover:underline">
+            <a href={`/?eq=${equipmentId}`} className="text-[#e8a020] hover:underline">
               Dashboard
             </a>{" "}
             to enable the fatigue chart.

@@ -16,10 +16,10 @@ function formatHours(min: number) {
 export function PartCard({ part, selected, onSelect }: Props) {
   const stateColor =
     part.health === "critical"
-      ? "text-rose-300"
+      ? "text-[#cc3311]"
       : part.health === "watch"
-        ? "text-amber-300"
-        : "text-emerald-300";
+        ? "text-[#c85a10]"
+        : "text-[#6ab04c]";
 
   const meter = part.isConsumable ? (
     <ConsumableMeter
@@ -39,34 +39,38 @@ export function PartCard({ part, selected, onSelect }: Props) {
   return (
     <button
       onClick={onSelect}
-      className={`group flex w-full items-center gap-4 rounded-xl border p-4 text-left transition ${
+      className={`group flex w-full items-center gap-4 border-2 p-4 text-left transition ${
         selected
-          ? "border-cyan-500 bg-cyan-950/25 shadow-[0_0_35px_rgba(8,145,178,0.25)]"
-          : "border-zinc-800 bg-zinc-900/55 hover:border-zinc-600"
+          ? "border-[#e8a020] bg-[#1c1814] shadow-[0_0_24px_rgba(232,160,32,0.2)]"
+          : "border-[#2e2820] bg-[#1c1814] hover:border-[#4a3c28]"
       }`}
     >
       {meter}
       <div className="min-w-0 space-y-1">
-        <p className="truncate text-sm font-semibold text-zinc-100">
+        <p className="truncate text-sm font-semibold text-[#f0dfc0]">
           {part.partName}
         </p>
-        <p className="font-mono text-[10px] text-zinc-500">
+        <p className="font-mono text-[10px] text-[#5a4a38]">
           {part.installationId}
-          {part.isConsumable && <span className="ml-1 text-amber-400">· consumable</span>}
-          {part.isStructural && <span className="ml-1 text-cyan-400">· structural</span>}
+          {part.isConsumable && <span className="ml-1 text-[#c85a10]">· consumable</span>}
+          {part.isStructural && <span className="ml-1 text-[#e8a020]">· structural</span>}
         </p>
-        <p className="text-xs text-zinc-400">S/N: {part.serialNumber || "—"}</p>
-        <p className="text-xs text-zinc-300">
+        <p className="font-mono text-xs text-[#8a7a60]">S/N: {part.serialNumber || "—"}</p>
+        <p className="font-mono text-xs text-[#8a7a60]">
           Active: {formatHours(part.granularRuntimeMinutes)} · σ-stress:{" "}
           {formatHours(part.highStressMinutes)}
         </p>
         <div className="flex items-center gap-2">
-          <span className={`text-xs font-medium uppercase tracking-wider ${stateColor}`}>
+          <span className={`font-orbitron text-[10px] font-medium uppercase tracking-wider ${stateColor}`}>
             {part.health}
           </span>
           {part.alert && (
-            <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-semibold uppercase text-amber-200">
-              {part.alert === "failure" ? "Replace now" : "Inspection due"}
+            <span className={`px-2 py-0.5 font-orbitron text-[9px] font-semibold uppercase tracking-wider ${
+              part.alert === "failure"
+                ? "bg-[#cc3311]/20 text-[#ff6644]"
+                : "bg-[#c85a10]/20 text-[#e8a020]"
+            }`}>
+              {part.alert === "failure" ? "Replace Now" : "Inspect Due"}
             </span>
           )}
         </div>
@@ -92,12 +96,12 @@ function RuntimeGauge({
   const C = 2 * Math.PI * radius;
   const off = C - ((pct ?? 0) / 100) * C;
   const stroke =
-    pct == null ? "#4b5563" : pct >= 85 ? "#fb7185" : pct >= 60 ? "#f59e0b" : "#22d3ee";
+    pct == null ? "#2e2820" : pct >= 85 ? "#cc3311" : pct >= 60 ? "#c85a10" : "#e8a020";
 
   return (
     <div className="relative h-24 w-24 shrink-0">
       <svg viewBox="0 0 100 100" className="h-full w-full">
-        <circle cx="50" cy="50" r={radius} fill="none" stroke="#1f2937" strokeWidth="9" />
+        <circle cx="50" cy="50" r={radius} fill="none" stroke="#2e2820" strokeWidth="9" />
         <circle
           cx="50"
           cy="50"
@@ -105,7 +109,7 @@ function RuntimeGauge({
           fill="none"
           stroke={stroke}
           strokeWidth="9"
-          strokeLinecap="round"
+          strokeLinecap="butt"
           strokeDasharray={C}
           strokeDashoffset={off}
           transform="rotate(-90 50 50)"
@@ -114,7 +118,7 @@ function RuntimeGauge({
           <InspectionTick angle={(inspection / ceiling) * 360} />
         )}
       </svg>
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center text-xs font-semibold text-zinc-200">
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center font-mono text-xs font-semibold text-[#f0dfc0]">
         {pct != null ? `${pct.toFixed(0)}%` : "—"}
       </div>
     </div>
@@ -129,7 +133,7 @@ function InspectionTick({ angle }: { angle: number }) {
   const y1 = 50 + r1 * Math.sin(rad);
   const x2 = 50 + r2 * Math.cos(rad);
   const y2 = 50 + r2 * Math.sin(rad);
-  return <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="#facc15" strokeWidth="2" />;
+  return <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="#e8a020" strokeWidth="2" />;
 }
 
 function ConsumableMeter({
@@ -143,18 +147,19 @@ function ConsumableMeter({
 }) {
   const wear = sealWearFraction(runtime, lifeLow, lifeHigh);
   const pct = Math.min(100, Math.round(wear * 100));
-  const fill = pct >= 85 ? "bg-rose-400" : pct >= 60 ? "bg-amber-400" : "bg-emerald-400";
+  const fill =
+    pct >= 85 ? "bg-[#cc3311]" : pct >= 60 ? "bg-[#c85a10]" : "bg-[#e8a020]";
   return (
-    <div className="flex h-24 w-24 shrink-0 flex-col items-center justify-center gap-1 rounded-lg bg-zinc-950 p-2">
-      <div className="text-[10px] uppercase tracking-widest text-zinc-500">Life</div>
-      <div className="relative h-12 w-3 overflow-hidden rounded-full bg-zinc-800">
+    <div className="flex h-24 w-24 shrink-0 flex-col items-center justify-center gap-1 border border-[#2e2820] bg-[#0e0c0a] p-2">
+      <div className="font-orbitron text-[8px] uppercase tracking-widest text-[#5a4a38]">Life</div>
+      <div className="relative h-12 w-3 overflow-hidden bg-[#2e2820]">
         <div
           className={`absolute bottom-0 left-0 right-0 ${fill}`}
           style={{ height: `${pct}%` }}
         />
       </div>
-      <div className="text-xs font-semibold text-zinc-200">{pct}%</div>
-      <div className="text-[9px] text-zinc-500">{lifeLow}–{lifeHigh} min</div>
+      <div className="font-mono text-xs font-semibold text-[#f0dfc0]">{pct}%</div>
+      <div className="font-mono text-[9px] text-[#5a4a38]">{lifeLow}–{lifeHigh} min</div>
     </div>
   );
 }

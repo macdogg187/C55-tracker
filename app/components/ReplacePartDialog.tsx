@@ -94,20 +94,20 @@ export function ReplacePartDialog({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
       <form
         onSubmit={submit}
-        className="w-full max-w-lg space-y-4 rounded-2xl border border-cyan-800/40 bg-[#040a14] p-6 shadow-[0_0_60px_rgba(6,182,212,0.18)]"
+        className="w-full max-w-lg space-y-4 border-2 border-[#e8a020] bg-[#0e0c0a] p-6 shadow-[0_0_60px_rgba(232,160,32,0.15)]"
       >
         <header>
-          <h3 className="text-lg font-semibold text-zinc-100">
+          <h3 className="font-orbitron text-base font-semibold uppercase tracking-widest text-[#e8a020]">
             {isReport ? "Report Failure" : isFreshInstall ? "Install Part" : "Replace Part"}
           </h3>
-          <p className="text-xs text-zinc-400">
+          <p className="mt-1 font-mono text-xs text-[#5a4a38]">
             {isReport ? (
               <>
                 Logs a failure observation for{" "}
-                <span className="font-mono text-amber-300">
+                <span className="text-[#c85a10]">
                   {part.installationId}
                 </span>{" "}
                 without archiving the lifecycle.
@@ -115,7 +115,7 @@ export function ReplacePartDialog({
             ) : isFreshInstall ? (
               <>
                 Creates a new lifecycle for{" "}
-                <span className="font-mono text-cyan-300">
+                <span className="text-[#e8a020]">
                   {part.installationId}
                 </span>{" "}
                 and starts the runtime odometer.
@@ -123,7 +123,7 @@ export function ReplacePartDialog({
             ) : (
               <>
                 Archives the current lifecycle and resets the odometer for{" "}
-                <span className="font-mono text-cyan-300">
+                <span className="text-[#e8a020]">
                   {part.installationId}
                 </span>
                 .
@@ -132,19 +132,19 @@ export function ReplacePartDialog({
           </p>
         </header>
 
-        <div className="grid gap-3 text-xs">
+        <div className="grid gap-3 font-mono text-xs">
           {!isFreshInstall && (
             <>
               <Row label="Outgoing serial number">
-                <span className="font-mono text-zinc-300">
+                <span className="text-[#f0dfc0]">
                   {part.serialNumber || "—"}
                 </span>
               </Row>
               <Row label="Active runtime captured">
-                <span className="font-mono text-zinc-300">
+                <span className="text-[#f0dfc0]">
                   {part.granularRuntimeMinutes} min
                   {part.highStressMinutes > 0 && (
-                    <span className="ml-2 text-amber-300">
+                    <span className="ml-2 text-[#c85a10]">
                       ({part.highStressMinutes} min high-stress)
                     </span>
                   )}
@@ -155,27 +155,27 @@ export function ReplacePartDialog({
 
           {!isReport && (
             <label className="flex flex-col gap-1">
-              <span className="text-zinc-400">
+              <span className="text-[#8a7a60]">
                 {isFreshInstall ? "Installation date" : "Replacement date"}
-                <span className="ml-1.5 text-zinc-600">(defaults to now · set earlier for backfills)</span>
+                <span className="ml-1.5 text-[#4a3c28]">(defaults to now · set earlier for backfills)</span>
               </span>
               <input
                 type="datetime-local"
                 value={installDate}
                 max={toDatetimeLocal(new Date().toISOString())}
                 onChange={(e) => setInstallDate(e.target.value)}
-                className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1.5 font-mono text-zinc-100 [color-scheme:dark]"
+                className="border border-[#4a3c28] bg-[#1c1814] px-2 py-1.5 font-mono text-[#f0dfc0] focus:border-[#e8a020] focus:outline-none [color-scheme:dark]"
               />
             </label>
           )}
 
           {!isReport && (
             <label className="flex flex-col gap-1">
-              <span className="text-zinc-400">Failure mode</span>
+              <span className="text-[#8a7a60]">Failure mode</span>
               <select
                 value={failureMode}
                 onChange={(e) => setFailureMode(e.target.value as FailureMode)}
-                className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-zinc-100"
+                className="border border-[#4a3c28] bg-[#1c1814] px-2 py-1.5 font-mono text-[#f0dfc0] focus:border-[#e8a020] focus:outline-none"
               >
                 {FAILURE_MODES.map((m) => (
                   <option key={m} value={m}>
@@ -188,11 +188,11 @@ export function ReplacePartDialog({
 
           {isReport && (
             <label className="flex flex-col gap-1">
-              <span className="text-zinc-400">Failure mode</span>
+              <span className="text-[#8a7a60]">Failure mode</span>
               <select
                 value={failureMode}
                 onChange={(e) => setFailureMode(e.target.value as FailureMode)}
-                className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-zinc-100"
+                className="border border-[#4a3c28] bg-[#1c1814] px-2 py-1.5 font-mono text-[#f0dfc0] focus:border-[#e8a020] focus:outline-none"
               >
                 {FAILURE_MODES.map((m) => (
                   <option key={m} value={m}>
@@ -205,19 +205,19 @@ export function ReplacePartDialog({
 
           {!isReport && (
             <label className="flex flex-col gap-1">
-              <span className="text-zinc-400">New serial number</span>
+              <span className="text-[#8a7a60]">New serial number</span>
               <input
                 required
                 value={newSerial}
                 onChange={(e) => setNewSerial(e.target.value)}
                 placeholder="e.g. HPT-26-014"
-                className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1.5 font-mono text-zinc-100"
+                className="border border-[#4a3c28] bg-[#1c1814] px-2 py-1.5 font-mono text-[#f0dfc0] placeholder-[#4a3c28] focus:border-[#e8a020] focus:outline-none"
               />
             </label>
           )}
 
           <label className="flex flex-col gap-1">
-            <span className="text-zinc-400">Notes</span>
+            <span className="text-[#8a7a60]">Notes</span>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
@@ -229,7 +229,7 @@ export function ReplacePartDialog({
                     ? "New part sourced from batch lot 26-B."
                     : "Weephole leak observed at the HP thread root."
               }
-              className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-zinc-100"
+              className="border border-[#4a3c28] bg-[#1c1814] px-2 py-1.5 font-mono text-[#f0dfc0] placeholder-[#4a3c28] focus:border-[#e8a020] focus:outline-none"
             />
           </label>
         </div>
@@ -238,7 +238,7 @@ export function ReplacePartDialog({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md border border-zinc-700 px-3 py-1.5 text-xs text-zinc-300 hover:bg-zinc-900"
+            className="border border-[#4a3c28] px-3 py-1.5 font-mono text-xs text-[#8a7a60] hover:border-[#8a7a60] hover:text-[#f0dfc0]"
           >
             Cancel
           </button>
@@ -246,8 +246,8 @@ export function ReplacePartDialog({
             type="submit"
             className={
               isReport
-                ? "rounded-md border border-amber-600 bg-amber-700/40 px-3 py-1.5 text-xs font-semibold text-amber-100 hover:bg-amber-700/60"
-                : "rounded-md border border-cyan-600 bg-cyan-700/40 px-3 py-1.5 text-xs font-semibold text-cyan-100 hover:bg-cyan-700/60"
+                ? "border border-[#c85a10] bg-[#c85a10]/20 px-3 py-1.5 font-orbitron text-xs font-semibold uppercase tracking-wider text-[#c85a10] hover:bg-[#c85a10]/30"
+                : "border border-[#e8a020] bg-[#e8a020]/20 px-3 py-1.5 font-orbitron text-xs font-semibold uppercase tracking-wider text-[#e8a020] hover:bg-[#e8a020]/30"
             }
           >
             {isReport
@@ -264,8 +264,8 @@ export function ReplacePartDialog({
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between rounded-md border border-zinc-800 bg-zinc-950/60 px-2.5 py-1.5">
-      <span className="text-zinc-400">{label}</span>
+    <div className="flex items-center justify-between border border-[#2e2820] bg-[#1c1814] px-2.5 py-1.5">
+      <span className="text-[#8a7a60]">{label}</span>
       {children}
     </div>
   );

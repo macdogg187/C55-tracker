@@ -110,16 +110,16 @@ export function DataIngestPanel({ onIngest }: Props) {
   }
 
   return (
-    <section className="rounded-2xl border border-cyan-900/40 bg-gradient-to-b from-slate-900 to-[#04080f] p-5">
+    <section className="border-2 border-[#2e2820] bg-[#1c1814] p-5">
       <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="text-xs uppercase tracking-[0.24em] text-cyan-400">Data ingest</p>
-          <h2 className="text-base font-semibold text-zinc-100">
-            Upload tracker & trends — the database refreshes in place
+          <p className="font-orbitron text-xs uppercase tracking-[0.24em] text-[#e8a020]">Data Ingest</p>
+          <h2 className="mt-1 text-sm font-semibold text-[#f0dfc0]">
+            Upload tracker &amp; trends — database refreshes in place
           </h2>
-          <p className="mt-1 text-xs text-zinc-500">
-            <strong>Tracker (.xlsx)</strong> seeds equipment / slots / lifecycles.{" "}
-            <strong>Trends (.csv)</strong> recomputes active runtime, high-stress
+          <p className="mt-1 font-mono text-xs text-[#5a4a38]">
+            <strong className="text-[#8a7a60]">Tracker (.xlsx)</strong> seeds equipment / slots / lifecycles.{" "}
+            <strong className="text-[#8a7a60]">Trends (.csv)</strong> recomputes active runtime, high-stress
             exposure, and failure-risk predictions for every active part.
           </p>
         </div>
@@ -147,12 +147,12 @@ export function DataIngestPanel({ onIngest }: Props) {
       </div>
 
       {status.kind === "error" && (
-        <p className="mt-3 rounded-md border border-rose-900/60 bg-rose-950/30 px-3 py-2 text-xs text-rose-200">
-          {status.channel} upload failed: {status.message}
+        <p className="mt-3 border border-[#cc3311]/60 bg-[#cc3311]/10 px-3 py-2 font-mono text-xs text-[#ff6644]">
+          {status.channel.toUpperCase()} UPLOAD FAILED: {status.message}
         </p>
       )}
       {status.kind === "uploading" && (
-        <p className="mt-3 text-xs text-cyan-200/80">Uploading {status.channel}…</p>
+        <p className="mt-3 font-mono text-xs text-[#e8a020]">Uploading {status.channel}…</p>
       )}
       {status.kind === "ok" && status.channel === "tracker" && (
         <TrackerSummary data={status.data} />
@@ -182,10 +182,10 @@ function UploadCard({
   onFile: (file: File) => void;
 }) {
   return (
-    <div className="flex flex-col gap-2 rounded-xl border border-zinc-800 bg-zinc-950/30 p-4">
-      <p className="text-sm font-semibold text-zinc-100">{label}</p>
-      <p className="text-xs text-zinc-400">{hint}</p>
-      <label className="mt-1 inline-flex w-fit cursor-pointer items-center gap-2 rounded-md border border-cyan-700/60 bg-cyan-900/30 px-3 py-1.5 text-xs font-semibold text-cyan-100 transition hover:bg-cyan-700/40">
+    <div className="flex flex-col gap-2 border border-[#2e2820] bg-[#0e0c0a] p-4">
+      <p className="font-orbitron text-xs uppercase tracking-wider text-[#f0dfc0]">{label}</p>
+      <p className="font-mono text-xs text-[#5a4a38]">{hint}</p>
+      <label className="mt-1 inline-flex w-fit cursor-pointer items-center gap-2 border border-[#e8a020] bg-[#1c1814] px-3 py-1.5 font-mono text-xs font-semibold text-[#e8a020] transition hover:bg-[#2e2820]">
         <input
           ref={inputRef}
           type="file"
@@ -198,7 +198,7 @@ function UploadCard({
             if (inputRef.current) inputRef.current.value = "";
           }}
         />
-        {busy ? "Uploading…" : buttonText}
+        {busy ? "UPLOADING…" : buttonText.toUpperCase()}
       </label>
     </div>
   );
@@ -206,9 +206,9 @@ function UploadCard({
 
 function TrackerSummary({ data }: { data: TrackerResponse }) {
   return (
-    <div className="mt-3 rounded-lg border border-emerald-900/50 bg-emerald-950/20 p-3 text-xs text-emerald-100">
-      <p className="font-medium text-emerald-300">
-        Tracker ingested · {data.file} → {data.backend}
+    <div className="mt-3 border border-[#6ab04c]/30 bg-[#6ab04c]/5 p-3 font-mono text-xs text-[#f0dfc0]">
+      <p className="font-medium text-[#6ab04c]">
+        TRACKER INGESTED · {data.file} → {data.backend}
       </p>
       <p className="mt-1">
         Equipment: <strong>{data.equipment_upserted}</strong> · Slots:{" "}
@@ -216,7 +216,7 @@ function TrackerSummary({ data }: { data: TrackerResponse }) {
         <strong>{data.lifecycles_upserted}</strong>{" "}
         ({data.lifecycles_inserted} inserted, {data.lifecycles_updated} updated).
       </p>
-      <p className="mt-1 text-emerald-200/80">
+      <p className="mt-1 text-[#8a7a60]">
         Source rows: {data.report.rows_total} ·{" "}
         skipped_no_install={data.report.skipped_no_install} ·{" "}
         skipped_bad_id={data.report.skipped_bad_id} ·{" "}
@@ -224,15 +224,15 @@ function TrackerSummary({ data }: { data: TrackerResponse }) {
         name_mismatches={data.report.name_mismatches} ·{" "}
         unknown_failure_modes={data.report.unknown_failure_modes}
       </p>
-      <p className="mt-1 text-emerald-200/70">
+      <p className="mt-1 text-[#5a4a38]">
         Incomplete payloads (imported anyway):
         missing_serial={data.report.missing_serial_number ?? 0} ·{" "}
         missing_runtime={data.report.missing_runtime ?? 0} ·{" "}
         closed_without_failure_mode={data.report.missing_failure_mode_for_closed ?? 0}
       </p>
       {data.report.warnings.length > 0 && (
-        <details className="mt-2 text-emerald-100/90">
-          <summary className="cursor-pointer text-emerald-300">
+        <details className="mt-2 text-[#f0dfc0]">
+          <summary className="cursor-pointer text-[#6ab04c]">
             {data.report.warnings.length} warning{data.report.warnings.length === 1 ? "" : "s"}
           </summary>
           <ul className="mt-1 max-h-40 overflow-auto pl-4">
@@ -250,45 +250,45 @@ function TrackerSummary({ data }: { data: TrackerResponse }) {
 
 function TrendsSummary({ data }: { data: TrendsResponse }) {
   return (
-    <div className="mt-3 rounded-lg border border-amber-900/45 bg-amber-950/15 p-3 text-xs text-amber-100">
-      <p className="font-medium text-amber-300">
-        Trends ingested · {data.file} → {data.backend}
+    <div className="mt-3 border border-[#e8a020]/30 bg-[#e8a020]/5 p-3 font-mono text-xs text-[#f0dfc0]">
+      <p className="font-medium text-[#e8a020]">
+        TRENDS INGESTED · {data.file} → {data.backend}
       </p>
       <p className="mt-1">
         {data.rows_ingested.toLocaleString()} samples · signals:{" "}
-        <span className="font-mono">{data.signals_detected.join(", ")}</span> ·{" "}
+        <span className="font-mono text-[#8a7a60]">{data.signals_detected.join(", ")}</span> ·{" "}
         sample period {data.summary.sample_minutes.toFixed(2)} min
       </p>
-      <p className="mt-1 text-amber-200/85">
-        Active: <strong>{data.summary.active_minutes_total} min</strong> ·{" "}
-        High-stress: <strong>{data.summary.high_stress_minutes_total} min</strong> ·{" "}
-        Off / maint: <strong>{data.summary.off_minutes_total} min</strong> ·{" "}
-        Out-of-band: <strong>{data.summary.out_of_band_minutes} min</strong>
+      <p className="mt-1 text-[#8a7a60]">
+        Active: <strong className="text-[#f0dfc0]">{data.summary.active_minutes_total} min</strong> ·{" "}
+        High-stress: <strong className="text-[#c85a10]">{data.summary.high_stress_minutes_total} min</strong> ·{" "}
+        Off / maint: <strong className="text-[#f0dfc0]">{data.summary.off_minutes_total} min</strong> ·{" "}
+        Out-of-band: <strong className="text-[#cc3311]">{data.summary.out_of_band_minutes} min</strong>
       </p>
-      <p className="mt-1 text-amber-200/85">
-        Updated <strong>{data.lifecycles_updated}</strong> lifecycles, logged{" "}
-        <strong>{data.events_logged}</strong> events
+      <p className="mt-1 text-[#8a7a60]">
+        Updated <strong className="text-[#f0dfc0]">{data.lifecycles_updated}</strong> lifecycles, logged{" "}
+        <strong className="text-[#f0dfc0]">{data.events_logged}</strong> events
         ({data.high_stress_windows} high-stress + {data.off_windows} off-maintenance windows).
       </p>
-      <p className="mt-1 text-amber-200/85">
-        Passes: <strong>{data.passes_total ?? 0}</strong>{" "}
+      <p className="mt-1 text-[#8a7a60]">
+        Passes: <strong className="text-[#f0dfc0]">{data.passes_total ?? 0}</strong>{" "}
         ({data.valid_passes_total ?? 0} valid 36–40 min) ·{" "}
-        Runs: <strong>{data.runs_total ?? 0}</strong>{" "}
+        Runs: <strong className="text-[#f0dfc0]">{data.runs_total ?? 0}</strong>{" "}
         ({data.conforming_runs_total ?? 0} conforming to 10/6-pass cadence) ·{" "}
         Schedule anomalies:{" "}
         <strong
           className={
-            (data.schedule_anomalies_total ?? 0) > 0 ? "text-orange-300" : ""
+            (data.schedule_anomalies_total ?? 0) > 0 ? "text-[#c85a10]" : "text-[#f0dfc0]"
           }
         >
           {data.schedule_anomalies_total ?? 0}
         </strong>
       </p>
       {data.predictions.length > 0 && (
-        <p className="mt-1 text-amber-200/80">
-          Top risk: <span className="font-mono">{data.predictions[0].installation_id}</span>{" "}
+        <p className="mt-1 text-[#8a7a60]">
+          Top risk: <span className="text-[#e8a020]">{data.predictions[0].installation_id}</span>{" "}
           ({data.predictions[0].part_name}) — risk{" "}
-          <strong>{data.predictions[0].risk_score}</strong>,{" "}
+          <strong className="text-[#f0dfc0]">{data.predictions[0].risk_score}</strong>,{" "}
           band {data.predictions[0].band}. See Failure Prediction panel below.
         </p>
       )}

@@ -60,24 +60,24 @@ export function MaintenanceLogPanel({
   }
 
   return (
-    <section className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-5">
+    <section className="border-2 border-[#2e2820] bg-[#1c1814] p-5">
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-base font-semibold text-zinc-100">Maintenance Log</h2>
-        <p className="text-xs text-zinc-500">
+        <h2 className="font-orbitron text-sm font-semibold uppercase tracking-widest text-[#e8a020]">Maintenance Log</h2>
+        <p className="font-mono text-xs text-[#5a4a38]">
           {selectedInstallationId
-            ? `Filtered by ${selectedInstallationId}`
+            ? `Filtered: ${selectedInstallationId}`
             : "Most recent across the line"}
         </p>
       </div>
 
       <form
         onSubmit={submit}
-        className="mb-4 grid gap-2 rounded-xl border border-zinc-800 bg-zinc-950/40 p-3 text-xs sm:grid-cols-[140px_1fr_auto] sm:items-center"
+        className="mb-4 grid gap-2 border border-[#2e2820] bg-[#0e0c0a] p-3 text-xs sm:grid-cols-[140px_1fr_auto] sm:items-center"
       >
         <select
           value={eventType}
           onChange={(e) => setEventType(e.target.value as typeof eventType)}
-          className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-zinc-100"
+          className="border border-[#4a3c28] bg-[#1c1814] px-2 py-1.5 font-mono text-[#f0dfc0] focus:border-[#e8a020] focus:outline-none"
         >
           <option value="inspect">Inspection</option>
           <option value="clean">Clean</option>
@@ -91,36 +91,36 @@ export function MaintenanceLogPanel({
               ? `Notes for ${selectedInstallationId}…`
               : "Select a part above first"
           }
-          className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1.5 text-zinc-100"
+          className="border border-[#4a3c28] bg-[#1c1814] px-2 py-1.5 font-mono text-[#f0dfc0] placeholder-[#4a3c28] focus:border-[#e8a020] focus:outline-none"
         />
         <button
           type="submit"
           disabled={submitting || !selectedInstallationId}
-          className="rounded-md border border-cyan-600 bg-cyan-700/30 px-3 py-1.5 font-semibold text-cyan-100 transition hover:bg-cyan-700/50 disabled:cursor-not-allowed disabled:opacity-50"
+          className="border border-[#e8a020] bg-[#1c1814] px-3 py-1.5 font-orbitron text-xs font-semibold uppercase tracking-wider text-[#e8a020] transition hover:bg-[#2e2820] disabled:cursor-not-allowed disabled:opacity-40"
         >
           {submitting ? "Logging…" : "Log Event"}
         </button>
       </form>
-      {error && <p className="mb-3 text-xs text-rose-300">{error}</p>}
+      {error && <p className="mb-3 font-mono text-xs text-[#cc3311]">{error}</p>}
 
       {filtered.length === 0 ? (
-        <p className="text-xs text-zinc-500">No events logged yet.</p>
+        <p className="font-mono text-xs text-[#5a4a38]">No events logged yet.</p>
       ) : (
-        <ul className="divide-y divide-zinc-900 rounded-xl border border-zinc-800">
+        <ul className="divide-y divide-[#2e2820] border border-[#2e2820]">
           {filtered.map((e, i) => (
-            <li key={e.id ?? `${e.detected_at}-${i}`} className="grid gap-1 p-3 text-xs sm:grid-cols-[120px_140px_1fr] sm:gap-3">
-              <span className="font-mono text-zinc-400">
+            <li key={e.id ?? `${e.detected_at}-${i}`} className="grid gap-1 p-3 font-mono text-xs sm:grid-cols-[120px_140px_1fr] sm:gap-3">
+              <span className="text-[#5a4a38]">
                 {new Date(e.detected_at).toLocaleString()}
               </span>
               <span className={`font-medium ${eventTypeColor(e.event_type)}`}>
                 {e.event_type}
                 {e.failure_mode && (
-                  <span className="ml-1 text-amber-300">· {e.failure_mode}</span>
+                  <span className="ml-1 text-[#e8a020]">· {e.failure_mode}</span>
                 )}
               </span>
-              <span className="text-zinc-300">
-                <span className="font-mono text-zinc-500">{e.installation_id ?? "—"}</span>
-                {e.notes && <span className="ml-2">{e.notes}</span>}
+              <span className="text-[#8a7a60]">
+                <span className="text-[#4a3c28]">{e.installation_id ?? "—"}</span>
+                {e.notes && <span className="ml-2 text-[#f0dfc0]">{e.notes}</span>}
               </span>
             </li>
           ))}
@@ -134,20 +134,20 @@ function eventTypeColor(t: string): string {
   switch (t) {
     case "replace":
     case "failure_alert":
-      return "text-rose-300";
+      return "text-[#cc3311]";
     case "failure_observation":
-      return "text-amber-300";
+      return "text-[#c85a10]";
     case "data_integrity_alert":
-      return "text-orange-300";
+      return "text-[#c85a10]";
     case "inspection_alert":
-      return "text-amber-200";
+      return "text-[#e8a020]";
     case "high_stress_window":
-      return "text-amber-300";
+      return "text-[#c85a10]";
     case "off_maintenance":
-      return "text-zinc-300";
+      return "text-[#8a7a60]";
     case "pass_detected":
-      return "text-emerald-300";
+      return "text-[#6ab04c]";
     default:
-      return "text-cyan-300";
+      return "text-[#e8a020]";
   }
 }

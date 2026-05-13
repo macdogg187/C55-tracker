@@ -61,7 +61,6 @@ function LMRRow({
   const isCenter = sorted.every((p) => p.orientation === "center");
 
   if (isCenter) {
-    // Single-center part (e.g. OM when listed within a structural section)
     const p = sorted[0];
     if (!p) return null;
     return (
@@ -87,7 +86,7 @@ function LMRRow({
           return (
             <div
               key={orient}
-              className="min-h-[100px] rounded-xl border border-zinc-800/40 bg-zinc-900/20 opacity-25"
+              className="min-h-[100px] border border-[#2e2820]/40 bg-[#0e0c0a]/20 opacity-25"
             />
           );
         }
@@ -107,8 +106,8 @@ function LMRRow({
 function RowLabel({ label, code }: { label: string; code: string }) {
   return (
     <div className="flex flex-col justify-center py-3">
-      <p className="text-xs font-semibold leading-snug text-zinc-200">{label}</p>
-      <p className="font-mono text-[10px] text-zinc-500">{code}</p>
+      <p className="font-orbitron text-[10px] font-semibold uppercase leading-snug tracking-wider text-[#f0dfc0]">{label}</p>
+      <p className="font-mono text-[10px] text-[#4a3c28]">{code}</p>
     </div>
   );
 }
@@ -120,7 +119,7 @@ function LMRHeader() {
       {(["LEFT", "MIDDLE", "RIGHT"] as const).map((o) => (
         <div
           key={o}
-          className="text-center text-[10px] font-semibold uppercase tracking-widest text-zinc-600"
+          className="text-center font-mono text-[10px] font-semibold uppercase tracking-[0.25em] text-[#4a3c28]"
         >
           {o}
         </div>
@@ -207,7 +206,7 @@ export function SubassemblyGrid({
     const centerRows = rows.filter((r) => r.parts.every((p) => p.orientation === "center"));
 
     return (
-      <section className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-5">
+      <section className="border-2 border-[#2e2820] bg-[#1c1814] p-5">
         <SectionHeader title={title} subtitle={subtitle} />
         <div className="space-y-6">
           {lmrRows.length > 0 && (
@@ -229,7 +228,7 @@ export function SubassemblyGrid({
           )}
           {centerRows.length > 0 && (
             <div>
-              <h3 className="mb-3 text-xs font-bold uppercase tracking-widest text-zinc-500">
+              <h3 className="mb-3 border-l-2 border-[#e8a020] pl-2 font-orbitron text-xs font-bold uppercase tracking-widest text-[#e8a020]">
                 Manifold &amp; Instruments
               </h3>
               <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -277,7 +276,7 @@ export function SubassemblyGrid({
   ].filter((s) => s.parts.length > 0);
 
   return (
-    <section className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-5">
+    <section className="border-2 border-[#2e2820] bg-[#1c1814] p-5">
       <SectionHeader title={title} subtitle={subtitle} />
       <div className="space-y-8">
         {sections.map((sec) => {
@@ -287,7 +286,7 @@ export function SubassemblyGrid({
 
           return (
             <div key={sec.key}>
-              <h3 className="mb-3 text-xs font-bold uppercase tracking-widest text-zinc-500">
+              <h3 className="mb-3 border-l-2 border-[#e8a020] pl-2 font-orbitron text-xs font-bold uppercase tracking-widest text-[#e8a020]">
                 {sec.label}
               </h3>
 
@@ -328,8 +327,8 @@ export function SubassemblyGrid({
 function SectionHeader({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
     <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
-      <h2 className="text-base font-semibold text-zinc-100">{title}</h2>
-      {subtitle && <p className="text-xs text-zinc-500">{subtitle}</p>}
+      <h2 className="font-orbitron text-sm font-semibold uppercase tracking-widest text-[#e8a020]">{title}</h2>
+      {subtitle && <p className="font-mono text-xs text-[#5a4a38]">{subtitle}</p>}
     </div>
   );
 }

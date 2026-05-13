@@ -66,17 +66,17 @@ type Props = {
 };
 
 const BAND_STYLE: Record<Prediction["band"], string> = {
-  low: "border-emerald-900/45 bg-emerald-900/15 text-emerald-200",
-  moderate: "border-amber-900/45 bg-amber-900/15 text-amber-200",
-  high: "border-orange-900/45 bg-orange-900/15 text-orange-200",
-  critical: "border-rose-900/45 bg-rose-900/15 text-rose-200",
+  low: "border-[#6ab04c]/30 bg-[#6ab04c]/5 text-[#f0dfc0]",
+  moderate: "border-[#e8a020]/30 bg-[#e8a020]/5 text-[#f0dfc0]",
+  high: "border-[#c85a10]/30 bg-[#c85a10]/5 text-[#f0dfc0]",
+  critical: "border-[#cc3311]/30 bg-[#cc3311]/5 text-[#f0dfc0]",
 };
 
 const SCORE_COLOR: Record<Prediction["band"], string> = {
-  low: "bg-emerald-500/70",
-  moderate: "bg-amber-500/70",
-  high: "bg-orange-500/80",
-  critical: "bg-rose-500/80",
+  low: "bg-[#6ab04c]",
+  moderate: "bg-[#e8a020]",
+  high: "bg-[#c85a10]",
+  critical: "bg-[#cc3311]",
 };
 
 // ── Sub-components ────────────────────────────────────────────────────────────
@@ -95,42 +95,42 @@ function PredictionCard({
   return (
     <div
       onClick={() => onSelect(p.installation_id)}
-      className={`cursor-pointer rounded-xl border p-3 transition hover:border-cyan-700 ${BAND_STYLE[p.band]} ${selectedId === p.installation_id ? "ring-1 ring-cyan-400" : ""}`}
+      className={`cursor-pointer border-2 p-3 transition hover:border-[#e8a020] ${BAND_STYLE[p.band]} ${selectedId === p.installation_id ? "border-[#e8a020] shadow-[0_0_16px_rgba(232,160,32,0.2)]" : ""}`}
     >
       <div className="mb-2 flex items-start justify-between gap-2">
         <div>
-          <p className="text-xs uppercase tracking-widest opacity-70">
+          <p className="font-orbitron text-[9px] uppercase tracking-widest text-[#8a7a60]">
             {p.installation_id}
           </p>
-          <p className="text-sm font-semibold text-zinc-100">{p.part_name}</p>
+          <p className="text-sm font-semibold text-[#f0dfc0]">{p.part_name}</p>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1.5">
-          <span className="rounded-md bg-black/30 px-2 py-1 text-[10px] font-bold uppercase tracking-wider">
+          <span className="bg-black/30 px-2 py-1 font-orbitron text-[9px] font-bold uppercase tracking-wider text-[#e8a020]">
             {p.band}
           </span>
           {replaceHref && (
             <a
               href={replaceHref(p.installation_id)}
               onClick={(e) => e.stopPropagation()}
-              className="rounded-md border border-cyan-700/60 bg-cyan-900/30 px-2 py-0.5 text-[10px] font-semibold text-cyan-300 hover:bg-cyan-800/40"
+              className="border border-[#e8a020]/60 bg-[#1c1814] px-2 py-0.5 font-mono text-[10px] font-semibold text-[#e8a020] hover:bg-[#2e2820]"
             >
               Replace →
             </a>
           )}
         </div>
       </div>
-      <div className="mb-2 h-1.5 w-full overflow-hidden rounded-full bg-black/30">
+      <div className="mb-2 h-1.5 w-full overflow-hidden bg-[#2e2820]">
         <div
           className={`h-full ${SCORE_COLOR[p.band]}`}
           style={{ width: `${Math.min(100, p.risk_score)}%` }}
         />
       </div>
-      <p className="text-xs">
-        Score <strong>{p.risk_score}</strong>
+      <p className="font-mono text-xs text-[#8a7a60]">
+        Score <strong className="text-[#f0dfc0]">{p.risk_score}</strong>
         {p.eta_minutes !== null && (
           <>
             {" · "}ETA{" "}
-            <strong>
+            <strong className="text-[#f0dfc0]">
               {p.eta_minutes <= 0
                 ? "service now"
                 : `${p.eta_minutes.toLocaleString()} min`}
@@ -140,9 +140,9 @@ function PredictionCard({
         {p.predicted_failure_mode && (
           <>
             {" · "}likely{" "}
-            <strong className="text-cyan-200">{p.predicted_failure_mode}</strong>
+            <strong className="text-[#e8a020]">{p.predicted_failure_mode}</strong>
             {p.predicted_failure_confidence !== undefined && (
-              <span className="text-zinc-400">
+              <span className="text-[#5a4a38]">
                 {" ("}
                 {Math.round(p.predicted_failure_confidence * 100)}%)
               </span>
@@ -151,14 +151,14 @@ function PredictionCard({
         )}
       </p>
       {p.factors.length > 0 && (
-        <ul className="mt-2 space-y-1 text-[11px] leading-tight">
+        <ul className="mt-2 space-y-1 font-mono text-[11px] leading-tight">
           {p.factors.slice(0, 3).map((f) => (
-            <li key={f.label} className="flex items-baseline gap-2">
-              <span className="opacity-90">{f.label}</span>
-              <span className="ml-auto font-mono opacity-80">
+            <li key={f.label} className="flex items-baseline gap-2 text-[#8a7a60]">
+              <span>{f.label}</span>
+              <span className="ml-auto">
                 {Math.round(f.weight * 100)}%
               </span>
-              <span className="block w-full text-[10px] opacity-70">{f.detail}</span>
+              <span className="block w-full text-[10px] text-[#5a4a38]">{f.detail}</span>
             </li>
           ))}
         </ul>
@@ -174,7 +174,7 @@ function LMRHeader() {
       {(["LEFT", "MIDDLE", "RIGHT"] as const).map((o) => (
         <div
           key={o}
-          className="text-center text-[10px] font-semibold uppercase tracking-widest text-zinc-600"
+          className="text-center font-orbitron text-[10px] font-semibold uppercase tracking-widest text-[#4a3c28]"
         >
           {o}
         </div>
@@ -201,8 +201,8 @@ function LMRRow({
   return (
     <div className="grid grid-cols-[160px_1fr_1fr_1fr] items-start gap-3">
       <div className="flex flex-col justify-center py-3">
-        <p className="text-xs font-semibold leading-snug text-zinc-200">{label}</p>
-        <p className="font-mono text-[10px] text-zinc-500">{partCode}</p>
+        <p className="font-orbitron text-[10px] font-semibold leading-snug uppercase tracking-wider text-[#f0dfc0]">{label}</p>
+        <p className="font-mono text-[10px] text-[#4a3c28]">{partCode}</p>
       </div>
       {(["left", "middle", "right"] as const).map((orient) => {
         const p = parts.find((x) => inferOrientation(x.installation_id) === orient);
@@ -210,7 +210,7 @@ function LMRRow({
           return (
             <div
               key={orient}
-              className="min-h-[80px] rounded-xl border border-zinc-800/40 bg-zinc-900/20 opacity-25"
+              className="min-h-[80px] border border-[#2e2820]/40 bg-[#0e0c0a]/20 opacity-25"
             />
           );
         }
@@ -257,7 +257,7 @@ function LMRSection({
   if (codes.length === 0) return null;
   return (
     <div>
-      <h3 className="mb-3 text-xs font-bold uppercase tracking-widest text-zinc-500">
+      <h3 className="mb-3 border-l-2 border-[#e8a020] pl-2 font-orbitron text-xs font-bold uppercase tracking-widest text-[#e8a020]">
         {label}
       </h3>
       <div className="overflow-x-auto">
@@ -304,7 +304,7 @@ function CenterSection({
   });
   return (
     <div>
-      <h3 className="mb-3 text-xs font-bold uppercase tracking-widest text-zinc-500">
+      <h3 className="mb-3 border-l-2 border-[#e8a020] pl-2 font-orbitron text-xs font-bold uppercase tracking-widest text-[#e8a020]">
         Homogenizer / Manifold &amp; Instruments
       </h3>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
@@ -408,18 +408,17 @@ export function FailurePredictionPanel({
   );
 
   return (
-    <section className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-5">
+    <section className="border-2 border-[#2e2820] bg-[#1c1814] p-5">
       <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
         <div>
-          <h2 className="text-base font-semibold text-zinc-100">Failure Prediction</h2>
-          <p className="text-xs text-zinc-500">
+          <h2 className="font-orbitron text-sm font-semibold uppercase tracking-widest text-[#e8a020]">Failure Prediction</h2>
+          <p className="mt-1 font-mono text-xs text-[#5a4a38]">
             Risk score combines runtime / failure-threshold ratio, high-stress
-            exposure, cumulative pressure stress, and inferred off-windows. Upload a
-            fresh trends CSV to refresh the inputs.
+            exposure, cumulative pressure stress, and inferred off-windows.
           </p>
         </div>
         {data && (
-          <div className="flex flex-col items-end gap-1 text-[11px] text-zinc-500">
+          <div className="flex flex-col items-end gap-1 font-mono text-[11px] text-[#5a4a38]">
             <p>
               {filtered.length} active part{filtered.length === 1 ? "" : "s"} ·{" "}
               updated {new Date(data.generated_at).toLocaleTimeString()}
@@ -428,15 +427,15 @@ export function FailurePredictionPanel({
               <span
                 className={
                   liveStatus.connected
-                    ? "inline-block h-1.5 w-1.5 rounded-full bg-emerald-400"
-                    : "inline-block h-1.5 w-1.5 rounded-full bg-zinc-600"
+                    ? "inline-block h-1.5 w-1.5 bg-[#6ab04c]"
+                    : "inline-block h-1.5 w-1.5 bg-[#4a3c28]"
                 }
               />
               {liveStatus.connected ? (
                 <>
                   Live stream
                   {liveStatus.lastSampleAt && (
-                    <span className="text-zinc-400">
+                    <span className="text-[#5a4a38]">
                       {" "}
                       · last sample {new Date(liveStatus.lastSampleAt).toLocaleTimeString()}
                     </span>
@@ -445,10 +444,10 @@ export function FailurePredictionPanel({
               ) : (
                 <>Polling (live worker offline)</>
               )}
-              <span className="mx-1 text-zinc-700">·</span>
+              <span className="mx-1 text-[#4a3c28]">·</span>
               <span
                 className={
-                  data.source === "model" ? "text-cyan-300" : "text-zinc-400"
+                  data.source === "model" ? "text-[#e8a020]" : "text-[#5a4a38]"
                 }
               >
                 {data.source === "model" ? "ML model" : "Heuristic"}
@@ -459,16 +458,16 @@ export function FailurePredictionPanel({
       </div>
 
       {loading && !data && (
-        <p className="text-xs text-zinc-500">Computing predictions…</p>
+        <p className="font-mono text-xs text-[#5a4a38]">Computing predictions…</p>
       )}
       {error && (
-        <p className="rounded-md border border-rose-900/60 bg-rose-950/30 px-3 py-2 text-xs text-rose-200">
+        <p className="border border-[#cc3311]/60 bg-[#cc3311]/10 px-3 py-2 font-mono text-xs text-[#ff6644]">
           Failed to load predictions: {error}
         </p>
       )}
 
       {filtered.length === 0 && !loading && !error && (
-        <p className="text-xs text-zinc-500">
+        <p className="font-mono text-xs text-[#5a4a38]">
           No active lifecycles for {equipmentId} yet. Upload the MTBF tracker to seed
           the database.
         </p>

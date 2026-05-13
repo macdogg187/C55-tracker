@@ -274,7 +274,7 @@ export default function Home() {
   );
 
   return (
-    <main className="min-h-screen bg-[#030711] text-zinc-100">
+    <main className="min-h-screen bg-[#12100e] text-[#f0dfc0]">
       <div className="mx-auto flex w-full max-w-[1500px] flex-col gap-6 px-5 py-6 lg:px-8">
 
         {/* Status bar */}
@@ -291,14 +291,14 @@ export default function Home() {
 
         {/* Parts needing attention banner */}
         {needsAttention.length > 0 && (
-          <div className="flex items-center justify-between gap-4 rounded-2xl border border-rose-800/50 bg-rose-950/20 px-5 py-3.5">
-            <p className="text-sm text-rose-200">
+          <div className="flex items-center justify-between gap-4 border-2 border-[#cc3311]/50 bg-[#cc3311]/10 px-5 py-3.5">
+            <p className="font-mono text-sm text-[#ff6644]">
               <span className="font-semibold">{needsAttention.length} part{needsAttention.length > 1 ? "s" : ""}</span>
               {" "}need{needsAttention.length === 1 ? "s" : ""} immediate attention.
             </p>
             <Link
               href={`/replace?eq=${equipmentId}`}
-              className="shrink-0 rounded-md border border-rose-600 bg-rose-700/40 px-4 py-1.5 text-sm font-semibold text-rose-100 transition hover:bg-rose-700/60"
+              className="shrink-0 border border-[#cc3311] bg-[#cc3311]/20 px-4 py-1.5 font-orbitron text-xs font-semibold uppercase tracking-wider text-[#ff6644] transition hover:bg-[#cc3311]/30"
             >
               Replace Part →
             </Link>
@@ -307,14 +307,14 @@ export default function Home() {
 
         {/* Missing components banner */}
         {missingParts.length > 0 && (
-          <div className="flex items-center justify-between gap-4 rounded-2xl border border-amber-800/50 bg-amber-950/20 px-5 py-3.5">
-            <p className="text-sm text-amber-200">
+          <div className="flex items-center justify-between gap-4 border-2 border-[#c85a10]/50 bg-[#c85a10]/10 px-5 py-3.5">
+            <p className="font-mono text-sm text-[#e8a020]">
               <span className="font-semibold">{missingParts.length} slot{missingParts.length > 1 ? "s" : ""}</span>
               {" "}missing installed part{missingParts.length > 1 ? "s" : ""}.
             </p>
             <Link
               href={`/replace?eq=${equipmentId}`}
-              className="shrink-0 rounded-md border border-amber-600 bg-amber-700/40 px-4 py-1.5 text-sm font-semibold text-amber-100 transition hover:bg-amber-700/60"
+              className="shrink-0 border border-[#e8a020] bg-[#e8a020]/20 px-4 py-1.5 font-orbitron text-xs font-semibold uppercase tracking-wider text-[#e8a020] transition hover:bg-[#e8a020]/30"
             >
               Install Part →
             </Link>
@@ -322,8 +322,8 @@ export default function Home() {
         )}
 
         {/* Process flow */}
-        <section className="rounded-2xl border border-cyan-900/40 bg-gradient-to-b from-slate-900 to-[#04080f] p-5">
-          <h2 className="mb-3 text-base font-semibold text-zinc-100">
+        <section className="border-2 border-[#2e2820] bg-[#1c1814] p-5">
+          <h2 className="mb-3 font-orbitron text-sm font-semibold uppercase tracking-widest text-[#e8a020]">
             C55 Sequential Process Flow
           </h2>
           <SequentialFlowchart
@@ -334,12 +334,12 @@ export default function Home() {
         </section>
 
         {/* Sensor / fatigue chart */}
-        <section className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-5">
+        <section className="border-2 border-[#2e2820] bg-[#1c1814] p-5">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-base font-semibold text-zinc-100">
+            <h2 className="font-orbitron text-sm font-semibold uppercase tracking-widest text-[#e8a020]">
               Fatigue Visualization
             </h2>
-            <p className="text-xs text-zinc-400">
+            <p className="font-mono text-xs text-[#5a4a38]">
               P01 pressure + rolling 10-min σ — correlates high pulsation with HP-thread weephole risk.
             </p>
           </div>
@@ -353,12 +353,12 @@ export default function Home() {
         </section>
 
         {/* Seal temperature slope */}
-        <section className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-5">
+        <section className="border-2 border-[#2e2820] bg-[#1c1814] p-5">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-base font-semibold text-zinc-100">
+            <h2 className="font-orbitron text-sm font-semibold uppercase tracking-widest text-[#c85a10]">
               Seal Temperature Slope
             </h2>
-            <p className="text-xs text-zinc-400">
+            <p className="font-mono text-xs text-[#5a4a38]">
               Max dT/dt across T01–T03 · x-axis = cumulative P01 active runtime
             </p>
           </div>
@@ -419,23 +419,23 @@ function StatusBar({
         : "connecting…";
 
   return (
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 rounded-xl border border-zinc-800/60 bg-zinc-900/30 px-4 py-2.5 text-xs text-zinc-500">
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border border-[#2e2820] bg-[#1c1814] px-4 py-2.5 font-mono text-xs text-[#5a4a38]">
       <span>
         Backend:{" "}
-        <span className={backend === "supabase" ? "text-emerald-300" : "text-zinc-300"}>
+        <span className={backend === "supabase" ? "text-[#6ab04c]" : "text-[#8a7a60]"}>
           {backendLabel}
         </span>
       </span>
       {snapshotAt && (
         <span>
           Snapshot:{" "}
-          <span className="text-zinc-300">{new Date(snapshotAt).toLocaleTimeString()}</span>
+          <span className="text-[#8a7a60]">{new Date(snapshotAt).toLocaleTimeString()}</span>
         </span>
       )}
       {pipelineLoaded && generatedAt && (
         <span>
           Pipeline:{" "}
-          <span className="text-zinc-300">{new Date(generatedAt).toLocaleTimeString()}</span>
+          <span className="text-[#8a7a60]">{new Date(generatedAt).toLocaleTimeString()}</span>
         </span>
       )}
     </div>
@@ -444,20 +444,20 @@ function StatusBar({
 
 function SummaryStrip({ summary }: { summary: NonNullable<PipelinePayload["summary"]> }) {
   return (
-    <section className="grid gap-3 rounded-2xl border border-zinc-800 bg-zinc-900/40 p-4 sm:grid-cols-2 lg:grid-cols-4">
-      <KPI label="Active Runtime" value={`${summary.active_minutes_total} min`} accent="text-cyan-300" />
-      <KPI label="High-Stress (σ > 2 kpsi)" value={`${summary.high_stress_minutes_total} min`} accent="text-amber-300" />
-      <KPI label="Off / Maintenance" value={`${summary.off_minutes_total} min`} accent="text-zinc-300" />
-      <KPI label="Out-of-Band (>30 kpsi)" value={`${summary.out_of_band_minutes} min`} accent="text-rose-300" />
+    <section className="grid gap-3 border-2 border-[#2e2820] bg-[#1c1814] p-4 sm:grid-cols-2 lg:grid-cols-4">
+      <KPI label="Active Runtime" value={`${summary.active_minutes_total} min`} accent="text-[#e8a020]" />
+      <KPI label="High-Stress (σ > 2 kpsi)" value={`${summary.high_stress_minutes_total} min`} accent="text-[#c85a10]" />
+      <KPI label="Off / Maintenance" value={`${summary.off_minutes_total} min`} accent="text-[#8a7a60]" />
+      <KPI label="Out-of-Band (>30 kpsi)" value={`${summary.out_of_band_minutes} min`} accent="text-[#cc3311]" />
     </section>
   );
 }
 
 function KPI({ label, value, accent }: { label: string; value: string; accent: string }) {
   return (
-    <div className="rounded-lg border border-zinc-800 bg-zinc-950/40 p-3">
-      <p className="text-[10px] uppercase tracking-widest text-zinc-500">{label}</p>
-      <p className={`mt-1 text-xl font-semibold ${accent}`}>{value}</p>
+    <div className="border border-[#2e2820] bg-[#0e0c0a] p-3">
+      <p className="font-orbitron text-[10px] uppercase tracking-widest text-[#4a3c28]">{label}</p>
+      <p className={`mt-1 font-mono text-xl font-semibold ${accent}`}>{value}</p>
     </div>
   );
 }

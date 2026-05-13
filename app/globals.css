@@ -1,26 +1,102 @@
 @import "tailwindcss";
 
+/* ── NASA Mission Control Palette ─────────────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --nasa-bg:          #12100e;
+  --nasa-panel:       #1c1814;
+  --nasa-panel-deep:  #0e0c0a;
+  --nasa-border:      #2e2820;
+  --nasa-border-lit:  #4a3c28;
+  --nasa-amber:       #e8a020;
+  --nasa-amber-dim:   #a06e10;
+  --nasa-orange:      #c85a10;
+  --nasa-red:         #cc3311;
+  --nasa-olive:       #6ab04c;
+  --nasa-cream:       #f0dfc0;
+  --nasa-tan:         #8a7a60;
+  --nasa-tan-dim:     #5a4a38;
+  --background: var(--nasa-bg);
+  --foreground: var(--nasa-cream);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-ibm-plex-mono);
+  --font-mono: var(--font-ibm-plex-mono);
+  --font-display: var(--font-orbitron);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* ── Base ──────────────────────────────────────────────────────────────── */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--nasa-bg);
+  color: var(--nasa-cream);
+  font-family: var(--font-ibm-plex-mono), "Courier New", monospace;
+  position: relative;
 }
+
+/* Subtle noise grain overlay */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.028;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-size: 128px 128px;
+}
+
+/* ── Horizontal teletype rule ──────────────────────────────────────────── */
+.nasa-rule {
+  border: none;
+  border-top: 1px solid var(--nasa-border);
+  margin: 0;
+}
+
+/* ── Orbitron utility ──────────────────────────────────────────────────── */
+.font-orbitron {
+  font-family: var(--font-orbitron), "Courier New", monospace;
+  letter-spacing: 0.12em;
+}
+
+/* ── Amber glow on focus ───────────────────────────────────────────────── */
+.nasa-focus:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--nasa-amber);
+}
+
+/* ── Status blink (critical indicator) ───────────────────────────────── */
+@keyframes nasa-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.25; }
+}
+.nasa-blink {
+  animation: nasa-blink 1.4s ease-in-out infinite;
+}
+
+/* ── Scan-line shimmer on chart panels ────────────────────────────────── */
+@keyframes nasa-scan {
+  0%   { background-position: 0 0; }
+  100% { background-position: 0 4px; }
+}
+.nasa-scanlines::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 3px,
+    rgba(0,0,0,0.12) 3px,
+    rgba(0,0,0,0.12) 4px
+  );
+  animation: nasa-scan 0.25s steps(1) infinite;
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────────────────── */
+::-webkit-scrollbar       { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--nasa-panel); }
+::-webkit-scrollbar-thumb { background: var(--nasa-border-lit); }
+::-webkit-scrollbar-thumb:hover { background: var(--nasa-amber-dim); }

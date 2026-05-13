@@ -32,12 +32,20 @@ export function Nav() {
   }
 
   return (
-    <nav className="sticky top-0 z-40 border-b border-zinc-800 bg-[#030711]/95 backdrop-blur-sm">
+    <nav className="sticky top-0 z-40 border-b-2 border-[#e8a020] bg-[#0e0c0a]">
       <div className="mx-auto flex w-full max-w-[1500px] items-center justify-between gap-4 px-5 py-2.5 lg:px-8">
-        <div className="flex items-center gap-0.5">
-          <span className="mr-4 hidden shrink-0 text-xs font-bold uppercase tracking-[0.22em] text-cyan-500 sm:block">
-            C55 Tracker
-          </span>
+        <div className="flex items-center gap-1">
+          {/* Logo */}
+          <div className="mr-5 hidden shrink-0 sm:block">
+            <div className="font-orbitron text-xs font-bold uppercase tracking-[0.22em] text-[#e8a020]">
+              C55 Tracker
+            </div>
+            <div className="text-[9px] uppercase tracking-[0.3em] text-[#5a4a38]">
+              Mission Control
+            </div>
+          </div>
+
+          {/* Nav tabs */}
           {TABS.map((tab) => {
             const isActive = pathname === tab.href;
             const href = tab.noEq ? tab.href : `${tab.href}?eq=${eq}`;
@@ -45,10 +53,10 @@ export function Nav() {
               <Link
                 key={tab.href}
                 href={href}
-                className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
+                className={`px-3 py-1.5 text-xs font-medium uppercase tracking-[0.14em] transition-colors font-orbitron ${
                   isActive
-                    ? "bg-cyan-900/40 text-cyan-300"
-                    : "text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-100"
+                    ? "bg-[#e8a020] text-[#0e0c0a]"
+                    : "text-[#8a7a60] hover:bg-[#2e2820] hover:text-[#e8a020]"
                 }`}
               >
                 {tab.label}
@@ -56,10 +64,12 @@ export function Nav() {
             );
           })}
         </div>
+
+        {/* Equipment selector */}
         <select
           value={eq}
           onChange={handleEqChange}
-          className="rounded-md border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-sm text-zinc-100 focus:outline-none focus:ring-1 focus:ring-cyan-700"
+          className="border border-[#e8a020] bg-[#1c1814] px-3 py-1.5 text-xs text-[#e8a020] font-orbitron uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-[#e8a020]"
         >
           {EQUIPMENT_OPTIONS.map((o) => (
             <option key={o.id} value={o.id}>

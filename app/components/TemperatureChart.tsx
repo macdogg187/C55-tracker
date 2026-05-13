@@ -138,25 +138,25 @@ export function TemperatureChart({ series }: Props) {
       width: el.clientWidth,
       height: 200,
       layout: {
-        background: { color: "#040a14" },
-        textColor: "#94a3b8",
+        background: { color: "#1c1814" },
+        textColor: "#8a7a60",
         fontSize: 11,
       },
       grid: {
-        vertLines: { color: "#0d1929" },
-        horzLines: { color: "#0d1929" },
+        vertLines: { color: "#2e2820" },
+        horzLines: { color: "#2e2820" },
       },
       crosshair: {
         mode: CrosshairMode.Normal,
-        vertLine: { color: "#334155", width: 1, style: 1, labelBackgroundColor: "#1e293b" },
-        horzLine: { color: "#334155", width: 1, style: 1, labelBackgroundColor: "#1e293b" },
+        vertLine: { color: "#4a3c28", width: 1, style: 1, labelBackgroundColor: "#2e2820" },
+        horzLine: { color: "#4a3c28", width: 1, style: 1, labelBackgroundColor: "#2e2820" },
       },
       rightPriceScale: {
-        borderColor: "#1f2937",
+        borderColor: "#2e2820",
         scaleMargins: { top: 0.08, bottom: 0.04 },
       },
       timeScale: {
-        borderColor: "#1f2937",
+        borderColor: "#2e2820",
         timeVisible: false,
         tickMarkFormatter: (t: UTCTimestamp) => `${Math.round((t as number) / 60)} min`,
       },
@@ -174,7 +174,7 @@ export function TemperatureChart({ series }: Props) {
     // Reference lines for warn / crit thresholds
     histSeries.createPriceLine({
       price: WARN,
-      color: "rgba(245,158,11,0.5)",
+      color: "rgba(200,90,16,0.6)",
       lineWidth: 1,
       lineStyle: 2,
       axisLabelVisible: true,
@@ -182,7 +182,7 @@ export function TemperatureChart({ series }: Props) {
     });
     histSeries.createPriceLine({
       price: CRIT,
-      color: "rgba(244,63,94,0.5)",
+      color: "rgba(204,51,17,0.6)",
       lineWidth: 1,
       lineStyle: 2,
       axisLabelVisible: true,
@@ -195,10 +195,10 @@ export function TemperatureChart({ series }: Props) {
         value: p.maxSlope,
         color:
           p.maxSlope >= CRIT
-            ? "#f43f5e"
+            ? "#cc3311"
             : p.maxSlope >= WARN
-            ? "#f59e0b"
-            : "#22c55e",
+            ? "#c85a10"
+            : "#6ab04c",
       })),
     );
 
@@ -235,24 +235,24 @@ export function TemperatureChart({ series }: Props) {
       if (!pt) { tooltip.style.display = "none"; return; }
 
       const sensorLine = (label: string, val: number, isWorst: boolean) => {
-        const color = isWorst ? "#f59e0b" : "#94a3b8";
+        const color = isWorst ? "#e8a020" : "#5a4a38";
         return `<div style="display:flex;align-items:center;gap:6px">
           <span style="color:${color};font-family:monospace">${label}</span>
-          <span style="color:#e2e8f0;font-family:monospace">${val.toFixed(3)} °C/min</span>
+          <span style="color:#f0dfc0;font-family:monospace">${val.toFixed(3)} °C/min</span>
         </div>`;
       };
 
       const worstVal = pt.maxSlope;
       tooltip.innerHTML = `
-        <div style="color:#64748b;font-size:10px;margin-bottom:3px">
-          Active runtime: ${pt.cumulativeMin.toFixed(1)} min
+        <div style="color:#5a4a38;font-size:10px;margin-bottom:3px;font-family:monospace;letter-spacing:0.1em">
+          RUNTIME: ${pt.cumulativeMin.toFixed(1)} min
         </div>
         ${sensorLine("T01", pt.slopeT01, pt.slopeT01 === worstVal && worstVal > 0)}
         ${sensorLine("T02", pt.slopeT02, pt.slopeT02 === worstVal && worstVal > 0)}
         ${sensorLine("T03", pt.slopeT03, pt.slopeT03 === worstVal && worstVal > 0)}
-        <div style="display:flex;align-items:center;gap:6px;border-top:1px solid #1e293b;margin-top:4px;padding-top:4px">
-          <span style="color:#f59e0b;font-family:monospace">max</span>
-          <span style="color:#e2e8f0;font-family:monospace">${worstVal.toFixed(3)} °C/min</span>
+        <div style="display:flex;align-items:center;gap:6px;border-top:1px solid #2e2820;margin-top:4px;padding-top:4px">
+          <span style="color:#c85a10;font-family:monospace">MAX</span>
+          <span style="color:#f0dfc0;font-family:monospace">${worstVal.toFixed(3)} °C/min</span>
         </div>
       `;
 
@@ -266,6 +266,7 @@ export function TemperatureChart({ series }: Props) {
       const top = py + 14 + ttH > el.clientHeight ? py - 14 - ttH : py + 14;
       tooltip.style.left = `${left}px`;
       tooltip.style.top = `${top}px`;
+      tooltip.style.borderColor = "#e8a020";
     });
 
     // ── Resize observer ──────────────────────────────────────────────────────
@@ -285,41 +286,41 @@ export function TemperatureChart({ series }: Props) {
 
   if (!hasTempData) {
     return (
-      <div className="flex h-40 items-center justify-center rounded-xl border border-zinc-800 bg-zinc-950/40 text-sm text-zinc-500">
-        No seal-temperature data — re-run <code className="mx-1 font-mono text-zinc-400">python data_pipeline.py</code> to populate T01–T03.
+      <div className="flex h-40 items-center justify-center border-2 border-[#2e2820] bg-[#1c1814] font-mono text-sm text-[#5a4a38]">
+        NO SEAL-TEMP DATA — RUN <code className="mx-1 text-[#8a7a60]">python data_pipeline.py</code> TO POPULATE T01–T03
       </div>
     );
   }
 
   if (slopePoints.length === 0) {
     return (
-      <div className="flex h-40 items-center justify-center rounded-xl border border-zinc-800 bg-zinc-950/40 text-sm text-zinc-500">
-        No active-run temperature samples available.
+      <div className="flex h-40 items-center justify-center border-2 border-[#2e2820] bg-[#1c1814] font-mono text-sm text-[#5a4a38]">
+        NO ACTIVE-RUN TEMPERATURE SAMPLES AVAILABLE
       </div>
     );
   }
 
   return (
-    <div className="rounded-xl border border-zinc-800 bg-[#040a14] p-3">
+    <div className="border-2 border-[#2e2820] bg-[#1c1814] p-3">
       {/* Header */}
       <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-xs">
         <div>
-          <div className="font-mono uppercase tracking-[0.18em] text-orange-400">
+          <div className="font-orbitron uppercase tracking-[0.18em] text-[#c85a10]">
             Seal Temperature Slope · dT/dt
           </div>
-          <div className="mt-0.5 text-[10px] text-zinc-500">
+          <div className="mt-0.5 font-mono text-[10px] text-[#5a4a38]">
             Active runs only · x-axis = cumulative P01 runtime (min) · worst-case rise rate across T01–T03
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-3 text-[10px] text-zinc-400">
-          <LegendSwatch color="#22c55e" label={`< ${LOGIC.TEMP_SLOPE_WARN_CPM} °C/min`} />
-          <LegendSwatch color="#f59e0b" label={`≥ ${LOGIC.TEMP_SLOPE_WARN_CPM} °C/min`} />
-          <LegendSwatch color="#f43f5e" label={`≥ ${LOGIC.TEMP_SLOPE_CRIT_CPM} °C/min`} />
+        <div className="flex flex-wrap items-center gap-3 font-mono text-[10px] text-[#8a7a60]">
+          <LegendSwatch color="#6ab04c" label={`< ${LOGIC.TEMP_SLOPE_WARN_CPM} °C/min`} />
+          <LegendSwatch color="#c85a10" label={`≥ ${LOGIC.TEMP_SLOPE_WARN_CPM} °C/min`} />
+          <LegendSwatch color="#cc3311" label={`≥ ${LOGIC.TEMP_SLOPE_CRIT_CPM} °C/min`} />
         </div>
       </div>
 
       {/* Chart */}
-      <div className="relative overflow-hidden rounded-lg">
+      <div className="relative overflow-hidden">
         <div ref={containerRef} />
         <div
           ref={tooltipRef}
@@ -329,18 +330,19 @@ export function TemperatureChart({ series }: Props) {
             minWidth: 200,
             zIndex: 10,
             pointerEvents: "none",
-            background: "rgba(15,23,42,0.95)",
-            border: "1px solid #334155",
-            borderRadius: 6,
+            background: "#0e0c0a",
+            border: "1px solid #e8a020",
+            borderRadius: 0,
             padding: "8px 10px",
             lineHeight: "1.55",
             fontSize: 11,
-            boxShadow: "0 4px 12px rgba(0,0,0,0.5)",
+            fontFamily: "monospace",
+            boxShadow: "0 4px 16px rgba(0,0,0,0.7)",
           }}
         />
       </div>
 
-      <div className="mt-1.5 text-[9px] text-zinc-600">
+      <div className="mt-1.5 font-mono text-[9px] text-[#4a3c28]">
         ↑ dT/dt (°C/min) · right axis · hover for per-sensor breakdown
       </div>
     </div>
@@ -350,7 +352,7 @@ export function TemperatureChart({ series }: Props) {
 function LegendSwatch({ color, label }: { color: string; label: string }) {
   return (
     <span className="inline-flex items-center gap-1.5">
-      <span className="inline-block h-2 w-3 rounded-sm" style={{ background: color }} />
+      <span className="inline-block h-2 w-3" style={{ background: color }} />
       {label}
     </span>
   );
