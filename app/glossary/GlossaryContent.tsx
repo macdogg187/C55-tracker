@@ -1,151 +1,136 @@
 "use client";
 
-import { isValidElement, type ReactNode } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import rehypeSlug from "rehype-slug";
 import type { Components } from "react-markdown";
 
-function textFromNode(node: ReactNode): string {
-  if (typeof node === "string" || typeof node === "number") {
-    return String(node);
-  }
-  if (Array.isArray(node)) {
-    return node.map(textFromNode).join("");
-  }
-  if (isValidElement<{ children?: ReactNode }>(node)) {
-    return textFromNode(node.props.children);
-  }
-  return "";
-}
-
-function githubHeadingBaseId(children: ReactNode): string {
-  return textFromNode(children)
-    .trim()
-    .toLowerCase()
-    .replace(/\s/g, "-")
-    .replace(/[^\w-]/g, "");
-}
-
 function glossaryComponents(): Components {
-  const usedHeadingIds = new Map<string, number>();
-  const headingId = (children: ReactNode) => {
-    const baseId = githubHeadingBaseId(children);
-    const count = usedHeadingIds.get(baseId) ?? 0;
-    usedHeadingIds.set(baseId, count + 1);
-    return count === 0 ? baseId : `${baseId}-${count}`;
-  };
-
   return {
-  h1: ({ children }) => (
-    <h1
-      id={headingId(children)}
-      className="mb-6 scroll-mt-6 text-3xl font-bold tracking-tight text-zinc-100"
-    >
-      {children}
-    </h1>
-  ),
-  h2: ({ children }) => (
-    <h2
-      id={headingId(children)}
-      className="mb-3 mt-10 scroll-mt-6 text-xl font-semibold text-cyan-300 first:mt-0"
-    >
-      {children}
-    </h2>
-  ),
-  h3: ({ children }) => (
-    <h3
-      id={headingId(children)}
-      className="mb-2 mt-6 scroll-mt-6 text-base font-semibold text-zinc-200"
-    >
-      {children}
-    </h3>
-  ),
-  h4: ({ children }) => (
-    <h4
-      id={headingId(children)}
-      className="mb-1.5 mt-4 scroll-mt-6 text-sm font-semibold uppercase tracking-widest text-zinc-400"
-    >
-      {children}
-    </h4>
-  ),
-  p: ({ children }) => (
-    <p className="mb-4 leading-relaxed text-zinc-300">{children}</p>
-  ),
-  a: ({ href, children }) => (
-    <a
-      href={href}
-      className="text-cyan-400 underline underline-offset-2 hover:text-cyan-300"
-      target={href?.startsWith("http") ? "_blank" : undefined}
-      rel={href?.startsWith("http") ? "noopener noreferrer" : undefined}
-    >
-      {children}
-    </a>
-  ),
-  ul: ({ children }) => (
-    <ul className="mb-4 ml-5 list-disc space-y-1.5 text-zinc-300">{children}</ul>
-  ),
-  ol: ({ children }) => (
-    <ol className="mb-4 ml-5 list-decimal space-y-1.5 text-zinc-300">{children}</ol>
-  ),
-  li: ({ children }) => <li className="leading-relaxed">{children}</li>,
-  blockquote: ({ children }) => (
-    <blockquote className="my-4 border-l-4 border-amber-600/60 bg-amber-950/20 px-4 py-3 text-sm text-amber-200 [&>p]:mb-0">
-      {children}
-    </blockquote>
-  ),
-  code: ({ className, children, ...props }) => {
-    const isBlock = className?.includes("language-");
-    if (isBlock) {
+    h1: ({ id, children }) => (
+      <h1
+        id={id}
+        className="mb-6 scroll-mt-6 text-3xl font-bold tracking-tight text-zinc-100"
+      >
+        {children}
+      </h1>
+    ),
+    h2: ({ id, children }) => (
+      <h2
+        id={id}
+        className="mb-3 mt-10 scroll-mt-6 text-xl font-semibold text-cyan-300 first:mt-0"
+      >
+        {children}
+      </h2>
+    ),
+    h3: ({ id, children }) => (
+      <h3
+        id={id}
+        className="mb-2 mt-6 scroll-mt-6 text-base font-semibold text-zinc-200"
+      >
+        {children}
+      </h3>
+    ),
+    h4: ({ id, children }) => (
+      <h4
+        id={id}
+        className="mb-1.5 mt-4 scroll-mt-6 text-sm font-semibold uppercase tracking-widest text-zinc-400"
+      >
+        {children}
+      </h4>
+    ),
+    p: ({ children }) => (
+      <p className="mb-4 leading-relaxed text-zinc-300">{children}</p>
+    ),
+    a: ({ href, children }) => {
+      const isInternalHash = href?.startsWith("#");
+
+      return (
+        <a
+          href={href}
+          className="text-cyan-400 underline underline-offset-2 hover:text-cyan-300"
+          target={!isInternalHash && href?.startsWith("http") ? "_blank" : undefined}
+          rel={!isInternalHash && href?.startsWith("http") ? "noopener noreferrer" : undefined}
+          onClick={(e) => {
+            if (isInternalHash) {
+              const el = document.getElementById(href.slice(1));
+              if (el) {
+                e.preventDefault();
+                el.scrollIntoView({ behavior: "smooth" });
+                window.history.pushState(null, "", href);
+              }
+            }
+          }}
+        >
+          {children}
+        </a>
+      );
+    },
+    ul: ({ children }) => (
+      <ul className="mb-4 ml-5 list-disc space-y-1.5 text-zinc-300">{children}</ul>
+    ),
+    ol: ({ children }) => (
+      <ol className="mb-4 ml-5 list-decimal space-y-1.5 text-zinc-300">{children}</ol>
+    ),
+    li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+    blockquote: ({ children }) => (
+      <blockquote className="my-4 border-l-4 border-amber-600/60 bg-amber-950/20 px-4 py-3 text-sm text-amber-200 [&>p]:mb-0">
+        {children}
+      </blockquote>
+    ),
+    code: ({ className, children, ...props }) => {
+      const isBlock = className?.includes("language-");
+      if (isBlock) {
+        return (
+          <code
+            className="block overflow-x-auto whitespace-pre rounded-lg border border-zinc-700 bg-zinc-900 p-4 font-mono text-sm leading-relaxed text-zinc-200"
+            {...props}
+          >
+            {children}
+          </code>
+        );
+      }
       return (
         <code
-          className="block overflow-x-auto whitespace-pre rounded-lg border border-zinc-700 bg-zinc-900 p-4 font-mono text-sm leading-relaxed text-zinc-200"
+          className="rounded bg-zinc-800 px-1.5 py-0.5 font-mono text-[0.8em] text-cyan-300"
           {...props}
         >
           {children}
         </code>
       );
-    }
-    return (
-      <code
-        className="rounded bg-zinc-800 px-1.5 py-0.5 font-mono text-[0.8em] text-cyan-300"
-        {...props}
-      >
+    },
+    pre: ({ children }) => (
+      <pre className="mb-4 mt-1 overflow-x-auto rounded-lg border border-zinc-700 bg-zinc-900">
         {children}
-      </code>
-    );
-  },
-  pre: ({ children }) => (
-    <pre className="mb-4 mt-1 overflow-x-auto rounded-lg border border-zinc-700 bg-zinc-900">
-      {children}
-    </pre>
-  ),
-  table: ({ children }) => (
-    <div className="mb-6 overflow-x-auto rounded-lg border border-zinc-700">
-      <table className="w-full border-collapse text-sm">{children}</table>
-    </div>
-  ),
-  thead: ({ children }) => (
-    <thead className="bg-zinc-800/80 text-zinc-300">{children}</thead>
-  ),
-  tbody: ({ children }) => (
-    <tbody className="divide-y divide-zinc-800">{children}</tbody>
-  ),
-  tr: ({ children }) => (
-    <tr className="transition-colors hover:bg-zinc-800/40">{children}</tr>
-  ),
-  th: ({ children }) => (
-    <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-zinc-400">
-      {children}
-    </th>
-  ),
-  td: ({ children }) => (
-    <td className="px-4 py-2.5 text-zinc-300">{children}</td>
-  ),
-  hr: () => <hr className="my-8 border-zinc-800" />,
-  strong: ({ children }) => (
-    <strong className="font-semibold text-zinc-100">{children}</strong>
-  ),
-  em: ({ children }) => <em className="italic text-zinc-300">{children}</em>,
+      </pre>
+    ),
+    table: ({ children }) => (
+      <div className="mb-6 overflow-x-auto rounded-lg border border-zinc-700">
+        <table className="w-full border-collapse text-sm">{children}</table>
+      </div>
+    ),
+    thead: ({ children }) => (
+      <thead className="bg-zinc-800/80 text-zinc-300">{children}</thead>
+    ),
+    tbody: ({ children }) => (
+      <tbody className="divide-y divide-zinc-800">{children}</tbody>
+    ),
+    tr: ({ children }) => (
+      <tr className="transition-colors hover:bg-zinc-800/40">{children}</tr>
+    ),
+    th: ({ children }) => (
+      <th className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-zinc-400">
+        {children}
+      </th>
+    ),
+    td: ({ children }) => (
+      <td className="px-4 py-2.5 text-zinc-300">{children}</td>
+    ),
+    hr: () => <hr className="my-8 border-zinc-800" />,
+    strong: ({ children }) => (
+      <strong className="font-semibold text-zinc-100">{children}</strong>
+    ),
+    em: ({ children }) => <em className="italic text-zinc-300">{children}</em>,
   };
 }
 
@@ -154,7 +139,11 @@ export function GlossaryContent({ markdown }: { markdown: string }) {
 
   return (
     <article>
-      <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        rehypePlugins={[rehypeSlug]}
+        components={components}
+      >
         {markdown}
       </ReactMarkdown>
     </article>
