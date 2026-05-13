@@ -103,11 +103,15 @@ class PartRecord:
     serial_number: str
     installation_date: str
     removal_date: str | None
+    effective_installation_date: str
+    effective_removal_date: str | None
+    boundary_source: dict   # {install: "gap"|"tracker_fallback", removal: "gap"|"tracker_fallback"|"open"}
     active_runtime_minutes: int
     high_stress_minutes: int
+    out_of_band_minutes: int
     cumulative_pressure_stress: float
     inferred_failures: int
-    expected_mtbf_minutes: int
+    expected_mtbf_minutes: int | None
     inspection_threshold_min: int | None
     failure_threshold_min: int | None
     health: str   # nominal | watch | critical
@@ -264,6 +268,89 @@ def detect_off_windows(
     return [(timestamps.iloc[i - 1], timestamps.iloc[i]) for i in gap_idx]
 
 
+def resolve_lifecycle_boundaries(
+    lifecycles: list[dict],
+    off_gaps: list[tuple[pd.Timestamp, pd.Timestamp]],
+    tolerance_days: float = 7.0,
+) -> dict[str, dict]:
+    """Snap tracker-entered install/removal dates to detected off-gaps.
+
+    Each lifecycle dict must contain:
+        installation_id  : str
+        installation_date: pd.Timestamp
+        removal_date     : pd.Timestamp | None
+
+    Returns a dict keyed by installation_id with:
+        effective_install_dt : pd.Timestamp
+        effective_removal_dt : pd.Timestamp | None
+        boundary_source      : dict with 'install' and 'removal' keys
+    """
+    tolerance = pd.Timedelta(days=tolerance_days)
+
+    def _nearest_gap(target: pd.Timestamp):
+        """Return the gap whose midpoint is closest to target, or None."""
+        if not off_gaps:
+            return None
+        best = None
+        best_dist = None
+        for g0, g1 in off_gaps:
+            mid = g0 + (g1 - g0) / 2
+            dist = abs((mid - target).total_seconds())
+            if best_dist is None or dist < best_dist:
+                best_dist = dist
+                best = (g0, g1)
+        return best, best_dist
+
+    result: dict[str, dict] = {}
+    for lc in lifecycles:
+        inst_id = lc["installation_id"]
+        tracker_install = lc["installation_date"]
+        tracker_removal = lc.get("removal_date")  # None if still installed
+
+        # ── Install boundary ─────────────────────────────────────────────
+        gap_result = _nearest_gap(tracker_install)
+        if gap_result and gap_result[0] is not None:
+            nearest, dist = gap_result
+            g0, g1 = nearest
+            mid = g0 + (g1 - g0) / 2
+            if abs((mid - tracker_install).total_seconds()) <= tolerance.total_seconds():
+                effective_install = g1  # machine came back up after swap
+                install_source = "gap"
+            else:
+                effective_install = tracker_install
+                install_source = "tracker_fallback"
+        else:
+            effective_install = tracker_install
+            install_source = "tracker_fallback"
+
+        # ── Removal boundary ─────────────────────────────────────────────
+        if tracker_removal is None or pd.isna(tracker_removal):
+            effective_removal = None
+            removal_source = "open"
+        else:
+            gap_result = _nearest_gap(tracker_removal)
+            if gap_result and gap_result[0] is not None:
+                nearest, _ = gap_result
+                g0, g1 = nearest
+                mid = g0 + (g1 - g0) / 2
+                if abs((mid - tracker_removal).total_seconds()) <= tolerance.total_seconds():
+                    effective_removal = g0  # machine went down for the swap
+                    removal_source = "gap"
+                else:
+                    effective_removal = tracker_removal
+                    removal_source = "tracker_fallback"
+            else:
+                effective_removal = tracker_removal
+                removal_source = "tracker_fallback"
+
+        result[inst_id] = {
+            "effective_install_dt": effective_install,
+            "effective_removal_dt": effective_removal,
+            "boundary_source": {"install": install_source, "removal": removal_source},
+        }
+    return result
+
+
 def tag_samples(df: pd.DataFrame) -> pd.DataFrame:
     """
     Annotate each sample with its Logic-Doc status.
@@ -359,7 +446,7 @@ def classify_health(
     return "nominal", None
 
 
-def part_thresholds(part_name: str, expected_mtbf: float) -> tuple[int, int | None, int | None]:
+def part_thresholds(part_name: str, expected_mtbf: float | None) -> tuple[int | None, int | None, int | None]:
     """Heuristic mapping from part_name → catalog code → thresholds."""
     n = part_name.lower()
     code = None
@@ -371,7 +458,8 @@ def part_thresholds(part_name: str, expected_mtbf: float) -> tuple[int, int | No
         code = "PB"
     insp = ALERT_INSPECTION_MIN.get(code) if code else None
     fail = ALERT_FAILURE_MIN.get(code) if code else None
-    return int(round(expected_mtbf)), insp, fail
+    mtbf_int = int(round(expected_mtbf)) if expected_mtbf is not None else None
+    return mtbf_int, insp, fail
 
 
 def compute_part_metrics(
@@ -385,24 +473,45 @@ def compute_part_metrics(
 
     is_active = sensor["is_active"].to_numpy()
     is_stress = sensor["is_high_stress"].to_numpy()
+    is_oob = sensor["is_out_of_band"].to_numpy()
     p01 = sensor["P01"].to_numpy()
     ts = sensor["timestamp"]
 
+    # Resolve effective boundaries for all lifecycles using off-gap data.
+    lc_list = [
+        {
+            "installation_id": str(row.installation_id),
+            "installation_date": row.installation_date,
+            "removal_date": row.removal_date if pd.notna(row.removal_date) else None,
+        }
+        for row in mtbf.itertuples(index=False)
+    ]
+    resolved = resolve_lifecycle_boundaries(lc_list, off_gaps)
+
     records: list[PartRecord] = []
     for row in mtbf.itertuples(index=False):
-        install_dt = row.installation_date
-        removal_dt = row.removal_date if pd.notna(row.removal_date) else sensor_max
+        inst_id = str(row.installation_id)
+        r = resolved.get(inst_id, {})
+        install_dt = r.get("effective_install_dt") or row.installation_date
+        has_removal = pd.notna(row.removal_date)
+        if r.get("effective_removal_dt") is not None:
+            removal_dt = r["effective_removal_dt"]
+        else:
+            removal_dt = sensor_max
 
         in_window = (ts >= install_dt) & (ts <= removal_dt)
         in_window_arr = in_window.to_numpy()
 
-        active_samples = int((is_active & in_window_arr).sum())
+        # out_of_band also counts toward active runtime (machine running at over-pressure).
+        active_samples = int(((is_active | is_oob) & in_window_arr).sum())
         stress_samples = int((is_stress & in_window_arr).sum())
+        oob_samples = int((is_oob & in_window_arr).sum())
         active_minutes = active_samples * sample_min
         stress_minutes = stress_samples * sample_min
+        oob_minutes = oob_samples * sample_min
 
         # Cumulative pressure-stress proxy: ∫ max(P01 - LOW, 0) dt
-        active_p = p01[(is_active | is_stress) & in_window_arr]
+        active_p = p01[(is_active | is_stress | is_oob) & in_window_arr]
         cum_stress = float(np.maximum(active_p - ACTIVE_BAND_LOW_KPSI, 0).sum() * sample_min)
 
         # Reconcile inferred failure-gaps that overlap the install window.
@@ -413,20 +522,29 @@ def compute_part_metrics(
 
         expected_mtbf = (
             float(row.expected_mtbf_minutes)
-            if pd.notna(row.expected_mtbf_minutes) else 12000.0
+            if pd.notna(row.expected_mtbf_minutes) else None
         )
         mtbf_int, insp, fail = part_thresholds(row.part_name, expected_mtbf)
         health, alert = classify_health(active_minutes, expected_mtbf, insp, fail)
 
+        boundary_source = r.get("boundary_source", {
+            "install": "tracker_fallback",
+            "removal": "open" if not has_removal else "tracker_fallback",
+        })
+
         records.append(
             PartRecord(
-                installation_id=str(row.installation_id),
+                installation_id=inst_id,
                 part_name=str(row.part_name).title(),
                 serial_number=str(row.serial_number) if row.serial_number else "",
-                installation_date=install_dt.isoformat(),
-                removal_date=removal_dt.isoformat() if pd.notna(row.removal_date) else None,
+                installation_date=row.installation_date.isoformat(),
+                removal_date=row.removal_date.isoformat() if has_removal else None,
+                effective_installation_date=install_dt.isoformat(),
+                effective_removal_date=removal_dt.isoformat() if has_removal else None,
+                boundary_source=boundary_source,
                 active_runtime_minutes=int(round(active_minutes)),
                 high_stress_minutes=int(round(stress_minutes)),
+                out_of_band_minutes=int(round(oob_minutes)),
                 cumulative_pressure_stress=round(cum_stress, 2),
                 inferred_failures=inferred,
                 expected_mtbf_minutes=mtbf_int,

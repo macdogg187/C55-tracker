@@ -82,17 +82,17 @@ function RuntimeGauge({
   failure,
 }: {
   runtime: number;
-  mtbf: number;
+  mtbf: number | null;
   inspection: number | null;
   failure: number | null;
 }) {
-  const ceiling = failure ?? mtbf;
-  const pct = Math.min((runtime / ceiling) * 100, 100);
+  const ceiling = failure ?? mtbf ?? null;
+  const pct = ceiling != null ? Math.min((runtime / ceiling) * 100, 100) : null;
   const radius = 38;
   const C = 2 * Math.PI * radius;
-  const off = C - (pct / 100) * C;
+  const off = C - ((pct ?? 0) / 100) * C;
   const stroke =
-    pct >= 85 ? "#fb7185" : pct >= 60 ? "#f59e0b" : "#22d3ee";
+    pct == null ? "#4b5563" : pct >= 85 ? "#fb7185" : pct >= 60 ? "#f59e0b" : "#22d3ee";
 
   return (
     <div className="relative h-24 w-24 shrink-0">
@@ -110,12 +110,12 @@ function RuntimeGauge({
           strokeDashoffset={off}
           transform="rotate(-90 50 50)"
         />
-        {inspection && ceiling > 0 && (
+        {inspection != null && ceiling != null && ceiling > 0 && (
           <InspectionTick angle={(inspection / ceiling) * 360} />
         )}
       </svg>
       <div className="pointer-events-none absolute inset-0 flex items-center justify-center text-xs font-semibold text-zinc-200">
-        {pct.toFixed(0)}%
+        {pct != null ? `${pct.toFixed(0)}%` : "—"}
       </div>
     </div>
   );

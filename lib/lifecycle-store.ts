@@ -36,12 +36,22 @@ export type Lifecycle = {
   installation_id: string;
   serial_number: string;
   is_refurb: boolean;
-  installation_date: string;        // ISO
-  removal_date: string | null;      // ISO or null
+  installation_date: string;        // ISO — tracker-entered
+  removal_date: string | null;      // ISO or null — tracker-entered
+  /** Effective install date after gap-snapping. Defaults to installation_date when not yet resolved. */
+  effective_installation_date: string;
+  /** Effective removal date after gap-snapping. Null while still installed. */
+  effective_removal_date: string | null;
+  /** How each boundary was resolved. */
+  boundary_source: {
+    install: "gap" | "tracker_fallback";
+    removal: "gap" | "tracker_fallback" | "open";
+  };
   failure_mode: FailureMode | null;
   failure_notes: string | null;
   active_runtime_minutes: number;
   high_stress_minutes: number;
+  out_of_band_minutes: number;
   cumulative_pressure_stress: number;
   inferred_failures: number;
   archived_at: string | null;
@@ -174,17 +184,29 @@ async function writeLocal(snapshot: StoreSnapshot): Promise<void> {
 }
 
 function normaliseLifecycle(raw: Partial<Lifecycle>): Lifecycle {
+  const installDate = raw.installation_date ?? new Date().toISOString();
+  const removalDate = raw.removal_date ?? null;
   return {
     id: raw.id ?? randomUUID(),
     installation_id: raw.installation_id ?? "",
     serial_number: raw.serial_number ?? "",
     is_refurb: raw.is_refurb ?? false,
-    installation_date: raw.installation_date ?? new Date().toISOString(),
-    removal_date: raw.removal_date ?? null,
+    installation_date: installDate,
+    removal_date: removalDate,
+    // Default effective dates to tracker dates until a pipeline run resolves them.
+    effective_installation_date: raw.effective_installation_date ?? installDate,
+    effective_removal_date: raw.effective_removal_date !== undefined
+      ? raw.effective_removal_date
+      : removalDate,
+    boundary_source: raw.boundary_source ?? {
+      install: "tracker_fallback",
+      removal: removalDate ? "tracker_fallback" : "open",
+    },
     failure_mode: raw.failure_mode ?? null,
     failure_notes: raw.failure_notes ?? null,
     active_runtime_minutes: raw.active_runtime_minutes ?? 0,
     high_stress_minutes: raw.high_stress_minutes ?? 0,
+    out_of_band_minutes: raw.out_of_band_minutes ?? 0,
     cumulative_pressure_stress: raw.cumulative_pressure_stress ?? 0,
     inferred_failures: raw.inferred_failures ?? 0,
     archived_at: raw.archived_at ?? null,
@@ -543,11 +565,16 @@ class LocalJsonStore implements LifecycleStore {
         ...lc,
         active_runtime_minutes: Math.max(lc.active_runtime_minutes, m.active_runtime_minutes),
         high_stress_minutes: Math.max(lc.high_stress_minutes, m.high_stress_minutes),
+        out_of_band_minutes: Math.max(lc.out_of_band_minutes ?? 0, m.out_of_band_minutes),
         cumulative_pressure_stress: Math.max(
           lc.cumulative_pressure_stress,
           m.cumulative_pressure_stress,
         ),
         inferred_failures: Math.max(lc.inferred_failures, m.inferred_failures),
+        // Always overwrite boundary data with the latest pipeline result.
+        effective_installation_date: m.effective_installation_date,
+        effective_removal_date: m.effective_removal_date,
+        boundary_source: m.boundary_source,
       };
       updated += 1;
     }

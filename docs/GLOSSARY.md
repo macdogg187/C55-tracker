@@ -80,7 +80,7 @@ P01 < 15.0 kpsi
 |---|---|
 | `active` | Machine running within the normal operating envelope. Time in this state accumulates toward `active_runtime_minutes`. |
 | `high_stress` | Machine running but pressure is fluctuating unusually hard (pulsation). Time here accumulates toward both `active_runtime_minutes` AND `high_stress_minutes`. |
-| `out_of_band` | Pressure exceeded the active band ceiling — abnormal over-pressure condition. Tracked separately as `out_of_band_minutes`. Does **not** accumulate toward part active runtime. |
+| `out_of_band` | Pressure exceeded the active band ceiling — abnormal over-pressure condition. Tracked separately as `out_of_band_minutes`. Also accumulates toward `active_runtime_minutes` because the machine is running (at over-pressure) and parts are wearing. |
 | `below_active` | Machine is off, ramping up, or in a cleaning/maintenance phase. Does not accumulate runtime. |
 
 ### Rolling stdev calculation

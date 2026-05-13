@@ -17,7 +17,9 @@ import {
   binFatigueSeries,
   computeCumulativeStress,
   LOGIC,
+  type CumulativeStressPoint,
   type FatigueSample,
+  type PartRecord,
   type RunRecord,
   type WindowSpan,
 } from "@/lib/analytics";
@@ -27,6 +29,7 @@ type Props = {
   highStress: WindowSpan[];
   offWindows: WindowSpan[];
   runs?: RunRecord[];
+  parts?: PartRecord[];
 };
 
 function toUTC(ts: string): UTCTimestamp {
@@ -51,7 +54,7 @@ function toUTC(ts: string): UTCTimestamp {
  * Supports zoom / pan (scroll wheel + drag) and a hover crosshair
  * tooltip showing exact P01, σ, and cumulative stress at any point.
  */
-export function FatigueChart({ series, runs }: Props) {
+export function FatigueChart({ series, runs, parts }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
@@ -68,7 +71,10 @@ export function FatigueChart({ series, runs }: Props) {
   );
 
   const binned = useMemo(() => binFatigueSeries(active, 600), [active]);
-  const cumStress = useMemo(() => computeCumulativeStress(binned), [binned]);
+  const cumStress = useMemo(
+    () => computeCumulativeStress(binned, LOGIC.ACTIVE_BAND_LOW_KPSI, parts),
+    [binned, parts],
+  );
 
   useEffect(() => {
     const el = containerRef.current;
@@ -128,14 +134,13 @@ export function FatigueChart({ series, runs }: Props) {
       crosshairMarkerBackgroundColor: "#22d3ee",
     });
 
-    const sigmaS = chart.addSeries(LineSeries, {
+    const sigmaS = chart.addSeries(HistogramSeries, {
       color: "rgba(251,113,133,0.75)",
-      lineWidth: 1,
+      base: 0,
       title: "σ",
       priceScaleId: "left",
       lastValueVisible: false,
       priceLineVisible: false,
-      crosshairMarkerVisible: false,
     });
 
     // Reference lines
@@ -168,7 +173,7 @@ export function FatigueChart({ series, runs }: Props) {
     p01S.setData(binned.map((s) => ({ time: toUTC(s.ts), value: s.p01 })));
     sigmaS.setData(binned.map((s) => ({ time: toUTC(s.ts), value: s.stdev })));
 
-    // ── Series markers: run starts + high-stress / out-of-band points ──────
+    // ── Series markers: run starts + high-stress / out-of-band + part lifecycle ──
 
     const markers: SeriesMarker<UTCTimestamp>[] = [];
 
@@ -205,6 +210,47 @@ export function FatigueChart({ series, runs }: Props) {
       }
     }
 
+    if (parts && parts.length > 0) {
+      for (const part of parts) {
+        // Use gap-snapped effective dates if available, fall back to tracker dates.
+        const installDate = part.effective_installation_date ?? part.installation_date;
+        const removalDate = part.effective_removal_date ?? part.removal_date;
+        const isFallbackInstall = part.boundary_source?.install === "tracker_fallback";
+
+        // Installation marker — muted colour when boundary is a tracker fallback.
+        markers.push({
+          time: toUTC(installDate),
+          position: "belowBar",
+          color: isFallbackInstall ? "#5eead4" : "#2dd4bf",
+          shape: "arrowUp",
+          text: `${part.part_name} in`,
+          size: 0.6,
+        });
+
+        if (removalDate) {
+          // Check if the removal falls inside a production run.
+          let duringRunText = "";
+          if (runs && runs.length > 0) {
+            const removalMs = new Date(removalDate).getTime();
+            const match = runs.find(
+              (r) =>
+                removalMs >= new Date(r.started_at).getTime() &&
+                removalMs <= new Date(r.ended_at).getTime(),
+            );
+            if (match) duringRunText = ` (during Run ${match.run_index + 1})`;
+          }
+          markers.push({
+            time: toUTC(removalDate),
+            position: "aboveBar",
+            color: "#a78bfa",
+            shape: "arrowDown",
+            text: `${part.part_name} out${duringRunText}`,
+            size: 0.6,
+          });
+        }
+      }
+    }
+
     markers.sort((a, b) => (a.time as number) - (b.time as number));
     createSeriesMarkers(p01S, markers);
 
@@ -222,18 +268,48 @@ export function FatigueChart({ series, runs }: Props) {
       base: 0,
     });
 
+    // Build a per-lifecycle threshold lookup (in kpsi-min, same unit as cumStress).
+    // Rate = part's observed kpsi-min per active-minute; thresholds are in minutes.
+    type PartThresholds = { inspKpsiMin: number | null; failKpsiMin: number | null };
+    const partThreshMap = new Map<string, PartThresholds>();
+    if (parts && parts.length > 0) {
+      for (const p of parts) {
+        const rate =
+          p.active_runtime_minutes > 0
+            ? p.cumulative_pressure_stress / p.active_runtime_minutes
+            : null;
+        partThreshMap.set(p.installation_id, {
+          inspKpsiMin: rate != null && p.inspection_threshold_min != null
+            ? rate * p.inspection_threshold_min
+            : null,
+          failKpsiMin: rate != null && p.failure_threshold_min != null
+            ? rate * p.failure_threshold_min
+            : null,
+        });
+      }
+    }
+
+    // Fallback: colour relative to series max (used when no threshold data exists).
     const maxStress = Math.max(1, ...cumStress.map((p) => p.value));
+
     stressSeries.setData(
-      cumStress.map((pt) => ({
-        time: toUTC(pt.ts),
-        value: pt.value,
-        color:
-          pt.value / maxStress > 0.75
-            ? "#f43f5e"
-            : pt.value / maxStress > 0.45
-              ? "#f59e0b"
-              : "#22c55e",
-      })),
+      cumStress.map((pt: CumulativeStressPoint) => {
+        const thresh = pt.installation_id ? partThreshMap.get(pt.installation_id) : undefined;
+        let color: string;
+        if (thresh?.failKpsiMin != null && pt.value >= thresh.failKpsiMin) {
+          color = "#f43f5e";
+        } else if (thresh?.inspKpsiMin != null && pt.value >= thresh.inspKpsiMin) {
+          color = "#f59e0b";
+        } else if (thresh?.inspKpsiMin != null) {
+          // Threshold data available and we're below inspection — green.
+          color = "#22c55e";
+        } else {
+          // Fallback: relative-to-max colouring when no lifecycle thresholds available.
+          const ratio = pt.value / maxStress;
+          color = ratio > 0.75 ? "#f43f5e" : ratio > 0.45 ? "#f59e0b" : "#22c55e";
+        }
+        return { time: toUTC(pt.ts), value: pt.value, color };
+      }),
     );
 
     chart.timeScale().fitContent();
@@ -353,7 +429,7 @@ export function FatigueChart({ series, runs }: Props) {
       chart.remove();
       chartRef.current = null;
     };
-  }, [binned, cumStress, runs]);
+  }, [binned, cumStress, runs, parts]);
 
   if (active.length === 0 && series.length > 0) {
     return (

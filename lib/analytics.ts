@@ -38,17 +38,31 @@ export type WindowSpan = {
   duration_min: number;
 };
 
+export type BoundarySource =
+  | "gap"              // snapped to a detected sensor off-gap
+  | "tracker_fallback" // no gap within tolerance; tracker date used as-is
+  | "open";            // still installed (no removal date)
+
 export type PartRecord = {
   installation_id: string;
   part_name: string;
   serial_number: string;
   installation_date: string;
   removal_date: string | null;
+  /** Effective install date after gap-snapping (may differ from installation_date). */
+  effective_installation_date?: string;
+  /** Effective removal date after gap-snapping (may differ from removal_date). */
+  effective_removal_date?: string | null;
+  /** How each boundary was determined. */
+  boundary_source?: {
+    install: Exclude<BoundarySource, "open">;
+    removal: BoundarySource;
+  };
   active_runtime_minutes: number;
   high_stress_minutes: number;
   cumulative_pressure_stress: number;
   inferred_failures: number;
-  expected_mtbf_minutes: number;
+  expected_mtbf_minutes: number | null;
   inspection_threshold_min: number | null;
   failure_threshold_min: number | null;
   health: "nominal" | "watch" | "critical";
@@ -138,25 +152,79 @@ export function sealWearFraction(
   return 0.5 + (0.5 * (activeMinutes - lifeLow)) / Math.max(1, lifeHigh - lifeLow);
 }
 
+export type CumulativeStressPoint = {
+  ts: string;
+  value: number;
+  /** installation_id of the part lifecycle active at this sample, if known. */
+  installation_id: string | null;
+};
+
 // Running integral of pressure stress above the active floor.
-// Returns one { ts, value } point per input sample where value is the
-// cumulative kpsi-min accumulated up to that moment.  Consecutive sample
-// gaps longer than GAP_OFF_MIN are treated as off periods and contribute 0.
+// Returns one CumulativeStressPoint per input sample.  The counter resets
+// whenever the sample's timestamp crosses a part installation boundary, so
+// each lifecycle starts from 0 — making the value directly comparable to
+// that part's per-lifecycle inspection/failure thresholds.
+//
+// If parts is omitted the counter never resets (legacy behaviour).
 export function computeCumulativeStress(
   series: FatigueSample[],
   activeFloor = LOGIC.ACTIVE_BAND_LOW_KPSI,
-): { ts: string; value: number }[] {
+  parts?: PartRecord[],
+): CumulativeStressPoint[] {
+  // Build sorted lifecycle windows from parts (most recent first for fast lookup).
+  type LifeWin = { installMs: number; removalMs: number; id: string; rate: number };
+  const windows: LifeWin[] = [];
+  if (parts && parts.length > 0) {
+    for (const p of parts) {
+      const installMs = new Date(
+        p.effective_installation_date ?? p.installation_date,
+      ).getTime();
+      const removalMs = (p.effective_removal_date ?? p.removal_date)
+        ? new Date((p.effective_removal_date ?? p.removal_date)!).getTime()
+        : Infinity;
+      // kpsi-min per active-minute: used to express threshold in same units as cumulative value.
+      const rate =
+        p.active_runtime_minutes > 0
+          ? p.cumulative_pressure_stress / p.active_runtime_minutes
+          : null;
+      if (Number.isFinite(installMs)) {
+        windows.push({ installMs, removalMs, id: p.installation_id, rate: rate ?? 0 });
+      }
+    }
+    windows.sort((a, b) => a.installMs - b.installMs);
+  }
+
+  function activePartAt(tsMs: number): LifeWin | null {
+    for (let i = windows.length - 1; i >= 0; i--) {
+      if (tsMs >= windows[i].installMs && tsMs <= windows[i].removalMs) {
+        return windows[i];
+      }
+    }
+    return null;
+  }
+
   let cumulative = 0;
+  let lastInstallId: string | null = null;
+
   return series.map((s, i) => {
+    const tsMs = new Date(s.ts).getTime();
+    const win = activePartAt(tsMs);
+
+    // Reset cumulative counter when we enter a new lifecycle.
+    if (win && win.id !== lastInstallId) {
+      cumulative = 0;
+      lastInstallId = win.id;
+    }
+
     if (i > 0) {
-      const dtMs = new Date(s.ts).getTime() - new Date(series[i - 1].ts).getTime();
+      const dtMs = tsMs - new Date(series[i - 1].ts).getTime();
       const dtMin = dtMs / 60_000;
-      // Skip gaps longer than the off-detection threshold (maintenance / off periods).
       if (dtMin <= LOGIC.GAP_OFF_MIN * 6) {
         cumulative += Math.max(0, s.p01 - activeFloor) * Math.min(dtMin, LOGIC.GAP_OFF_MIN);
       }
     }
-    return { ts: s.ts, value: cumulative };
+
+    return { ts: s.ts, value: cumulative, installation_id: win?.id ?? null };
   });
 }
 

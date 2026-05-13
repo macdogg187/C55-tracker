@@ -2,6 +2,10 @@ import "server-only";
 import Papa from "papaparse";
 import { LOGIC, type WindowSpan } from "@/lib/analytics";
 import {
+  resolveLifecycleBoundaries,
+  type OffGap,
+} from "@/lib/lifecycle-boundaries";
+import {
   DEFAULT_PASS_CONFIG,
   detectPasses,
   cumulativeRuntimeMinutes,
@@ -93,16 +97,23 @@ export type TaggedSeries = {
 
 export type LifecycleWindow = {
   installation_id: string;
-  installation_date: string;   // ISO
-  removal_date: string | null; // ISO
+  installation_date: string;   // ISO — tracker-entered date
+  removal_date: string | null; // ISO — tracker-entered date (null = still installed)
 };
 
 export type LifecycleMetrics = {
   installation_id: string;
   active_runtime_minutes: number;
   high_stress_minutes: number;
+  out_of_band_minutes: number;
   cumulative_pressure_stress: number;
   inferred_failures: number;
+  effective_installation_date: string;
+  effective_removal_date: string | null;
+  boundary_source: {
+    install: "gap" | "tracker_fallback";
+    removal: "gap" | "tracker_fallback" | "open";
+  };
 };
 
 export type PassSummary = {
@@ -597,26 +608,45 @@ export function computeTrendsMetrics(
   for (let i = 0; i < times.length; i++) {
     if (isActive[i]) activeTotal++;
     if (isHighStress[i]) stressTotal++;
-    if (isOutOfBand[i]) outOfBandTotal++;
+    if (isOutOfBand[i]) { activeTotal++; outOfBandTotal++; }
   }
 
   const sensorMaxMs = times.length ? times[times.length - 1] : Date.now();
+
+  // Resolve effective install/removal boundaries from gap data.
+  const offGapObjects: OffGap[] = offGaps.map(([s, e]) => ({ start: s, end: e }));
+  const resolvedBoundaries = resolveLifecycleBoundaries(
+    lifecycleWindows.map((w) => ({
+      installation_id: w.installation_id,
+      tracker_install_ms: new Date(w.installation_date).getTime(),
+      tracker_removal_ms: w.removal_date ? new Date(w.removal_date).getTime() : null,
+    })),
+    offGapObjects,
+  );
+  const resolvedByInstId = new Map(resolvedBoundaries.map((r) => [r.installation_id, r]));
+
   const lifecycleMetrics: LifecycleMetrics[] = [];
 
   for (const win of lifecycleWindows) {
-    const installMs = new Date(win.installation_date).getTime();
-    const removalMs = win.removal_date ? new Date(win.removal_date).getTime() : sensorMaxMs;
+    const resolved = resolvedByInstId.get(win.installation_id);
+    const installMs = resolved?.effective_install_ms ?? new Date(win.installation_date).getTime();
     if (!Number.isFinite(installMs)) continue;
+    const removalMs =
+      resolved && resolved.effective_removal_ms !== null
+        ? resolved.effective_removal_ms
+        : sensorMaxMs;
 
     let activeSamples = 0;
     let stressSamples = 0;
+    let outOfBandSamples = 0;
     let cumStress = 0;
     for (let i = 0; i < times.length; i++) {
       const t = times[i];
       if (t < installMs || t > removalMs) continue;
       if (isActive[i]) activeSamples++;
       if (isHighStress[i]) stressSamples++;
-      if (isActive[i] || isHighStress[i]) {
+      if (isOutOfBand[i]) { activeSamples++; outOfBandSamples++; }
+      if (isActive[i] || isHighStress[i] || isOutOfBand[i]) {
         cumStress += Math.max(0, p01[i] - LOGIC.ACTIVE_BAND_LOW_KPSI);
       }
     }
@@ -628,8 +658,18 @@ export function computeTrendsMetrics(
       installation_id: win.installation_id,
       active_runtime_minutes: Math.round(activeSamples * sampleMin),
       high_stress_minutes: Math.round(stressSamples * sampleMin),
+      out_of_band_minutes: Math.round(outOfBandSamples * sampleMin),
       cumulative_pressure_stress: Math.round(cumStress * sampleMin * 100) / 100,
       inferred_failures: inferred,
+      effective_installation_date: new Date(installMs).toISOString(),
+      effective_removal_date:
+        resolved?.effective_removal_ms != null
+          ? new Date(resolved.effective_removal_ms).toISOString()
+          : null,
+      boundary_source: resolved?.boundary_source ?? {
+        install: "tracker_fallback",
+        removal: win.removal_date ? "tracker_fallback" : "open",
+      },
     });
   }
 

@@ -71,7 +71,7 @@ function buildParts(
         granularRuntimeMinutes: 0,
         highStressMinutes: 0,
         cumulativePressureStress: 0,
-        expectedMtbfMinutes: catalog.expectedMtbfMinutes ?? 12000,
+        expectedMtbfMinutes: catalog.expectedMtbfMinutes ?? null,
         inspectionThresholdMin: catalog.inspectionThresholdMin ?? null,
         failureThresholdMin: catalog.failureThresholdMin ?? null,
         sealLifeLowMin: catalog.sealLifeLowMin,
@@ -97,17 +97,17 @@ function buildParts(
     const mtbf = pp?.expected_mtbf_minutes || s.expectedMtbfMinutes;
     const failure = pp?.failure_threshold_min ?? s.failureThresholdMin;
     const inspection = pp?.inspection_threshold_min ?? s.inspectionThresholdMin;
-    const ceiling = failure ?? mtbf;
-    const pct = runtime / Math.max(1, ceiling);
+    const ceiling = failure ?? mtbf ?? null;
+    const pct = ceiling != null ? runtime / Math.max(1, ceiling) : null;
     const health: PartStatus["health"] =
       (pp?.health as PartStatus["health"]) ??
       (failure && runtime >= failure
         ? "critical"
         : inspection && runtime >= inspection
           ? "watch"
-          : pct >= 0.85
+          : pct != null && pct >= 0.85
             ? "critical"
-            : pct >= 0.6
+            : pct != null && pct >= 0.6
               ? "watch"
               : "nominal");
     const alert: PartStatus["alert"] =
@@ -133,7 +133,8 @@ function buildParts(
 }
 
 function wearPct(p: PartStatus) {
-  const ceiling = p.failureThresholdMin ?? p.expectedMtbfMinutes;
+  const ceiling = p.failureThresholdMin ?? p.expectedMtbfMinutes ?? null;
+  if (ceiling == null) return null;
   return p.granularRuntimeMinutes / Math.max(1, ceiling);
 }
 
@@ -215,7 +216,7 @@ export default function ReplacePage() {
         const healthOrder = { critical: 0, watch: 1, nominal: 2 };
         const hDiff = (healthOrder[a.health] ?? 2) - (healthOrder[b.health] ?? 2);
         if (hDiff !== 0) return hDiff;
-        return wearPct(b) - wearPct(a);
+        return (wearPct(b) ?? 0) - (wearPct(a) ?? 0);
       });
   }, [parts]);
 
@@ -566,7 +567,7 @@ function PartSelectRow({
   onClick: () => void;
 }) {
   const pct = wearPct(part);
-  const pctDisplay = Math.min(100, Math.round(pct * 100));
+  const pctDisplay = pct != null ? Math.min(100, Math.round(pct * 100)) : null;
   const isFresh = !part.serialNumber;
 
   const borderColor =
@@ -588,13 +589,15 @@ function PartSelectRow({
         {!isFresh && (
           <div
             className={`absolute bottom-0 left-0 right-0 rounded-full transition-all ${
-              pctDisplay >= 85
-                ? "bg-rose-400"
-                : pctDisplay >= 60
-                  ? "bg-amber-400"
-                  : "bg-emerald-400"
+              pctDisplay == null
+                ? "bg-zinc-600"
+                : pctDisplay >= 85
+                  ? "bg-rose-400"
+                  : pctDisplay >= 60
+                    ? "bg-amber-400"
+                    : "bg-emerald-400"
             }`}
-            style={{ height: `${pctDisplay}%` }}
+            style={{ height: `${pctDisplay ?? 0}%` }}
           />
         )}
       </div>
@@ -629,14 +632,16 @@ function PartSelectRow({
       {!isFresh && (
         <div
           className={`shrink-0 text-right text-lg font-bold tabular-nums ${
-            pctDisplay >= 85
-              ? "text-rose-300"
-              : pctDisplay >= 60
-                ? "text-amber-300"
-                : "text-emerald-300"
+            pctDisplay == null
+              ? "text-zinc-500"
+              : pctDisplay >= 85
+                ? "text-rose-300"
+                : pctDisplay >= 60
+                  ? "text-amber-300"
+                  : "text-emerald-300"
           }`}
         >
-          {pctDisplay}%
+          {pctDisplay != null ? `${pctDisplay}%` : "—"}
         </div>
       )}
 

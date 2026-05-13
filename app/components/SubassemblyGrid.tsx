@@ -29,8 +29,9 @@ const ZONE_PART_ORDER: Record<string, string[]> = {
 const ORIENTATION_ORDER = ["left", "middle", "right", "center"] as const;
 type Orientation = (typeof ORIENTATION_ORDER)[number];
 
-function wearPct(p: PartStatus): number {
-  const ceiling = p.failureThresholdMin ?? p.expectedMtbfMinutes;
+function wearPct(p: PartStatus): number | null {
+  const ceiling = p.failureThresholdMin ?? p.expectedMtbfMinutes ?? null;
+  if (ceiling == null) return null;
   return p.granularRuntimeMinutes / Math.max(1, ceiling);
 }
 
@@ -196,7 +197,7 @@ export function SubassemblyGrid({
       .map(([code, ps]) => ({
         code,
         parts: ps,
-        maxPct: Math.max(...ps.map(wearPct)),
+        maxPct: Math.max(...ps.map((p) => wearPct(p) ?? 0)),
       }))
       .sort((a, b) => b.maxPct - a.maxPct);
 

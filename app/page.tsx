@@ -95,7 +95,7 @@ function buildPartStatuses(
         granularRuntimeMinutes: 0,
         highStressMinutes: 0,
         cumulativePressureStress: 0,
-        expectedMtbfMinutes: catalog.expectedMtbfMinutes ?? 12000,
+        expectedMtbfMinutes: catalog.expectedMtbfMinutes ?? null,
         inspectionThresholdMin: catalog.inspectionThresholdMin ?? null,
         failureThresholdMin: catalog.failureThresholdMin ?? null,
         sealLifeLowMin: catalog.sealLifeLowMin,
@@ -126,17 +126,17 @@ function buildPartStatuses(
     const inspection = pp?.inspection_threshold_min ?? seed.inspectionThresholdMin;
     const failure = pp?.failure_threshold_min ?? seed.failureThresholdMin;
 
-    const ceiling = failure ?? mtbf;
-    const pct = runtime / Math.max(1, ceiling);
+    const ceiling = failure ?? mtbf ?? null;
+    const pct = ceiling != null ? runtime / Math.max(1, ceiling) : null;
     const health: PartStatus["health"] =
       (pp?.health as PartStatus["health"]) ??
       (failure && runtime >= failure
         ? "critical"
         : inspection && runtime >= inspection
           ? "watch"
-          : pct >= 0.85
+          : pct != null && pct >= 0.85
             ? "critical"
-            : pct >= 0.6
+            : pct != null && pct >= 0.6
               ? "watch"
               : "nominal");
     const alert: PartStatus["alert"] =
@@ -342,7 +342,13 @@ export default function Home() {
               P01 pressure + rolling 10-min σ — correlates high pulsation with HP-thread weephole risk.
             </p>
           </div>
-          <FatigueChart series={fatigue} highStress={highStress} offWindows={offWindows} />
+          <FatigueChart
+            series={fatigue}
+            highStress={highStress}
+            offWindows={offWindows}
+            parts={pipelineParts}
+            runs={pipelinePayload?.runs}
+          />
         </section>
 
         {/* Structural Odometers — sorted highest % → lowest */}

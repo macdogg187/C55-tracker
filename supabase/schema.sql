@@ -77,10 +77,15 @@ create table if not exists public.part_lifecycle (
             'other','unknown'
         )),
     failure_notes               text,
+    -- Gap-snapped effective boundaries (may differ from tracker dates).
+    effective_installation_date timestamptz,
+    effective_removal_date      timestamptz,
+    boundary_source             jsonb,   -- {install: "gap"|"tracker_fallback", removal: "gap"|"tracker_fallback"|"open"}
     -- Cached metrics, refreshed by the pipeline (cheap to recompute, costly
     -- to recalculate on every dashboard load).
     active_runtime_minutes      integer not null default 0,
     high_stress_minutes         integer not null default 0,
+    out_of_band_minutes         integer not null default 0,
     cumulative_pressure_stress  numeric not null default 0,  -- ∫(P01-19) dt
     inferred_failures           integer not null default 0,
     last_metrics_refresh        timestamptz,

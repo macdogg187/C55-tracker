@@ -26,7 +26,7 @@ export type PartStatus = {
   granularRuntimeMinutes: number;
   highStressMinutes: number;
   cumulativePressureStress: number;
-  expectedMtbfMinutes: number;
+  expectedMtbfMinutes: number | null;
   inspectionThresholdMin?: number | null;
   failureThresholdMin?: number | null;
   sealLifeLowMin?: number;
@@ -57,7 +57,7 @@ export function buildSeedPartStatuses(equipmentId: string): PartStatus[] {
       granularRuntimeMinutes: 0,
       highStressMinutes: 0,
       cumulativePressureStress: 0,
-      expectedMtbfMinutes: catalog.expectedMtbfMinutes ?? 12000,
+      expectedMtbfMinutes: catalog.expectedMtbfMinutes ?? null,
       inspectionThresholdMin: catalog.inspectionThresholdMin ?? null,
       failureThresholdMin: catalog.failureThresholdMin ?? null,
       sealLifeLowMin: catalog.sealLifeLowMin,
