@@ -200,23 +200,51 @@ export function SubassemblyGrid({
       }))
       .sort((a, b) => b.maxPct - a.maxPct);
 
+    // Split L/M/R rows from center-only rows so center parts (e.g. Outlet Manifold)
+    // are never rendered under the LEFT | MIDDLE | RIGHT header.
+    const lmrRows    = rows.filter((r) => r.parts.some((p) => p.orientation !== "center"));
+    const centerRows = rows.filter((r) => r.parts.every((p) => p.orientation === "center"));
+
     return (
       <section className="rounded-2xl border border-zinc-800 bg-zinc-900/30 p-5">
         <SectionHeader title={title} subtitle={subtitle} />
-        <div className="overflow-x-auto">
-          <div className="min-w-[680px] space-y-2.5">
-            <LMRHeader />
-            {rows.map(({ code, parts: ps }) => (
-              <LMRRow
-                key={code}
-                label={ps[0].partName}
-                partCode={code}
-                parts={ps}
-                selectedId={selectedId}
-                onSelect={onSelect}
-              />
-            ))}
-          </div>
+        <div className="space-y-6">
+          {lmrRows.length > 0 && (
+            <div className="overflow-x-auto">
+              <div className="min-w-[680px] space-y-2.5">
+                <LMRHeader />
+                {lmrRows.map(({ code, parts: ps }) => (
+                  <LMRRow
+                    key={code}
+                    label={ps[0].partName}
+                    partCode={code}
+                    parts={ps}
+                    selectedId={selectedId}
+                    onSelect={onSelect}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+          {centerRows.length > 0 && (
+            <div>
+              <h3 className="mb-3 text-xs font-bold uppercase tracking-widest text-zinc-500">
+                Manifold &amp; Instruments
+              </h3>
+              <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                {centerRows.map(({ parts: ps }) =>
+                  sortByOrientation(ps).map((p) => (
+                    <PartCard
+                      key={p.id}
+                      part={p}
+                      selected={selectedId === p.id}
+                      onSelect={() => onSelect(p.id)}
+                    />
+                  )),
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </section>
     );
