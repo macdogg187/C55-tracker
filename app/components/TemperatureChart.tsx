@@ -30,8 +30,8 @@ type SlopePoint = {
  * Compute sample-to-sample rising temperature slopes during active P01 windows.
  *
  * X-axis: cumulative active runtime minutes (re-mapped to fake UTCTimestamp so
- *   lightweight-charts can use its time scale). Gaps ≥ gap_off_min reset the
- *   runtime counter to a new session.
+ *   lightweight-charts can use its time scale). Gaps ≥ gap_off_min are skipped
+ *   but the cumulative counter keeps increasing so chart times stay sorted.
  * Y-axis: max(0, dT/dt) across T01/T02/T03, in °C/min.
  */
 function computeSlopePoints(series: FatigueSample[]): SlopePoint[] {
@@ -54,9 +54,11 @@ function computeSlopePoints(series: FatigueSample[]): SlopePoint[] {
 
     if (dtMin <= 0) continue;
 
-    // Gaps ≥ gap_off_min indicate a machine-off period — skip and reset.
+    // Gaps ≥ gap_off_min indicate a machine-off period — skip the pair but
+    // do NOT reset cumulativeMin. Resetting caused fakeTime to go backwards
+    // (later points got smaller timestamps than earlier ones), which crashed
+    // lightweight-charts' strict ascending-time assertion on setData.
     if (dtMin > GAP_MIN) {
-      cumulativeMin = 0;
       continue;
     }
 
@@ -105,7 +107,7 @@ function binSlopePoints(points: SlopePoint[], bins = 300): SlopePoint[] {
  * Seal temperature slope histogram.
  *
  * X-axis  — Cumulative P01 active runtime (minutes). Only time when P01 is in
- *            the active band advances the counter; machine-off gaps reset it.
+ *            the active band advances the counter; machine-off gaps are skipped.
  * Y-axis  — Max rising dT/dt across T01/T02/T03 (°C/min).
  * Colours — Green < warn threshold · Amber ≥ warn < crit · Red ≥ crit
  *           Thresholds are tunable via config/logic-params.json → temp_slope.
