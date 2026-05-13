@@ -136,12 +136,13 @@ Defined in [`lib/analytics.ts`](lib/analytics.ts):
     active_band_low_kpsi: number;        // 19.0
     active_band_high_kpsi: number;       // 26.0
     pulsation_threshold_kpsi: number;    // 2.0
-    rolling_window: string;              // "10 min"
+    rolling_window: string;              // "10min"
     gap_off_minutes: number;             // 5
     sample_minutes: number;
     // From trends-ingest summary (when present):
     passes_total?: number;
     valid_passes_total?: number;
+    pass_runtime_minutes_total?: number;
     runs_total?: number;
     conforming_runs_total?: number;
     schedule_anomalies_total?: number;
@@ -150,6 +151,13 @@ Defined in [`lib/analytics.ts`](lib/analytics.ts):
   fatigue_series: FatigueSample[];       // [{ ts, p01, stdev, status }]
   off_windows: WindowSpan[];             // [{ start, end, duration_min }]
   high_stress_windows: WindowSpan[];
+  runs?: {
+    run_index: number;
+    started_at: string;
+    ended_at: string;
+    actual_pass_count: number;
+    status: string;
+  }[];
 }
 ```
 
@@ -184,12 +192,12 @@ Defined in [`lib/analytics.ts`](lib/analytics.ts):
 | `ICVB` | Inlet Check Valve Body | cluster | no | no | yes | 10,000 | — | — | — |
 | `HPT` | High Pressure Tee | cluster | no | yes | yes | 9,000 | 2,000 | 2,400 | — |
 | `OCVB` | Outlet Check Valve Body | cluster | no | no | yes | 11,000 | — | — | — |
-| `ICVBS` | Inlet CV Ball Seat | cluster | yes | no | — | — | — | — | 800–1,200 |
-| `OCVBS` | Outlet CV Ball Seat | cluster | yes | no | — | — | — | — | 800–1,200 |
+| `ICVBS` | Inlet Check Valve Ball Seat | cluster | yes | no | — | — | — | — | 800–1,200 |
+| `OCVBS` | Outlet Check Valve Ball Seat | cluster | yes | no | — | — | — | — | 800–1,200 |
 | `CVBALL` | Check Valve Ball | cluster | yes | no | — | — | — | — | 800–1,200 |
 | `SPRING` | Check Valve Spring | cluster | yes | no | — | — | — | — | 800–1,200 |
 | `PLG` | Plunger | pump | no | no | — | 8,000 | — | — | — |
-| `BUS` | Backup Support Seal | pump | yes | no | — | — | — | — | 800–1,200 |
+| `BUS` | Backup Support Seal (BUS) | pump | yes | no | — | — | — | — | 800–1,200 |
 | `PB` | Pump Body | pump | no | yes | yes | 15,000 | 12,000 | 14,500 | — |
 | `CVBSPB` | CV Ball Seat (Pump Body) | pump | yes | no | — | — | — | — | 800–1,200 |
 | `HVB` | Homogenizing Valve Body | homogenizer | no | no | yes | 12,000 | — | — | — |
@@ -252,4 +260,5 @@ Defined in [`supabase/schema.sql`](supabase/schema.sql), 10 tables, all RLS-enab
 - `public/lifecycles.json` — committed seed; bootstraps `data/lifecycles.json` on first read.
 - `data/lifecycles.json` — gitignored mutable local store. Created on first write.
 - `public/pipeline.json` — committed seed; rewritten by `data_pipeline.py`, `scripts/import_tracker.py` (lifecycles only), and `applyTrendsIngest` on every trends upload.
+- `config/logic-params.json` — optional runtime overrides for thresholds/weights; read by `loadLogicParams()` and mutated by `PUT /api/logic-params`.
 - `models/failure_predictor.json` — gitignored sklearn artefact; optional. When absent, `predict-model.ts` falls back to the heuristic in `predict.ts`.

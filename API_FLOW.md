@@ -16,6 +16,7 @@ The store interface is identical between backends, so route code never branches 
 | Method | Path | Body / params | Effect |
 |--------|------|---------------|--------|
 | GET | `/api/lifecycles` | — | Returns full `StoreSnapshot` + `backend`. |
+| GET | `/api/history` | — | Returns flattened lifecycle history rows (active + archived), joined to slot/catalog metadata where available. |
 | POST | `/api/lifecycle/replace` | `{ installation_id, new_serial, failure_mode, notes?, timestamp? }` | Archives current lifecycle on that slot, inserts fresh lifecycle with reset odometers, logs `replace` (or `reset` if no prior) event. |
 | POST | `/api/maintenance` | `{ event_type, installation_id?, equipment_id?, lifecycle_id?, failure_mode?, detected_at?, ended_at?, duration_minutes?, notes?, source? }` | Inserts one `MaintenanceEvent`. Validates `event_type` against the union and `failure_mode` against `FAILURE_MODES`. |
 | POST | `/api/failure/log` | `{ installation_id, failure_mode, notes?, timestamp? }` | Inserts a `failure_observation` event **without** archiving the lifecycle. Used as a positive label for the predictor. |
@@ -23,12 +24,16 @@ The store interface is identical between backends, so route code never branches 
 | POST | `/api/ingest/trends` | multipart `file: .csv\|.txt` | Parses (UTF-16 LE BOM + tab/comma auto-detect), computes metrics, detects passes/runs/anomalies, applies to store, rewrites `public/pipeline.json`. Max **80 MB**. |
 | GET | `/api/predictions` | — | Returns ranked predictions for every active lifecycle (latest per slot). |
 | GET | `/api/predictions/live` | — | Server-Sent Events stream from in-process bus in `stream_worker.ts`. Replays ring buffer on connect. |
-| GET | `/api/components` | `?parent_lifecycle_id=...` **or** `?installation_id=...` | **Stub** — references `listComponents` that doesn't exist in `lib/` yet. |
-| POST | `/api/components` | `{ parent_lifecycle_id\|installation_id, subpart_code, sub_index, serial_number?, installation_date? }` | **Stub** — pending `SUBCOMPONENT_CATALOG` in `lib/parts-catalog.ts`. |
-| GET | `/api/components/missing` | `?equipment_id=0091` | **Stub** — pending `missingComponentFlags` on the store. |
-| POST | `/api/components/archive` | `{ component_id, failure_mode, failure_notes?, timestamp? }` | **Stub** — pending `archiveComponent` on the store. |
+| GET | `/api/logic-params` | — | Returns active logic/tuning parameters from `loadLogicParams()`. |
+| PUT | `/api/logic-params` | partial `LogicParams` object | Validates, merges, and persists `config/logic-params.json`; invalidates params cache and returns updated params. |
+| POST | `/api/recalculate` | optional `{ equipment_id? }` | Recomputes predictions + health summary from current params without mutating lifecycle rows. |
+| POST | `/api/agent/tune` | optional `{ trigger?, dry_run?, equipment_id? }` | Runs proposal loop in `agent-param-tuner`; can apply medium/high-confidence updates and log a maintenance audit event. |
+| GET | `/api/components` | `?parent_lifecycle_id=...` **or** `?installation_id=...` | Handler scaffolding exists (parent resolution + validation), but route is currently blocked by missing component store/catalog exports in `lib/`. |
+| POST | `/api/components` | `{ parent_lifecycle_id\|installation_id, subpart_code, sub_index, serial_number?, installation_date? }` | Handler scaffolding exists, but route is currently blocked by missing component store/catalog exports in `lib/`. |
+| GET | `/api/components/missing` | `?equipment_id=0091` | Handler exists, but route is currently blocked by missing `missingComponentFlags` implementation on the store. |
+| POST | `/api/components/archive` | `{ component_id, failure_mode, failure_notes?, timestamp? }` | Handler exists, but route is currently blocked by missing `archiveComponent` implementation on the store. |
 
-All routes set `dynamic = "force-dynamic"` and the ingest/prediction routes pin `runtime = "nodejs"`.
+All routes set `dynamic = "force-dynamic"` except `/api/logic-params` (which is server-only but does not explicitly export `dynamic`). Ingest/prediction/tuning routes pin `runtime = "nodejs"` where long-running or Node APIs are required.
 
 ## Replace-part flow (`POST /api/lifecycle/replace`)
 
@@ -88,7 +93,7 @@ Fresh predictions snapshot computed inline so the operator sees impact immediate
 
 Equipment scope for runs/passes is resolved as: `input.equipment_id` → `inferEquipmentIdFromSource(filename)` (matches `0091_*.csv` etc.) → first equipment in snapshot → `"0091"` fallback.
 
-Response includes `rows_ingested`, `signals_detected`, `summary`, `passes_total`, `runs_total`, `schedule_anomalies_total`, `predictions: predictions.slice(0, 30)`.
+Response includes `rows_ingested`, `signals_detected`, `summary`, `passes_total`, `valid_passes_total`, `runs_total`, `conforming_runs_total`, `schedule_anomalies_total`, persistence counters, and `predictions: predictions.slice(0, 30)`.
 
 ## Predictions flow (`GET /api/predictions`)
 
@@ -104,21 +109,46 @@ Response: `{ backend, generated_at, source, count, predictions }`.
 
 ### Risk scoring (`lib/predict.ts`)
 
-Five factors → composite `0–100`:
+Five factors → composite `0–100` (weights and cutoffs loaded from `logic-params`; defaults shown below):
 
 | # | Factor | Weight | Detail |
 |---|--------|--------|--------|
 | 1 | `runtime / failure_threshold_min` (or `/ expected_mtbf_minutes` fallback) | full | Dominant signal. |
-| 2 | `runtime / inspection_threshold_min` | × 0.6 | Early warning. |
+| 2 | `runtime / inspection_threshold_min` | × `inspection_proximity_multiplier` (default `0.6`) | Early warning. |
 | 3 | `high_stress_minutes / active_runtime_minutes` | full | Weephole-leak driver per Logic Doc. |
-| 4 | `cumulative_pressure_stress / runtime`, normalized to 4.0 kpsi-min/min | × 0.7 | Fatigue proxy. |
-| 5 | `inferred_failures / 5` | × 0.5 | Off-maintenance gap count. |
+| 4 | `cumulative_pressure_stress / runtime`, normalized to `pressure_intensity_ceiling_kpsi_per_min` (default `4.0`) | × `pressure_intensity_multiplier` (default `0.7`) | Fatigue proxy. |
+| 5 | `inferred_failures / inferred_failures_normalizer` (default `5`) | × `inferred_failures_multiplier` (default `0.5`) | Off-maintenance gap count. |
 
-`composite = clamp01(0.6 × max_factor + 0.4 × avg_factors)`. `score = round(composite × 100) + (runtime_ratio > 1 ? 8 : 0)`, capped at 100.
+`composite = clamp01(max_factor_weight × max_factor + mean_factor_weight × avg_factors)` with defaults `0.6` and `0.4`.
+`score = round(composite × 100) + (runtime_ratio > 1 ? overlife_boost_points : 0)` (default boost `8`), capped at 100.
 
-Bands: `low < 35 ≤ moderate < 60 ≤ high < 80 ≤ critical`.
+Bands come from `risk_bands` (defaults: `low < 35 ≤ moderate < 60 ≤ high < 80 ≤ critical`).
 
 `eta_minutes = max(0, (failure_min ?? mtbf) - runtime)`, or `null` when no ceiling is set.
+
+## Logic params + recalculate flow
+
+`GET /api/logic-params` returns the active parameter set (defaults merged with `config/logic-params.json` when present).
+
+`PUT /api/logic-params` validates partial updates, merges onto current params, persists JSON, invalidates cache, and returns `{ ok: true, params }`.
+
+`POST /api/recalculate` then re-scores active lifecycles with the current params snapshot (optionally scoped by `equipment_id`) and returns:
+
+- `predictions` (model-backed when available; heuristic fallback otherwise)
+- `health_summary` computed from config-driven MTBF percentages and threshold cutoffs
+- `params_snapshot` (key constants used for that recompute)
+
+No lifecycle rows are mutated by recalculate.
+
+## Agent tune flow (`POST /api/agent/tune`)
+
+1. Load snapshot + current params.
+2. Gather evidence from closed lifecycles with known failure modes.
+3. Compare observed failure runtimes vs current thresholds and generate proposals (`parts.*` thresholds, MTBF, optional pulsation tuning).
+4. If not `dry_run`, apply medium/high-confidence proposals to `config/logic-params.json`.
+5. Best-effort log a `maintenance_event` audit record (`event_type: data_integrity_alert`, source `agent-param-tuner:*`).
+
+Response includes proposal list, applied paths, optional event id, and summary text.
 
 ## Live telemetry SSE (`GET /api/predictions/live`)
 

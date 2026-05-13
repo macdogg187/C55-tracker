@@ -14,9 +14,10 @@ High-level source of truth for the C55 Tracker. Read first in any new Agent sess
 - **Frontend**: Next.js 16 (App Router only, no `pages/`) + React 19 + Tailwind 4 + TypeScript 5.
 - **Tests**: `node --import tsx --test` against `lib/__tests__/*.test.ts`.
 - **Storage**: Dual backend — `LocalJsonStore` (default, writes `data/lifecycles.json`) or `SupabaseStore` (Postgres + RLS) when `SUPABASE_SERVICE_ROLE_KEY` is set.
-- **Sensor ingest**: TS path = `POST /api/ingest/trends` (CSV/TXT via `lib/trends-ingest.ts`). Python path = `data_pipeline.py` one-shot or `scripts/watch_csv.py` folder watcher — both write `public/pipeline.json`.
+- **Sensor ingest**: TS path = `POST /api/ingest/trends` (CSV/TXT via `lib/trends-ingest-txt.ts` → `lib/trends-ingest.ts`). Python path = `data_pipeline.py` one-shot or `scripts/watch_csv.py` folder watcher — both write `public/pipeline.json`.
 - **Live telemetry**: `scripts/stream_worker.ts` + `lib/vantagepoint-adapter.ts` (MockAdapter today, OpcUaAdapter stub) → SSE at `/api/predictions/live`.
 - **Model**: Optional `models/failure_predictor.json` (sklearn GBM, trained by `scripts/train_failure_model.py`); `lib/predict-model.ts` falls back to the heuristic in `lib/predict.ts` when absent.
+- **Tunable logic params**: `config/logic-params.json` via `GET/PUT /api/logic-params`, on-demand rescoring at `POST /api/recalculate`, and agentic proposals at `POST /api/agent/tune`.
 
 ## Architecture
 
@@ -29,7 +30,8 @@ MTBF Tracker .xlsx ──── parseTrackerWorkbook ────── store.in
                                                                                 ↓
                                               ┌────────────────────────────────┘
                                               ↓
-Dashboard (app/page.tsx) ←── /api/lifecycles, /api/predictions, /api/predictions/live (SSE)
+Dashboard (app/page.tsx) ←── /api/lifecycles, /api/predictions, /api/predictions/live (SSE),
+                             /api/history, /api/logic-params, /api/recalculate
 ```
 
 - **Default mode (no env var)**: API routes read seed from `public/lifecycles.json`, mutate `data/lifecycles.json`, regenerate `public/pipeline.json` on trends upload.
@@ -75,23 +77,25 @@ Bands: `low < 35 ≤ moderate < 60 ≤ high < 80 ≤ critical`.
 - **Python deps install to user site** (`pip install --user` is implicit on this box); not required for dashboard dev.
 - **ESLint 9 flat config** (`eslint.config.mjs`). One known pre-existing warning: `_opts` unused in `vantagepoint-adapter.ts`.
 - **Multipart limits**: tracker = 25 MB, trends = 80 MB.
-- **`app/api/components/*` routes are stubs** — they import `SUBCOMPONENT_CATALOG`, `listComponents`, etc. that don't yet exist in `lib/`. Don't rely on them.
+- **`app/api/components/*` routes are not wired end-to-end yet** — route handlers exist, but they still reference `SUBCOMPONENT_CATALOG`/component store methods that are not exported from `lib/`. Don't rely on them.
 
 ## Current progress
 
 _(Update at end of every session. Replace this block — don't append.)_
 
-- Lifecycle store dual-backend complete, both modes pass tests.
-- Trends ingest detects passes + runs + cadence anomalies; rewrites `public/pipeline.json`.
-- Heuristic predictor live; sklearn model loads when `models/failure_predictor.json` is present.
-- Live telemetry SSE wired through `MockAdapter`; `OpcUaAdapter` stubbed.
+- Lifecycle store dual-backend complete; local mode persists lifecycle/events/runs/passes and Supabase mode upserts the same core entities.
+- Trends ingest detects passes + runs + cadence anomalies, applies metrics idempotently, and rewrites `public/pipeline.json` (including `runs`).
+- Prediction stack is config-driven via `logic-params` defaults/overrides, with model fallback to heuristic when `models/failure_predictor.json` is absent.
+- Runtime tuning endpoints are live: `GET/PUT /api/logic-params`, `POST /api/recalculate`, and `POST /api/agent/tune`.
+- History read model is live at `GET /api/history` for active + archived lifecycle rows.
 
 ## Next steps
 
 _(Update at end of every session.)_
 
-- Implement `SUBCOMPONENT_CATALOG` + sub-component store methods so `app/api/components/*` routes work.
+- Implement/export `SUBCOMPONENT_CATALOG` and component store methods (`listComponents`, `upsertComponent`, `archiveComponent`, `missingComponentFlags`) so `app/api/components/*` compiles and works.
 - Wire `OpcUaAdapter` against the plant OPC-UA endpoint when NodeIds are confirmed.
+- Add dedupe safeguards for Supabase trend-derived event inserts (local JSON path already dedupes by `(event_type, detected_at, ended_at)`).
 - Improve trainer label quality — current TTF labels are coarse.
 
 ## Reference index
@@ -99,6 +103,8 @@ _(Update at end of every session.)_
 - Types + dual-backend store: [`lib/lifecycle-store.ts`](lib/lifecycle-store.ts)
 - Part catalog + slot builder: [`lib/parts-catalog.ts`](lib/parts-catalog.ts)
 - Logic Doc constants: [`lib/analytics.ts`](lib/analytics.ts)
+- Logic/tuning config: [`lib/logic-params.ts`](lib/logic-params.ts)
 - Heuristic scorer: [`lib/predict.ts`](lib/predict.ts)
+- Agent tuner loop: [`lib/agent-param-tuner.ts`](lib/agent-param-tuner.ts)
 - See [`DATA_SCHEMA.md`](DATA_SCHEMA.md) for every field name.
 - See [`API_FLOW.md`](API_FLOW.md) for every route + the ingest pipeline.
