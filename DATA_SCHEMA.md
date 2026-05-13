@@ -133,8 +133,8 @@ Defined in [`lib/analytics.ts`](lib/analytics.ts):
     off_minutes_total: number;
     out_of_band_minutes: number;
     signals_detected: string[];          // e.g. ["P01","P02","T01"]
-    active_band_low_kpsi: number;        // 19.0
-    active_band_high_kpsi: number;       // 26.0
+    active_band_low_kpsi: number;        // 15.0
+    active_band_high_kpsi: number;       // 30.0
     pulsation_threshold_kpsi: number;    // 2.0
     rolling_window: string;              // "10min"
     gap_off_minutes: number;             // 5
@@ -236,7 +236,7 @@ VantagePoint exports column names like `P01_0091 (kpsi)`; the parser strips the 
 | `RPM` | Motor / drive speed | rpm |
 | `VIB` | Vibration | g-rms or ips |
 
-**Active band**: `19 ≤ P01 ≤ 26 kpsi`. **High stress**: rolling 10-min σ(P01) > 2 kpsi.
+**Active band**: `15 ≤ P01 ≤ 30 kpsi`. **High stress**: rolling 10-min σ(P01) > 2 kpsi.
 
 ## Supabase tables (when `SUPABASE_SERVICE_ROLE_KEY` is set)
 

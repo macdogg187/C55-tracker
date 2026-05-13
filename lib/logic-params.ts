@@ -69,8 +69,8 @@ export type LogicParams = {
 };
 
 export const DEFAULT_LOGIC_PARAMS: LogicParams = {
-  active_band_low_kpsi: 19.0,
-  active_band_high_kpsi: 26.0,
+  active_band_low_kpsi: 15.0,
+  active_band_high_kpsi: 30.0,
   pulsation_stdev_kpsi: 2.0,
   rolling_window_min: 10,
   gap_off_min: 5,

@@ -18,7 +18,7 @@ lib/
   tracker-import.ts   TS port of the Tracker .xlsx parser (self-healing)
   trends-ingest.ts    VantagePoint CSV/TXT trends pipeline (CSV → metrics)
   trends-ingest-txt.ts Encoding + delimiter sniff (UTF-16 LE BOM, tab/comma)
-  pass-detect.ts      34–40 min P01 pass detector (19–26 kpsi band)
+  pass-detect.ts      34–40 min P01 pass detector (15–30 kpsi band)
   run-validate.ts     Biweekly 10-pass / 6-pass cadence validator
   predict.ts          Heuristic 0-100 failure-risk scorer
   predict-model.ts    TS scorer for the trained sklearn artefact
@@ -71,10 +71,10 @@ and `scripts/train_failure_model.py` — they must stay in sync.
 
 | Rule              | Threshold                  |
 | ----------------- | -------------------------- |
-| Active runtime    | `19_000 ≤ P01 ≤ 26_000` psi (19–26 kpsi) |
+| Active runtime    | `15_000 ≤ P01 ≤ 30_000` psi (15–30 kpsi) |
 | Off / Maintenance | inter-sample gap > 5 min   |
 | Pulsation (high stress) | rolling 10-min σ(P01) > 2_000 psi |
-| Out-of-band       | P01 > 26 kpsi              |
+| Out-of-band       | P01 > 30 kpsi              |
 | Valid pass        | contiguous P01 in band, duration 34–40 min |
 | Production run    | one or more passes separated by < 4h gaps |
 | Cadence (per 14 d) | 6 of 7 runs are 10-pass, 1 of 7 is 6-pass |

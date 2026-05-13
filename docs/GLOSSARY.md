@@ -37,8 +37,8 @@ everything downstream.
 
 | Constant | Current Value | Unit | What it means |
 |---|---|---|---|
-| `ACTIVE_BAND_LOW_KPSI` | **19.0** | kpsi | Lower pressure bound of the active operating band. Samples below this are considered idle / ramping. |
-| `ACTIVE_BAND_HIGH_KPSI` | **26.0** | kpsi | Upper pressure bound. Samples above this are flagged `out_of_band` — atypical over-pressure. |
+| `ACTIVE_BAND_LOW_KPSI` | **15.0** | kpsi | Lower pressure bound of the active operating band. Samples below this are considered idle / ramping. |
+| `ACTIVE_BAND_HIGH_KPSI` | **30.0** | kpsi | Upper pressure bound. Samples above this are flagged `out_of_band` — atypical over-pressure. |
 | `PULSATION_STDEV_KPSI` | **2.0** | kpsi | Rolling standard-deviation threshold. When σ(P01) exceeds this within the active band, the sample is tagged `high_stress` (pulsation-driven fatigue). |
 | `ROLLING_WINDOW_MIN` | **10** | minutes | Width of the trailing time window used to compute the rolling stdev. |
 | `GAP_OFF_MIN` | **5** | minutes | Minimum gap between consecutive sensor samples to be interpreted as a Machine Off / Maintenance window. |
@@ -61,16 +61,16 @@ pressure and the rolling stdev of P01 over the preceding 10 minutes.
 ### Decision tree
 
 ```
-P01 > 26.0 kpsi
+P01 > 30.0 kpsi
     → status = "out_of_band"
 
-P01 < 19.0 kpsi
+P01 < 15.0 kpsi
     → status = "below_active"
 
-19.0 ≤ P01 ≤ 26.0  AND  rolling_stdev(P01, 10 min) > 2.0 kpsi
+15.0 ≤ P01 ≤ 30.0  AND  rolling_stdev(P01, 10 min) > 2.0 kpsi
     → status = "high_stress"
 
-19.0 ≤ P01 ≤ 26.0  AND  rolling_stdev(P01, 10 min) ≤ 2.0 kpsi
+15.0 ≤ P01 ≤ 30.0  AND  rolling_stdev(P01, 10 min) ≤ 2.0 kpsi
     → status = "active"
 ```
 
@@ -111,8 +111,8 @@ minutes. Passes are the atomic unit of production scheduling.
 
 | Parameter | Current Value | Unit | Description |
 |---|---|---|---|
-| `active_band_low_kpsi` | **19.0** | kpsi | Inherited from LOGIC constants |
-| `active_band_high_kpsi` | **26.0** | kpsi | Inherited from LOGIC constants |
+| `active_band_low_kpsi` | **15.0** | kpsi | Inherited from LOGIC constants |
+| `active_band_high_kpsi` | **30.0** | kpsi | Inherited from LOGIC constants |
 | `min_duration_min` | **34** | minutes | Shortest excursion that qualifies as a `valid` pass |
 | `max_duration_min` | **40** | minutes | Longest excursion that still qualifies as `valid`; beyond this it is tagged `long` |
 | `intra_pass_gap_min` | **2** | minutes | Maximum in-band gap tolerated before the pass is considered ended (handles brief VantagePoint sample-rate dropouts) |
@@ -240,15 +240,15 @@ elevated fatigue risk — this feeds directly into Factor 3 of the risk score.
 
 ```
 cumulative_pressure_stress =
-    Σ max(P01_i − 19.0, 0)  ×  sample_interval_minutes
+    Σ max(P01_i − 15.0, 0)  ×  sample_interval_minutes
     for every sample i where status is "active" OR "high_stress"
     and the sample falls within the lifecycle window
 
 Unit: kpsi-minutes (pressure excess above the active floor, integrated over time)
 ```
 
-This is a fatigue proxy: a part running at 25 kpsi accumulates (25 − 19) = 6
-kpsi-min per minute, whereas one running at 20 kpsi only accumulates 1 kpsi-min
+This is a fatigue proxy: a part running at 25 kpsi accumulates (25 − 15) = 10
+kpsi-min per minute, whereas one running at 20 kpsi only accumulates 5 kpsi-min
 per minute.
 
 ### inferred_failures
@@ -421,7 +421,7 @@ if active_runtime_minutes > 0:
 
 Normalizes the average kpsi-above-floor per minute against **4.0 kpsi-min/min**,
 which represents the upper end of a typical mid-pressure cycle operating near
-the ceiling of the active band (~23 kpsi average → 4 kpsi above the 19 floor).
+the ceiling of the active band (~19 kpsi average → 4 kpsi above the 15 floor).
 The 0.7 multiplier caps its contribution to 70 % weight.
 
 **Factor 5 — Inferred off-window failures**
@@ -723,7 +723,7 @@ against the archived lifecycle.
 | A2 | VantagePoint exports are UTC wall-clock (no timezone offset) | Off-window detection and lifecycle overlap could be wrong by a full timezone offset |
 | A3 | Median inter-sample interval is representative of all samples | Sparse gaps inflate `active_runtime_minutes` and `high_stress_minutes` |
 | A4 | Off-gaps > 5 min represent machine-off events, not sensor dropouts | Sensor dropout would be counted as an inferred failure |
-| A5 | The active band 19–26 kpsi captures the full production operating range | Samples outside the band during normal operation would not accumulate toward runtime |
+| A5 | The active band 15–30 kpsi captures the full production operating range | Samples outside the band during normal operation would not accumulate toward runtime |
 | A6 | 34–40 min defines a valid production pass | Passes shorter or longer than this range are flagged but still recorded |
 | A7 | 4 kpsi-min/min is a representative mid-pressure intensity ceiling for Factor 4 normalization | If average operating pressure shifts, this normalization will over- or under-weight the pressure intensity factor |
 | A8 | 5 off-gaps is the "concerning" normalizer for Factor 5 | Parts with > 5 inferred failures are capped at the same weight as 5 |

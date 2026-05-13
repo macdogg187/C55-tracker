@@ -54,8 +54,8 @@ import pandas as pd
 # Logic Doc constants                                                         #
 # --------------------------------------------------------------------------- #
 
-ACTIVE_BAND_LOW_KPSI = 19.0      # 19,000 psi
-ACTIVE_BAND_HIGH_KPSI = 26.0     # 26,000 psi
+ACTIVE_BAND_LOW_KPSI = 15.0      # 15,000 psi
+ACTIVE_BAND_HIGH_KPSI = 30.0     # 30,000 psi
 PULSATION_STDEV_KPSI = 2.0       # 2,000 psi rolling-stdev threshold
 ROLLING_WINDOW = "10min"         # pulsation evaluation window
 GAP_OFF_MIN = 5                  # minutes ⇒ "Machine Off / Maintenance"
@@ -272,8 +272,8 @@ def tag_samples(df: pd.DataFrame) -> pd.DataFrame:
         rolling_stdev   : stdev(P01) over a 10-min trailing window
         is_active       : within active band AND not high-stress
         is_high_stress  : within active band but stdev > 2 kpsi
-        is_out_of_band  : above the active ceiling (>26 kpsi)
-        is_below_active : below 19 kpsi (ramp / idle)
+        is_out_of_band  : above the active ceiling (>30 kpsi)
+        is_below_active : below 15 kpsi (ramp / idle)
         status          : 'active' | 'high_stress' | 'out_of_band'
                           | 'below_active'
     """

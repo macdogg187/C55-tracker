@@ -428,7 +428,7 @@ function SummaryStrip({ summary }: { summary: NonNullable<PipelinePayload["summa
       <KPI label="Active Runtime" value={`${summary.active_minutes_total} min`} accent="text-cyan-300" />
       <KPI label="High-Stress (σ > 2 kpsi)" value={`${summary.high_stress_minutes_total} min`} accent="text-amber-300" />
       <KPI label="Off / Maintenance" value={`${summary.off_minutes_total} min`} accent="text-zinc-300" />
-      <KPI label="Out-of-Band (>26 kpsi)" value={`${summary.out_of_band_minutes} min`} accent="text-rose-300" />
+      <KPI label="Out-of-Band (>30 kpsi)" value={`${summary.out_of_band_minutes} min`} accent="text-rose-300" />
     </section>
   );
 }

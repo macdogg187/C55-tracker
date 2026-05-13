@@ -62,8 +62,8 @@ except ImportError as e:  # pragma: no cover - install hint
 # Constants — keep in sync with lib/analytics.ts and lib/pass-detect.ts        #
 # --------------------------------------------------------------------------- #
 
-ACTIVE_BAND_LOW_KPSI = 19.0
-ACTIVE_BAND_HIGH_KPSI = 26.0
+ACTIVE_BAND_LOW_KPSI = 15.0
+ACTIVE_BAND_HIGH_KPSI = 30.0
 ROLLING_WINDOW_MIN = 10
 
 SIGNAL_ALIASES: dict[str, list[str]] = {
