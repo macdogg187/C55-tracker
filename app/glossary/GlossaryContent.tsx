@@ -1,27 +1,70 @@
 "use client";
 
+import { isValidElement, type ReactNode } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { Components } from "react-markdown";
 
-const components: Components = {
+function textFromNode(node: ReactNode): string {
+  if (typeof node === "string" || typeof node === "number") {
+    return String(node);
+  }
+  if (Array.isArray(node)) {
+    return node.map(textFromNode).join("");
+  }
+  if (isValidElement<{ children?: ReactNode }>(node)) {
+    return textFromNode(node.props.children);
+  }
+  return "";
+}
+
+function githubHeadingBaseId(children: ReactNode): string {
+  return textFromNode(children)
+    .trim()
+    .toLowerCase()
+    .replace(/\s/g, "-")
+    .replace(/[^\w-]/g, "");
+}
+
+function glossaryComponents(): Components {
+  const usedHeadingIds = new Map<string, number>();
+  const headingId = (children: ReactNode) => {
+    const baseId = githubHeadingBaseId(children);
+    const count = usedHeadingIds.get(baseId) ?? 0;
+    usedHeadingIds.set(baseId, count + 1);
+    return count === 0 ? baseId : `${baseId}-${count}`;
+  };
+
+  return {
   h1: ({ children }) => (
-    <h1 className="mb-6 text-3xl font-bold tracking-tight text-zinc-100">
+    <h1
+      id={headingId(children)}
+      className="mb-6 scroll-mt-6 text-3xl font-bold tracking-tight text-zinc-100"
+    >
       {children}
     </h1>
   ),
   h2: ({ children }) => (
-    <h2 className="mb-3 mt-10 text-xl font-semibold text-cyan-300 first:mt-0">
+    <h2
+      id={headingId(children)}
+      className="mb-3 mt-10 scroll-mt-6 text-xl font-semibold text-cyan-300 first:mt-0"
+    >
       {children}
     </h2>
   ),
   h3: ({ children }) => (
-    <h3 className="mb-2 mt-6 text-base font-semibold text-zinc-200">
+    <h3
+      id={headingId(children)}
+      className="mb-2 mt-6 scroll-mt-6 text-base font-semibold text-zinc-200"
+    >
       {children}
     </h3>
   ),
   h4: ({ children }) => (
-    <h4 className="mb-1.5 mt-4 text-sm font-semibold uppercase tracking-widest text-zinc-400">
+    <h4
+      id={headingId(children)}
+      className="mb-1.5 mt-4 scroll-mt-6 text-sm font-semibold uppercase tracking-widest text-zinc-400"
+    >
       {children}
     </h4>
   ),
@@ -103,9 +146,12 @@ const components: Components = {
     <strong className="font-semibold text-zinc-100">{children}</strong>
   ),
   em: ({ children }) => <em className="italic text-zinc-300">{children}</em>,
-};
+  };
+}
 
 export function GlossaryContent({ markdown }: { markdown: string }) {
+  const components = glossaryComponents();
+
   return (
     <article>
       <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
