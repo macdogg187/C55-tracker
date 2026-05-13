@@ -32,13 +32,15 @@ export async function POST(req: Request) {
       { status: 400 },
     );
   }
-  if (typeof new_serial !== "string" || !new_serial.trim()) {
+  // Consumable parts may not have tracked serial numbers — allow empty string
+  if (typeof new_serial !== "string") {
     return NextResponse.json(
-      { error: "new_serial is required" },
+      { error: "new_serial must be a string" },
       { status: 400 },
     );
   }
-  if (!isFailureMode(failure_mode)) {
+  // failure_mode is optional — fresh installs (no prior lifecycle) have no failure
+  if (failure_mode != null && !isFailureMode(failure_mode)) {
     return NextResponse.json(
       { error: `failure_mode must be one of ${FAILURE_MODES.join(", ")}` },
       { status: 400 },
@@ -48,7 +50,7 @@ export async function POST(req: Request) {
   const input: ReplacePartInput = {
     installation_id: installation_id.trim(),
     new_serial: new_serial.trim(),
-    failure_mode,
+    failure_mode: isFailureMode(failure_mode) ? failure_mode : undefined,
     notes: typeof notes === "string" ? notes : undefined,
     timestamp: typeof timestamp === "string" ? timestamp : undefined,
   };

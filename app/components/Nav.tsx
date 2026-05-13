@@ -32,16 +32,18 @@ export function Nav() {
   }
 
   return (
-    <nav className="sticky top-0 z-40 border-b-2 border-[#e8a020] bg-[#0e0c0a]">
+    <nav className="sticky top-0 z-40 border-b-2 border-[#C04810] bg-[#F0EFE8]">
       <div className="mx-auto flex w-full max-w-[1500px] items-center justify-between gap-4 px-5 py-2.5 lg:px-8">
         <div className="flex items-center gap-1">
           {/* Logo */}
-          <div className="mr-5 hidden shrink-0 sm:block">
-            <div className="font-orbitron text-xs font-bold uppercase tracking-[0.22em] text-[#e8a020]">
-              C55 Tracker
-            </div>
-            <div className="text-[9px] uppercase tracking-[0.3em] text-[#5a4a38]">
-              Mission Control
+          <div className="mr-5 hidden shrink-0 sm:flex items-center gap-2">
+            <div>
+              <div className="font-barlow text-sm font-bold uppercase tracking-[0.16em] text-[#C04810]">
+                C55 Tracker
+              </div>
+              <div className="text-[9px] uppercase tracking-[0.3em] text-[#7A7768]">
+                Predictive Maintenance
+              </div>
             </div>
           </div>
 
@@ -53,10 +55,10 @@ export function Nav() {
               <Link
                 key={tab.href}
                 href={href}
-                className={`px-3 py-1.5 text-xs font-medium uppercase tracking-[0.14em] transition-colors font-orbitron ${
+                className={`px-3 py-1.5 text-xs font-medium uppercase tracking-[0.1em] transition-all font-outfit ${
                   isActive
-                    ? "bg-[#e8a020] text-[#0e0c0a]"
-                    : "text-[#8a7a60] hover:bg-[#2e2820] hover:text-[#e8a020]"
+                    ? "bg-[#C04810] text-[#FAFAF5] shadow-sm"
+                    : "text-[#4A4A42] hover:bg-[#E5E3DA] hover:text-[#1A1A16]"
                 }`}
               >
                 {tab.label}
@@ -69,7 +71,7 @@ export function Nav() {
         <select
           value={eq}
           onChange={handleEqChange}
-          className="border border-[#e8a020] bg-[#1c1814] px-3 py-1.5 text-xs text-[#e8a020] font-orbitron uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-[#e8a020]"
+          className="border border-[#C04810] bg-[#FAFAF5] px-3 py-1.5 text-xs text-[#C04810] font-outfit uppercase tracking-wider focus:outline-none focus:ring-1 focus:ring-[#C04810] rounded-sm"
         >
           {EQUIPMENT_OPTIONS.map((o) => (
             <option key={o.id} value={o.id}>

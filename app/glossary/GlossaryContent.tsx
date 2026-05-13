@@ -10,7 +10,7 @@ function glossaryComponents(): Components {
     h1: ({ id, children }) => (
       <h1
         id={id}
-        className="mb-6 scroll-mt-6 font-orbitron text-3xl font-bold tracking-tight text-[#f0dfc0]"
+        className="mb-6 scroll-mt-6 font-barlow text-3xl font-bold tracking-tight text-[#1A1A16]"
       >
         {children}
       </h1>
@@ -18,7 +18,7 @@ function glossaryComponents(): Components {
     h2: ({ id, children }) => (
       <h2
         id={id}
-        className="mb-3 mt-10 scroll-mt-6 font-orbitron text-xl font-semibold uppercase tracking-wider text-[#e8a020] first:mt-0"
+        className="mb-3 mt-10 scroll-mt-6 font-barlow text-xl font-semibold uppercase tracking-wider text-[#C04810] first:mt-0"
       >
         {children}
       </h2>
@@ -26,7 +26,7 @@ function glossaryComponents(): Components {
     h3: ({ id, children }) => (
       <h3
         id={id}
-        className="mb-2 mt-6 scroll-mt-6 text-base font-semibold text-[#f0dfc0]"
+        className="mb-2 mt-6 scroll-mt-6 text-base font-semibold text-[#1A1A16]"
       >
         {children}
       </h3>
@@ -34,13 +34,13 @@ function glossaryComponents(): Components {
     h4: ({ id, children }) => (
       <h4
         id={id}
-        className="mb-1.5 mt-4 scroll-mt-6 font-orbitron text-sm font-semibold uppercase tracking-widest text-[#8a7a60]"
+        className="mb-1.5 mt-4 scroll-mt-6 font-barlow text-sm font-semibold uppercase tracking-widest text-[#4A4A42]"
       >
         {children}
       </h4>
     ),
     p: ({ children }) => (
-      <p className="mb-4 font-mono leading-relaxed text-[#8a7a60]">{children}</p>
+      <p className="mb-4 leading-relaxed text-[#4A4A42]">{children}</p>
     ),
     a: ({ href, children }) => {
       const isInternalHash = href?.startsWith("#");
@@ -48,11 +48,11 @@ function glossaryComponents(): Components {
       return (
         <a
           href={href}
-          className="text-[#e8a020] underline underline-offset-2 hover:text-[#c85a10]"
+          className="text-[#C04810] underline underline-offset-2 hover:text-[#9A3A0E]"
           target={!isInternalHash && href?.startsWith("http") ? "_blank" : undefined}
           rel={!isInternalHash && href?.startsWith("http") ? "noopener noreferrer" : undefined}
           onClick={(e) => {
-            if (isInternalHash) {
+            if (isInternalHash && href) {
               const el = document.getElementById(href.slice(1));
               if (el) {
                 e.preventDefault();
@@ -67,14 +67,14 @@ function glossaryComponents(): Components {
       );
     },
     ul: ({ children }) => (
-      <ul className="mb-4 ml-5 list-disc space-y-1.5 font-mono text-[#8a7a60]">{children}</ul>
+      <ul className="mb-4 ml-5 list-disc space-y-1.5 text-[#4A4A42]">{children}</ul>
     ),
     ol: ({ children }) => (
-      <ol className="mb-4 ml-5 list-decimal space-y-1.5 font-mono text-[#8a7a60]">{children}</ol>
+      <ol className="mb-4 ml-5 list-decimal space-y-1.5 text-[#4A4A42]">{children}</ol>
     ),
     li: ({ children }) => <li className="leading-relaxed">{children}</li>,
     blockquote: ({ children }) => (
-      <blockquote className="my-4 border-l-4 border-[#c85a10]/60 bg-[#c85a10]/10 px-4 py-3 font-mono text-sm text-[#e8a020] [&>p]:mb-0">
+      <blockquote className="my-4 border-l-4 border-[#B8860B]/60 bg-[#B8860B]/8 px-4 py-3 text-sm text-[#C04810] [&>p]:mb-0 rounded-r-sm">
         {children}
       </blockquote>
     ),
@@ -83,7 +83,7 @@ function glossaryComponents(): Components {
       if (isBlock) {
         return (
           <code
-            className="block overflow-x-auto whitespace-pre border border-[#2e2820] bg-[#0e0c0a] p-4 font-mono text-sm leading-relaxed text-[#f0dfc0]"
+            className="block overflow-x-auto whitespace-pre border border-[#B0AD9E] bg-[#E5E3DA] p-4 text-sm leading-relaxed text-[#1A1A16] rounded-sm"
             {...props}
           >
             {children}
@@ -92,7 +92,7 @@ function glossaryComponents(): Components {
       }
       return (
         <code
-          className="bg-[#2e2820] px-1.5 py-0.5 font-mono text-[0.8em] text-[#e8a020]"
+          className="bg-[#E5E3DA] px-1.5 py-0.5 text-[0.8em] text-[#C04810] rounded-sm"
           {...props}
         >
           {children}
@@ -100,37 +100,37 @@ function glossaryComponents(): Components {
       );
     },
     pre: ({ children }) => (
-      <pre className="mb-4 mt-1 overflow-x-auto border border-[#2e2820] bg-[#0e0c0a]">
+      <pre className="mb-4 mt-1 overflow-x-auto border border-[#B0AD9E] bg-[#E5E3DA] rounded-sm">
         {children}
       </pre>
     ),
     table: ({ children }) => (
-      <div className="mb-6 overflow-x-auto border border-[#2e2820]">
+      <div className="mb-6 overflow-x-auto border border-[#B0AD9E] rounded-sm">
         <table className="w-full border-collapse text-sm">{children}</table>
       </div>
     ),
     thead: ({ children }) => (
-      <thead className="bg-[#1c1814] text-[#8a7a60]">{children}</thead>
+      <thead className="bg-[#E5E3DA] text-[#4A4A42]">{children}</thead>
     ),
     tbody: ({ children }) => (
-      <tbody className="divide-y divide-[#2e2820]">{children}</tbody>
+      <tbody className="divide-y divide-[#B0AD9E]">{children}</tbody>
     ),
     tr: ({ children }) => (
-      <tr className="transition-colors hover:bg-[#2e2820]/40">{children}</tr>
+      <tr className="transition-colors hover:bg-[#E5E3DA]/60">{children}</tr>
     ),
     th: ({ children }) => (
-      <th className="px-4 py-2.5 text-left font-mono text-xs font-semibold uppercase tracking-wider text-[#4a3c28]">
+      <th className="px-4 py-2.5 text-left font-barlow text-xs font-semibold uppercase tracking-wider text-[#7A7768]">
         {children}
       </th>
     ),
     td: ({ children }) => (
-      <td className="px-4 py-2.5 font-mono text-[#8a7a60]">{children}</td>
+      <td className="px-4 py-2.5 text-[#4A4A42]">{children}</td>
     ),
-    hr: () => <hr className="my-8 border-[#2e2820]" />,
+    hr: () => <hr className="my-8 border-[#B0AD9E]" />,
     strong: ({ children }) => (
-      <strong className="font-semibold text-[#f0dfc0]">{children}</strong>
+      <strong className="font-semibold text-[#1A1A16]">{children}</strong>
     ),
-    em: ({ children }) => <em className="italic text-[#8a7a60]">{children}</em>,
+    em: ({ children }) => <em className="italic text-[#4A4A42]">{children}</em>,
   };
 }
 

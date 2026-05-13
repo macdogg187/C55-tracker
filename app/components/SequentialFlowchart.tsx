@@ -9,14 +9,11 @@ type Props = {
 };
 
 const HEALTH_FILL: Record<string, string> = {
-  nominal: "#6ab04c",
-  watch: "#c85a10",
-  critical: "#cc3311",
+  nominal: "#2B7A3E",
+  watch: "#B8860B",
+  critical: "#A82020",
 };
 
-// Group slots by the canonical sequential phase of the production flow.
-// Order: Cluster (3 orientations × 5 positions) → Pumps (3 × 4) → Outlet Manifold
-// → Homogenizing Valve section (HVB → Ceramic Seat → Impact Ring → Ceramic Stem → Transducer).
 function groupParts(parts: PartStatus[]) {
   const sorted = [...parts].sort((a, b) => a.sequenceOrder - b.sequenceOrder);
   const phase = (p: PartStatus) =>
@@ -26,7 +23,7 @@ function groupParts(parts: PartStatus[]) {
         ? `pump:${p.orientation}`
         : p.zone === "manifold"
           ? "manifold"
-          : "homogenizer"; // instrument zone (Transducer) merges into homogenizer section
+          : "homogenizer";
   const groups: { key: string; label: string; parts: PartStatus[] }[] = [];
   for (const p of sorted) {
     const k = phase(p);
@@ -58,13 +55,13 @@ export function SequentialFlowchart({ parts, selectedId, onSelect }: Props) {
   return (
     <div className="flex w-full flex-col gap-3">
       <div className="flex items-center justify-between text-xs">
-        <span className="font-orbitron uppercase tracking-[0.18em] text-[#e8a020]">
+        <span className="font-barlow uppercase tracking-[0.18em] text-[#C04810]">
           Process Flow · Inlet → Outlet
         </span>
-        <span className="font-mono text-[#5a4a38]">Click a node to focus its lifecycle.</span>
+        <span className="text-[#787870]">Click a node to focus its lifecycle.</span>
       </div>
 
-      <div className="flex w-full overflow-x-auto border-2 border-[#2e2820] bg-[#1c1814] p-4">
+      <div className="flex w-full overflow-x-auto border border-[#B0AD9E] bg-[#E5E3DA] p-4 rounded-sm">
         <div className="flex min-w-max items-stretch gap-3">
           {groups.map((g, i) => (
             <div key={g.key} className="flex items-stretch gap-3">
@@ -88,8 +85,8 @@ function FlowGroup({
   onSelect: (id: string) => void;
 }) {
   return (
-    <div className="flex flex-col border border-[#2e2820] bg-[#0e0c0a] px-3 py-2">
-      <div className="mb-2 font-orbitron text-[10px] font-semibold uppercase tracking-widest text-[#4a3c28]">
+    <div className="flex flex-col border border-[#B0AD9E] bg-[#FAFAF5] px-3 py-2 rounded-sm">
+      <div className="mb-2 font-barlow text-[10px] font-semibold uppercase tracking-widest text-[#7A7768]">
         {group.label}
       </div>
       <div className="flex flex-col gap-1.5">
@@ -97,21 +94,21 @@ function FlowGroup({
           <button
             key={p.id}
             onClick={() => onSelect(p.id)}
-            className={`group flex min-w-[180px] items-center justify-between gap-3 border px-2.5 py-1.5 text-left text-xs transition ${
+            className={`group flex min-w-[180px] items-center justify-between gap-3 border px-2.5 py-1.5 text-left text-xs transition-all rounded-sm ${
               selectedId === p.id
-                ? "border-[#e8a020] bg-[#2e2820] text-[#f0dfc0] shadow-[0_0_12px_rgba(232,160,32,0.2)]"
-                : "border-[#2e2820] bg-[#1c1814] text-[#8a7a60] hover:border-[#4a3c28]"
+                ? "border-[#C04810] bg-[#F0EFE8] text-[#1A1A16] shadow-[0_0_0_1px_rgba(212,96,42,0.2)]"
+                : "border-[#B0AD9E] bg-[#F0EFE8] text-[#4A4A42] hover:border-[#7A7768]"
             }`}
             title={`${p.installationId} · ${p.partName}`}
           >
             <div className="flex min-w-0 flex-col">
-              <span className="truncate font-mono text-[#f0dfc0]">{p.partName}</span>
-              <span className="font-mono text-[10px] text-[#4a3c28]">
+              <span className="truncate text-[#1A1A16]">{p.partName}</span>
+              <span className="text-[10px] text-[#7A7768]">
                 {p.installationId}
               </span>
             </div>
             <span
-              className="h-2.5 w-2.5 shrink-0"
+              className="h-2.5 w-2.5 shrink-0 rounded-full"
               style={{ backgroundColor: HEALTH_FILL[p.health] }}
               aria-label={p.health}
             />
@@ -131,10 +128,10 @@ function FlowArrow() {
           y1="11"
           x2="20"
           y2="11"
-          stroke="#e8a020"
+          stroke="#C04810"
           strokeWidth="2"
         />
-        <polygon points="20,5 24,11 20,17" fill="#e8a020" />
+        <polygon points="20,5 24,11 20,17" fill="#C04810" />
       </svg>
     </div>
   );

@@ -17,23 +17,14 @@ type Props = {
 };
 
 type SlopePoint = {
-  /** Fake UTCTimestamp = cumulativeRuntimeSeconds, used as x-axis value. */
   fakeTime: UTCTimestamp;
   cumulativeMin: number;
-  maxSlope: number;   // worst-case rising dT/dt across T01/T02/T03 (°C/min)
+  maxSlope: number;
   slopeT01: number;
   slopeT02: number;
   slopeT03: number;
 };
 
-/**
- * Compute sample-to-sample rising temperature slopes during active P01 windows.
- *
- * X-axis: cumulative active runtime minutes (re-mapped to fake UTCTimestamp so
- *   lightweight-charts can use its time scale). Gaps ≥ gap_off_min are skipped
- *   but the cumulative counter keeps increasing so chart times stay sorted.
- * Y-axis: max(0, dT/dt) across T01/T02/T03, in °C/min.
- */
 function computeSlopePoints(series: FatigueSample[]): SlopePoint[] {
   const ACTIVE = new Set(["active", "high_stress", "out_of_band"]);
   const GAP_MIN = LOGIC.GAP_OFF_MIN;
@@ -54,10 +45,6 @@ function computeSlopePoints(series: FatigueSample[]): SlopePoint[] {
 
     if (dtMin <= 0) continue;
 
-    // Gaps ≥ gap_off_min indicate a machine-off period — skip the pair but
-    // do NOT reset cumulativeMin. Resetting caused fakeTime to go backwards
-    // (later points got smaller timestamps than earlier ones), which crashed
-    // lightweight-charts' strict ascending-time assertion on setData.
     if (dtMin > GAP_MIN) {
       continue;
     }
@@ -87,7 +74,6 @@ function computeSlopePoints(series: FatigueSample[]): SlopePoint[] {
   return points;
 }
 
-/** Bin slope points, keeping the max slope within each bin. */
 function binSlopePoints(points: SlopePoint[], bins = 300): SlopePoint[] {
   if (points.length <= bins) return points;
   const step = Math.max(1, Math.floor(points.length / bins));
@@ -106,11 +92,9 @@ function binSlopePoints(points: SlopePoint[], bins = 300): SlopePoint[] {
 /**
  * Seal temperature slope histogram.
  *
- * X-axis  — Cumulative P01 active runtime (minutes). Only time when P01 is in
- *            the active band advances the counter; machine-off gaps are skipped.
+ * X-axis  — Cumulative P01 active runtime (minutes).
  * Y-axis  — Max rising dT/dt across T01/T02/T03 (°C/min).
- * Colours — Green < warn threshold · Amber ≥ warn < crit · Red ≥ crit
- *           Thresholds are tunable via config/logic-params.json → temp_slope.
+ * Colours — Avocado < warn · Gold ≥ warn < crit · Red ≥ crit
  */
 export function TemperatureChart({ series }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -138,25 +122,29 @@ export function TemperatureChart({ series }: Props) {
       width: el.clientWidth,
       height: 200,
       layout: {
-        background: { color: "#1c1814" },
-        textColor: "#8a7a60",
+        background: { color: "#F0EFE8" },
+        textColor: "#4A4A42",
         fontSize: 11,
       },
       grid: {
-        vertLines: { color: "#2e2820" },
-        horzLines: { color: "#2e2820" },
+        vertLines: { color: "#D5D3C8" },
+        horzLines: { color: "#D5D3C8" },
       },
       crosshair: {
         mode: CrosshairMode.Normal,
-        vertLine: { color: "#4a3c28", width: 1, style: 1, labelBackgroundColor: "#2e2820" },
-        horzLine: { color: "#4a3c28", width: 1, style: 1, labelBackgroundColor: "#2e2820" },
+        vertLine: { color: "#7A7768", width: 1, style: 1, labelBackgroundColor: "#E5E3DA" },
+        horzLine: { color: "#7A7768", width: 1, style: 1, labelBackgroundColor: "#E5E3DA" },
       },
       rightPriceScale: {
-        borderColor: "#2e2820",
+        borderColor: "#B0AD9E",
         scaleMargins: { top: 0.08, bottom: 0.04 },
       },
+      leftPriceScale: {
+        visible: true,
+        borderColor: "#B0AD9E",
+      },
       timeScale: {
-        borderColor: "#2e2820",
+        borderColor: "#B0AD9E",
         timeVisible: false,
         tickMarkFormatter: (t: UTCTimestamp) => `${Math.round((t as number) / 60)} min`,
       },
@@ -165,16 +153,15 @@ export function TemperatureChart({ series }: Props) {
 
     const histSeries = chart.addSeries(HistogramSeries, {
       base: 0,
-      title: "dT/dt max",
+      title: "dT/dt (°C/min)",
       priceScaleId: "right",
       lastValueVisible: true,
       priceLineVisible: false,
     });
 
-    // Reference lines for warn / crit thresholds
     histSeries.createPriceLine({
       price: WARN,
-      color: "rgba(200,90,16,0.6)",
+      color: "rgba(218,165,32,0.6)",
       lineWidth: 1,
       lineStyle: 2,
       axisLabelVisible: true,
@@ -182,7 +169,7 @@ export function TemperatureChart({ series }: Props) {
     });
     histSeries.createPriceLine({
       price: CRIT,
-      color: "rgba(204,51,17,0.6)",
+      color: "rgba(184,58,27,0.6)",
       lineWidth: 1,
       lineStyle: 2,
       axisLabelVisible: true,
@@ -195,10 +182,10 @@ export function TemperatureChart({ series }: Props) {
         value: p.maxSlope,
         color:
           p.maxSlope >= CRIT
-            ? "#cc3311"
+            ? "#A82020"
             : p.maxSlope >= WARN
-            ? "#c85a10"
-            : "#6ab04c",
+            ? "#B8860B"
+            : "#2B7A3E",
       })),
     );
 
@@ -235,24 +222,24 @@ export function TemperatureChart({ series }: Props) {
       if (!pt) { tooltip.style.display = "none"; return; }
 
       const sensorLine = (label: string, val: number, isWorst: boolean) => {
-        const color = isWorst ? "#e8a020" : "#5a4a38";
+        const color = isWorst ? "#C04810" : "#787870";
         return `<div style="display:flex;align-items:center;gap:6px">
-          <span style="color:${color};font-family:monospace">${label}</span>
-          <span style="color:#f0dfc0;font-family:monospace">${val.toFixed(3)} °C/min</span>
+          <span style="color:${color}">${label}</span>
+          <span style="color:#1A1A16">${val.toFixed(3)} °C/min</span>
         </div>`;
       };
 
       const worstVal = pt.maxSlope;
       tooltip.innerHTML = `
-        <div style="color:#5a4a38;font-size:10px;margin-bottom:3px;font-family:monospace;letter-spacing:0.1em">
+        <div style="color:#787870;font-size:10px;margin-bottom:3px;letter-spacing:0.1em">
           RUNTIME: ${pt.cumulativeMin.toFixed(1)} min
         </div>
         ${sensorLine("T01", pt.slopeT01, pt.slopeT01 === worstVal && worstVal > 0)}
         ${sensorLine("T02", pt.slopeT02, pt.slopeT02 === worstVal && worstVal > 0)}
         ${sensorLine("T03", pt.slopeT03, pt.slopeT03 === worstVal && worstVal > 0)}
-        <div style="display:flex;align-items:center;gap:6px;border-top:1px solid #2e2820;margin-top:4px;padding-top:4px">
-          <span style="color:#c85a10;font-family:monospace">MAX</span>
-          <span style="color:#f0dfc0;font-family:monospace">${worstVal.toFixed(3)} °C/min</span>
+        <div style="display:flex;align-items:center;gap:6px;border-top:1px solid #B0AD9E;margin-top:4px;padding-top:4px">
+          <span style="color:#B8860B">MAX</span>
+          <span style="color:#1A1A16">${worstVal.toFixed(3)} °C/min</span>
         </div>
       `;
 
@@ -266,7 +253,7 @@ export function TemperatureChart({ series }: Props) {
       const top = py + 14 + ttH > el.clientHeight ? py - 14 - ttH : py + 14;
       tooltip.style.left = `${left}px`;
       tooltip.style.top = `${top}px`;
-      tooltip.style.borderColor = "#e8a020";
+      tooltip.style.borderColor = "#C04810";
     });
 
     // ── Resize observer ──────────────────────────────────────────────────────
@@ -286,36 +273,36 @@ export function TemperatureChart({ series }: Props) {
 
   if (!hasTempData) {
     return (
-      <div className="flex h-40 items-center justify-center border-2 border-[#2e2820] bg-[#1c1814] font-mono text-sm text-[#5a4a38]">
-        NO SEAL-TEMP DATA — RUN <code className="mx-1 text-[#8a7a60]">python data_pipeline.py</code> TO POPULATE T01–T03
+      <div className="flex h-40 items-center justify-center border border-[#B0AD9E] bg-[#E5E3DA] text-sm text-[#787870] rounded-sm">
+        NO SEAL-TEMP DATA — RUN <code className="mx-1 text-[#4A4A42]">python data_pipeline.py</code> TO POPULATE T01–T03
       </div>
     );
   }
 
   if (slopePoints.length === 0) {
     return (
-      <div className="flex h-40 items-center justify-center border-2 border-[#2e2820] bg-[#1c1814] font-mono text-sm text-[#5a4a38]">
+      <div className="flex h-40 items-center justify-center border border-[#B0AD9E] bg-[#E5E3DA] text-sm text-[#787870] rounded-sm">
         NO ACTIVE-RUN TEMPERATURE SAMPLES AVAILABLE
       </div>
     );
   }
 
   return (
-    <div className="border-2 border-[#2e2820] bg-[#1c1814] p-3">
+    <div className="border border-[#B0AD9E] bg-[#E5E3DA] p-3 rounded-sm">
       {/* Header */}
       <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-xs">
         <div>
-          <div className="font-orbitron uppercase tracking-[0.18em] text-[#c85a10]">
+          <div className="font-barlow uppercase tracking-[0.18em] text-[#B8860B]">
             Seal Temperature Slope · dT/dt
           </div>
-          <div className="mt-0.5 font-mono text-[10px] text-[#5a4a38]">
+          <div className="mt-0.5 text-[10px] text-[#787870]">
             Active runs only · x-axis = cumulative P01 runtime (min) · worst-case rise rate across T01–T03
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-3 font-mono text-[10px] text-[#8a7a60]">
-          <LegendSwatch color="#6ab04c" label={`< ${LOGIC.TEMP_SLOPE_WARN_CPM} °C/min`} />
-          <LegendSwatch color="#c85a10" label={`≥ ${LOGIC.TEMP_SLOPE_WARN_CPM} °C/min`} />
-          <LegendSwatch color="#cc3311" label={`≥ ${LOGIC.TEMP_SLOPE_CRIT_CPM} °C/min`} />
+        <div className="flex flex-wrap items-center gap-3 text-[10px] text-[#4A4A42]">
+          <LegendSwatch color="#2B7A3E" label={`< ${LOGIC.TEMP_SLOPE_WARN_CPM} °C/min`} />
+          <LegendSwatch color="#B8860B" label={`≥ ${LOGIC.TEMP_SLOPE_WARN_CPM} °C/min`} />
+          <LegendSwatch color="#A82020" label={`≥ ${LOGIC.TEMP_SLOPE_CRIT_CPM} °C/min`} />
         </div>
       </div>
 
@@ -330,19 +317,18 @@ export function TemperatureChart({ series }: Props) {
             minWidth: 200,
             zIndex: 10,
             pointerEvents: "none",
-            background: "#0e0c0a",
-            border: "1px solid #e8a020",
-            borderRadius: 0,
+            background: "#FAFAF5",
+            border: "1px solid #C04810",
+            borderRadius: "4px",
             padding: "8px 10px",
             lineHeight: "1.55",
             fontSize: 11,
-            fontFamily: "monospace",
-            boxShadow: "0 4px 16px rgba(0,0,0,0.7)",
+            boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
           }}
         />
       </div>
 
-      <div className="mt-1.5 font-mono text-[9px] text-[#4a3c28]">
+      <div className="mt-1.5 text-[9px] text-[#7A7768]">
         ↑ dT/dt (°C/min) · right axis · hover for per-sensor breakdown
       </div>
     </div>
@@ -352,7 +338,7 @@ export function TemperatureChart({ series }: Props) {
 function LegendSwatch({ color, label }: { color: string; label: string }) {
   return (
     <span className="inline-flex items-center gap-1.5">
-      <span className="inline-block h-2 w-3" style={{ background: color }} />
+      <span className="inline-block h-2 w-3 rounded-sm" style={{ background: color }} />
       {label}
     </span>
   );

@@ -221,7 +221,7 @@ function normaliseLifecycle(raw: Partial<Lifecycle>): Lifecycle {
 export type ReplacePartInput = {
   installation_id: string;
   new_serial: string;
-  failure_mode: FailureMode;
+  failure_mode?: FailureMode | null;   // optional for fresh installs
   notes?: string;
   timestamp?: string;        // override "now" for backfills
 };
@@ -377,7 +377,7 @@ class LocalJsonStore implements LifecycleStore {
         removal_date: ts,
         archived_at: ts,
         archive_reason: "replace_part",
-        failure_mode: input.failure_mode,
+        failure_mode: input.failure_mode ?? null,
         failure_notes: input.notes ?? previous.failure_notes,
       };
 
@@ -418,7 +418,7 @@ class LocalJsonStore implements LifecycleStore {
       installation_id: input.installation_id,
       lifecycle_id: archived?.id ?? null,
       event_type: isFreshInstall ? "reset" : "replace",
-      failure_mode: isFreshInstall ? null : input.failure_mode,
+      failure_mode: isFreshInstall ? null : (input.failure_mode ?? null),
       detected_at: ts,
       ended_at: ts,
       duration_minutes: null,
@@ -829,7 +829,7 @@ class SupabaseStore implements LifecycleStore {
         installation_id: input.installation_id,
         lifecycle_id: archived?.id ?? null,
         event_type: isFreshInstall ? "reset" : "replace",
-        failure_mode: isFreshInstall ? null : input.failure_mode,
+        failure_mode: isFreshInstall ? null : (input.failure_mode ?? null),
         detected_at: ts,
         ended_at: ts,
         source: "manual",

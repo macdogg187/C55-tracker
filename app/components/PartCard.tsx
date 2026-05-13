@@ -7,19 +7,20 @@ type Props = {
   part: PartStatus;
   selected: boolean;
   onSelect: () => void;
+  onReplace?: () => void;
 };
 
 function formatHours(min: number) {
   return `${(min / 60).toFixed(1)} h`;
 }
 
-export function PartCard({ part, selected, onSelect }: Props) {
+export function PartCard({ part, selected, onSelect, onReplace }: Props) {
   const stateColor =
     part.health === "critical"
-      ? "text-[#cc3311]"
+      ? "text-[#A82020]"
       : part.health === "watch"
-        ? "text-[#c85a10]"
-        : "text-[#6ab04c]";
+        ? "text-[#B8860B]"
+        : "text-[#2B7A3E]";
 
   const meter = part.isConsumable ? (
     <ConsumableMeter
@@ -37,45 +38,55 @@ export function PartCard({ part, selected, onSelect }: Props) {
   );
 
   return (
-    <button
-      onClick={onSelect}
-      className={`group flex w-full items-center gap-4 border-2 p-4 text-left transition ${
+    <div
+      className={`group flex w-full items-center gap-4 border p-4 text-left transition-all rounded-sm ${
         selected
-          ? "border-[#e8a020] bg-[#1c1814] shadow-[0_0_24px_rgba(232,160,32,0.2)]"
-          : "border-[#2e2820] bg-[#1c1814] hover:border-[#4a3c28]"
+          ? "border-[#C04810] bg-[#F0EFE8] shadow-[0_0_0_1px_rgba(212,96,42,0.2)]"
+          : "border-[#B0AD9E] bg-[#F0EFE8] hover:border-[#7A7768]"
       }`}
     >
-      {meter}
-      <div className="min-w-0 space-y-1">
-        <p className="truncate text-sm font-semibold text-[#f0dfc0]">
-          {part.partName}
-        </p>
-        <p className="font-mono text-[10px] text-[#5a4a38]">
-          {part.installationId}
-          {part.isConsumable && <span className="ml-1 text-[#c85a10]">· consumable</span>}
-          {part.isStructural && <span className="ml-1 text-[#e8a020]">· structural</span>}
-        </p>
-        <p className="font-mono text-xs text-[#8a7a60]">S/N: {part.serialNumber || "—"}</p>
-        <p className="font-mono text-xs text-[#8a7a60]">
-          Active: {formatHours(part.granularRuntimeMinutes)} · σ-stress:{" "}
-          {formatHours(part.highStressMinutes)}
-        </p>
-        <div className="flex items-center gap-2">
-          <span className={`font-orbitron text-[10px] font-medium uppercase tracking-wider ${stateColor}`}>
-            {part.health}
-          </span>
-          {part.alert && (
-            <span className={`px-2 py-0.5 font-orbitron text-[9px] font-semibold uppercase tracking-wider ${
-              part.alert === "failure"
-                ? "bg-[#cc3311]/20 text-[#ff6644]"
-                : "bg-[#c85a10]/20 text-[#e8a020]"
-            }`}>
-              {part.alert === "failure" ? "Replace Now" : "Inspect Due"}
+      <button onClick={onSelect} className="flex flex-1 items-center gap-4 text-left">
+        {meter}
+        <div className="min-w-0 space-y-1">
+          <p className="truncate text-sm font-semibold text-[#1A1A16]">
+            {part.partName}
+          </p>
+          <p className="text-[10px] text-[#787870]">
+            {part.installationId}
+            {part.isConsumable && <span className="ml-1 text-[#B8860B]">· consumable</span>}
+            {part.isStructural && <span className="ml-1 text-[#C04810]">· structural</span>}
+          </p>
+          <p className="text-xs text-[#4A4A42]">S/N: {part.serialNumber || "—"}</p>
+          <p className="text-xs text-[#4A4A42]">
+            Active: {formatHours(part.granularRuntimeMinutes)} · σ-stress:{" "}
+            {formatHours(part.highStressMinutes)}
+          </p>
+          <div className="flex items-center gap-2">
+            <span className={`font-barlow text-[10px] font-medium uppercase tracking-wider ${stateColor}`}>
+              {part.health}
             </span>
-          )}
+            {part.alert && (
+              <span className={`px-2 py-0.5 font-barlow text-[9px] font-semibold uppercase tracking-wider rounded-sm ${
+                part.alert === "failure"
+                  ? "bg-[#A82020]/15 text-[#A82020]"
+                  : "bg-[#B8860B]/15 text-[#B8860B]"
+              }`}>
+                {part.alert === "failure" ? "Replace Now" : "Inspect Due"}
+              </span>
+            )}
+          </div>
         </div>
-      </div>
-    </button>
+      </button>
+      {onReplace && (
+        <button
+          onClick={(e) => { e.stopPropagation(); onReplace(); }}
+          className="shrink-0 border border-[#C04810] bg-[#C04810]/10 px-2.5 py-1.5 font-barlow text-[9px] font-semibold uppercase tracking-wider text-[#C04810] transition hover:bg-[#C04810]/20 rounded-sm"
+          title="Replace this part"
+        >
+          Replace
+        </button>
+      )}
+    </div>
   );
 }
 
@@ -96,12 +107,12 @@ function RuntimeGauge({
   const C = 2 * Math.PI * radius;
   const off = C - ((pct ?? 0) / 100) * C;
   const stroke =
-    pct == null ? "#2e2820" : pct >= 85 ? "#cc3311" : pct >= 60 ? "#c85a10" : "#e8a020";
+    pct == null ? "#B0AD9E" : pct >= 85 ? "#A82020" : pct >= 60 ? "#B8860B" : "#C04810";
 
   return (
     <div className="relative h-24 w-24 shrink-0">
       <svg viewBox="0 0 100 100" className="h-full w-full">
-        <circle cx="50" cy="50" r={radius} fill="none" stroke="#2e2820" strokeWidth="9" />
+        <circle cx="50" cy="50" r={radius} fill="none" stroke="#B0AD9E" strokeWidth="9" />
         <circle
           cx="50"
           cy="50"
@@ -118,7 +129,7 @@ function RuntimeGauge({
           <InspectionTick angle={(inspection / ceiling) * 360} />
         )}
       </svg>
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center font-mono text-xs font-semibold text-[#f0dfc0]">
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center text-xs font-semibold text-[#1A1A16]">
         {pct != null ? `${pct.toFixed(0)}%` : "—"}
       </div>
     </div>
@@ -133,7 +144,7 @@ function InspectionTick({ angle }: { angle: number }) {
   const y1 = 50 + r1 * Math.sin(rad);
   const x2 = 50 + r2 * Math.cos(rad);
   const y2 = 50 + r2 * Math.sin(rad);
-  return <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="#e8a020" strokeWidth="2" />;
+  return <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="#C04810" strokeWidth="2" />;
 }
 
 function ConsumableMeter({
@@ -148,18 +159,18 @@ function ConsumableMeter({
   const wear = sealWearFraction(runtime, lifeLow, lifeHigh);
   const pct = Math.min(100, Math.round(wear * 100));
   const fill =
-    pct >= 85 ? "bg-[#cc3311]" : pct >= 60 ? "bg-[#c85a10]" : "bg-[#e8a020]";
+    pct >= 85 ? "bg-[#A82020]" : pct >= 60 ? "bg-[#B8860B]" : "bg-[#C04810]";
   return (
-    <div className="flex h-24 w-24 shrink-0 flex-col items-center justify-center gap-1 border border-[#2e2820] bg-[#0e0c0a] p-2">
-      <div className="font-orbitron text-[8px] uppercase tracking-widest text-[#5a4a38]">Life</div>
-      <div className="relative h-12 w-3 overflow-hidden bg-[#2e2820]">
+    <div className="flex h-24 w-24 shrink-0 flex-col items-center justify-center gap-1 border border-[#B0AD9E] bg-[#E5E3DA] p-2 rounded-sm">
+      <div className="font-barlow text-[8px] uppercase tracking-widest text-[#787870]">Life</div>
+      <div className="relative h-12 w-3 overflow-hidden bg-[#B0AD9E] rounded-sm">
         <div
-          className={`absolute bottom-0 left-0 right-0 ${fill}`}
+          className={`absolute bottom-0 left-0 right-0 ${fill} rounded-sm`}
           style={{ height: `${pct}%` }}
         />
       </div>
-      <div className="font-mono text-xs font-semibold text-[#f0dfc0]">{pct}%</div>
-      <div className="font-mono text-[9px] text-[#5a4a38]">{lifeLow}–{lifeHigh} min</div>
+      <div className="text-xs font-semibold text-[#1A1A16]">{pct}%</div>
+      <div className="text-[9px] text-[#787870]">{lifeLow}–{lifeHigh} min</div>
     </div>
   );
 }

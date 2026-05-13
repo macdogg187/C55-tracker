@@ -14,7 +14,7 @@ export default async function GlossaryPage() {
   const markdown = await fs.readFile(filePath, "utf-8");
 
   return (
-    <main className="min-h-screen bg-[#12100e] text-[#f0dfc0]">
+    <main className="min-h-screen bg-[#FAFAF5] text-[#3D3427]">
       <div className="mx-auto w-full max-w-4xl px-5 py-10 lg:px-8">
         <GlossaryContent markdown={markdown} />
       </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useMemo } from "react";
+import { useEffect, useRef, useMemo, useCallback } from "react";
 import {
   createChart,
   LineSeries,
@@ -9,15 +9,14 @@ import {
   CrosshairMode,
   type UTCTimestamp,
   type IChartApi,
+  type ISeriesApi,
   type SeriesMarker,
   type MouseEventParams,
   type Time,
 } from "lightweight-charts";
 import {
   binFatigueSeries,
-  computeCumulativeStress,
   LOGIC,
-  type CumulativeStressPoint,
   type FatigueSample,
   type PartRecord,
   type RunRecord,
@@ -37,27 +36,18 @@ function toUTC(ts: string): UTCTimestamp {
 }
 
 /**
- * Interactive two-pane fatigue chart powered by lightweight-charts (TradingView).
+ * Single-pane fatigue chart: P01 pressure line + σ pulsation histogram.
  *
- * Pane 0 — Pressure + pulsation:
- *   • Cyan line  = P01 homogenizing pressure (right scale, kpsi)
- *   • Rose line  = 10-min rolling σ (left scale, kpsi)
- *   • Amber ◯   = high-stress samples (σ > 2 kpsi)
- *   • Red ◯     = out-of-band samples (P01 > 30 kpsi)
- *   • ↑ markers  = production run start boundaries
- *   • Dashed ref lines at 15 / 30 kpsi and σ = 2 kpsi
- *
- * Pane 1 — Cumulative stress:
- *   • Histogram = running Σ (p01 − 19 kpsi) × Δt in kpsi-min
- *   • Green → amber → red as accumulated fatigue climbs
- *
- * Supports zoom / pan (scroll wheel + drag) and a hover crosshair
- * tooltip showing exact P01, σ, and cumulative stress at any point.
+ * Zoom/pan state is preserved across data refreshes — the chart is created
+ * once and updated in-place via setData() rather than being torn down.
  */
 export function FatigueChart({ series, runs, parts }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
+  const p01SeriesRef = useRef<ISeriesApi<"Line"> | null>(null);
+  const sigmaSeriesRef = useRef<ISeriesApi<"Histogram"> | null>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
+  const initializedRef = useRef(false);
 
   const active = useMemo(
     () =>
@@ -71,118 +61,17 @@ export function FatigueChart({ series, runs, parts }: Props) {
   );
 
   const binned = useMemo(() => binFatigueSeries(active, 600), [active]);
-  const cumStress = useMemo(
-    () => computeCumulativeStress(binned, LOGIC.ACTIVE_BAND_LOW_KPSI, parts),
-    [binned, parts],
-  );
 
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el || binned.length === 0) return;
-
-    const chart = createChart(el, {
-      width: el.clientWidth,
-      height: 420,
-      layout: {
-        background: { color: "#1c1814" },
-        textColor: "#8a7a60",
-        fontSize: 11,
-      },
-      grid: {
-        vertLines: { color: "#2e2820" },
-        horzLines: { color: "#2e2820" },
-      },
-      crosshair: {
-        mode: CrosshairMode.Normal,
-        vertLine: { color: "#4a3c28", width: 1, style: 1, labelBackgroundColor: "#2e2820" },
-        horzLine: { color: "#4a3c28", width: 1, style: 1, labelBackgroundColor: "#2e2820" },
-      },
-      rightPriceScale: {
-        borderColor: "#2e2820",
-        scaleMargins: { top: 0.06, bottom: 0.06 },
-      },
-      leftPriceScale: {
-        visible: true,
-        borderColor: "#2e2820",
-        // Compress sigma to the lower third of pane 0 so it doesn't crowd P01
-        scaleMargins: { top: 0.65, bottom: 0.0 },
-      },
-      timeScale: {
-        borderColor: "#2e2820",
-        timeVisible: true,
-        secondsVisible: false,
-        fixLeftEdge: false,
-        fixRightEdge: false,
-      },
-    });
-    chartRef.current = chart;
-
-    // ── Pane 0: P01 + sigma ────────────────────────────────────────────────
-
-    chart.panes()[0].setHeight(270);
-
-    const p01S = chart.addSeries(LineSeries, {
-      color: "#e8a020",
-      lineWidth: 2,
-      title: "P01",
-      priceScaleId: "right",
-      lastValueVisible: true,
-      priceLineVisible: false,
-      crosshairMarkerVisible: true,
-      crosshairMarkerRadius: 4,
-      crosshairMarkerBorderColor: "#a06e10",
-      crosshairMarkerBackgroundColor: "#e8a020",
-    });
-
-    const sigmaS = chart.addSeries(HistogramSeries, {
-      color: "rgba(200,90,16,0.75)",
-      base: 0,
-      title: "σ",
-      priceScaleId: "left",
-      lastValueVisible: false,
-      priceLineVisible: false,
-    });
-
-    // Reference lines
-    p01S.createPriceLine({
-      price: LOGIC.ACTIVE_BAND_HIGH_KPSI,
-      color: "#4a3c28",
-      lineWidth: 1,
-      lineStyle: 2,
-      axisLabelVisible: true,
-      title: `${LOGIC.ACTIVE_BAND_HIGH_KPSI} kpsi`,
-    });
-    p01S.createPriceLine({
-      price: LOGIC.ACTIVE_BAND_LOW_KPSI,
-      color: "#4a3c28",
-      lineWidth: 1,
-      lineStyle: 2,
-      axisLabelVisible: true,
-      title: `${LOGIC.ACTIVE_BAND_LOW_KPSI} kpsi`,
-    });
-    sigmaS.createPriceLine({
-      price: LOGIC.PULSATION_STDEV_KPSI,
-      color: "rgba(200,90,16,0.6)",
-      lineWidth: 1,
-      lineStyle: 2,
-      axisLabelVisible: true,
-      title: "σ limit",
-    });
-
-    // Data
-    p01S.setData(binned.map((s) => ({ time: toUTC(s.ts), value: s.p01 })));
-    sigmaS.setData(binned.map((s) => ({ time: toUTC(s.ts), value: s.stdev })));
-
-    // ── Series markers: run starts + high-stress / out-of-band + part lifecycle ──
-
-    const markers: SeriesMarker<UTCTimestamp>[] = [];
+  // Build marker data from runs, status, and parts
+  const markers = useMemo(() => {
+    const m: SeriesMarker<UTCTimestamp>[] = [];
 
     if (runs && runs.length > 0) {
       for (const run of runs) {
-        markers.push({
+        m.push({
           time: toUTC(run.started_at),
           position: "belowBar",
-          color: "#e8a020",
+          color: "#C04810",
           shape: "arrowUp",
           text: `Run ${run.run_index + 1}`,
           size: 0.7,
@@ -192,18 +81,18 @@ export function FatigueChart({ series, runs, parts }: Props) {
 
     for (const s of binned) {
       if (s.status === "out_of_band") {
-        markers.push({
+        m.push({
           time: toUTC(s.ts),
           position: "aboveBar",
-          color: "#cc3311",
+          color: "#A82020",
           shape: "circle",
           size: 0.5,
         });
       } else if (s.status === "high_stress") {
-        markers.push({
+        m.push({
           time: toUTC(s.ts),
           position: "aboveBar",
-          color: "#c85a10",
+          color: "#B8860B",
           shape: "circle",
           size: 0.4,
         });
@@ -212,23 +101,20 @@ export function FatigueChart({ series, runs, parts }: Props) {
 
     if (parts && parts.length > 0) {
       for (const part of parts) {
-        // Use gap-snapped effective dates if available, fall back to tracker dates.
         const installDate = part.effective_installation_date ?? part.installation_date;
         const removalDate = part.effective_removal_date ?? part.removal_date;
         const isFallbackInstall = part.boundary_source?.install === "tracker_fallback";
 
-        // Installation marker — muted colour when boundary is a tracker fallback.
-        markers.push({
+        m.push({
           time: toUTC(installDate),
           position: "belowBar",
-          color: isFallbackInstall ? "#a06e10" : "#e8a020",
+          color: isFallbackInstall ? "#9A3A0E" : "#C04810",
           shape: "arrowUp",
           text: `${part.part_name} in`,
           size: 0.6,
         });
 
         if (removalDate) {
-          // Check if the removal falls inside a production run.
           let duringRunText = "";
           if (runs && runs.length > 0) {
             const removalMs = new Date(removalDate).getTime();
@@ -239,10 +125,10 @@ export function FatigueChart({ series, runs, parts }: Props) {
             );
             if (match) duringRunText = ` (during Run ${match.run_index + 1})`;
           }
-          markers.push({
+          m.push({
             time: toUTC(removalDate),
             position: "aboveBar",
-            color: "#c85a10",
+            color: "#B8860B",
             shape: "arrowDown",
             text: `${part.part_name} out${duringRunText}`,
             size: 0.6,
@@ -251,104 +137,105 @@ export function FatigueChart({ series, runs, parts }: Props) {
       }
     }
 
-    markers.sort((a, b) => (a.time as number) - (b.time as number));
-    createSeriesMarkers(p01S, markers);
+    m.sort((a, b) => (a.time as number) - (b.time as number));
+    return m;
+  }, [binned, runs, parts]);
 
-    // ── Pane 1: Cumulative stress histogram ────────────────────────────────
+  // ── Initialize chart once ────────────────────────────────────────────────
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
 
-    const stressPane = chart.addPane();
-    stressPane.setHeight(120);
+    const chart = createChart(el, {
+      width: el.clientWidth,
+      height: 340,
+      layout: {
+        background: { color: "#F0EFE8" },
+        textColor: "#4A4A42",
+        fontSize: 11,
+      },
+      grid: {
+        vertLines: { color: "#D5D3C8" },
+        horzLines: { color: "#D5D3C8" },
+      },
+      crosshair: {
+        mode: CrosshairMode.Normal,
+        vertLine: { color: "#7A7768", width: 1, style: 1, labelBackgroundColor: "#E5E3DA" },
+        horzLine: { color: "#7A7768", width: 1, style: 1, labelBackgroundColor: "#E5E3DA" },
+      },
+      rightPriceScale: {
+        borderColor: "#B0AD9E",
+        scaleMargins: { top: 0.06, bottom: 0.06 },
+      },
+      leftPriceScale: {
+        visible: true,
+        borderColor: "#B0AD9E",
+        scaleMargins: { top: 0.65, bottom: 0.0 },
+      },
+      timeScale: {
+        borderColor: "#B0AD9E",
+        timeVisible: true,
+        secondsVisible: false,
+        fixLeftEdge: false,
+        fixRightEdge: false,
+      },
+    });
+    chartRef.current = chart;
 
-    const stressSeries = stressPane.addSeries(HistogramSeries, {
-      color: "#6ab04c",
-      title: "Cumul. stress",
+    const p01S = chart.addSeries(LineSeries, {
+      color: "#C04810",
+      lineWidth: 2,
+      title: "P01 (kpsi)",
       priceScaleId: "right",
       lastValueVisible: true,
       priceLineVisible: false,
-      base: 0,
+      crosshairMarkerVisible: true,
+      crosshairMarkerRadius: 4,
+      crosshairMarkerBorderColor: "#9A3A0E",
+      crosshairMarkerBackgroundColor: "#C04810",
     });
+    p01SeriesRef.current = p01S;
 
-    // Build a per-lifecycle threshold lookup (in kpsi-min, same unit as cumStress).
-    // Rate = part's observed kpsi-min per active-minute; thresholds are in minutes.
-    type PartThresholds = { inspKpsiMin: number | null; failKpsiMin: number | null };
-    const partThreshMap = new Map<string, PartThresholds>();
-    if (parts && parts.length > 0) {
-      for (const p of parts) {
-        const rate =
-          p.active_runtime_minutes > 0
-            ? p.cumulative_pressure_stress / p.active_runtime_minutes
-            : null;
-        partThreshMap.set(p.installation_id, {
-          inspKpsiMin: rate != null && p.inspection_threshold_min != null
-            ? rate * p.inspection_threshold_min
-            : null,
-          failKpsiMin: rate != null && p.failure_threshold_min != null
-            ? rate * p.failure_threshold_min
-            : null,
-        });
-      }
-    }
+    const sigmaS = chart.addSeries(HistogramSeries, {
+      color: "rgba(218,165,32,0.75)",
+      base: 0,
+      title: "σ (kpsi)",
+      priceScaleId: "left",
+      lastValueVisible: false,
+      priceLineVisible: false,
+    });
+    sigmaSeriesRef.current = sigmaS;
 
-    // Fallback: colour relative to series max (used when no threshold data exists).
-    const maxStress = Math.max(1, ...cumStress.map((p) => p.value));
-
-    stressSeries.setData(
-      cumStress.map((pt: CumulativeStressPoint) => {
-        const thresh = pt.installation_id ? partThreshMap.get(pt.installation_id) : undefined;
-        let color: string;
-        if (thresh?.failKpsiMin != null && pt.value >= thresh.failKpsiMin) {
-          color = "#cc3311";
-        } else if (thresh?.inspKpsiMin != null && pt.value >= thresh.inspKpsiMin) {
-          color = "#c85a10";
-        } else if (thresh?.inspKpsiMin != null) {
-          // Threshold data available and we're below inspection — olive.
-          color = "#6ab04c";
-        } else {
-          // Fallback: relative-to-max colouring when no lifecycle thresholds available.
-          const ratio = pt.value / maxStress;
-          color = ratio > 0.75 ? "#cc3311" : ratio > 0.45 ? "#c85a10" : "#6ab04c";
-        }
-        return { time: toUTC(pt.ts), value: pt.value, color };
-      }),
-    );
-
-    chart.timeScale().fitContent();
+    // Reference lines
+    p01S.createPriceLine({
+      price: LOGIC.ACTIVE_BAND_HIGH_KPSI,
+      color: "#7A7768",
+      lineWidth: 1,
+      lineStyle: 2,
+      axisLabelVisible: true,
+      title: `${LOGIC.ACTIVE_BAND_HIGH_KPSI} kpsi`,
+    });
+    p01S.createPriceLine({
+      price: LOGIC.ACTIVE_BAND_LOW_KPSI,
+      color: "#7A7768",
+      lineWidth: 1,
+      lineStyle: 2,
+      axisLabelVisible: true,
+      title: `${LOGIC.ACTIVE_BAND_LOW_KPSI} kpsi`,
+    });
+    sigmaS.createPriceLine({
+      price: LOGIC.PULSATION_STDEV_KPSI,
+      color: "rgba(218,165,32,0.6)",
+      lineWidth: 1,
+      lineStyle: 2,
+      axisLabelVisible: true,
+      title: "σ limit",
+    });
 
     // ── Crosshair tooltip ──────────────────────────────────────────────────
 
     const tooltip = tooltipRef.current;
-
-    // Build lookup maps keyed by UTCTimestamp for O(1) hover lookups
-    const p01ByTime = new Map<number, FatigueSample>(
-      binned.map((s) => [toUTC(s.ts) as number, s]),
-    );
-    const stressByTime = new Map<number, number>(
-      cumStress.map((p) => [toUTC(p.ts) as number, p.value]),
-    );
-
-    function nearestSample(ts: UTCTimestamp): FatigueSample | null {
-      const exact = p01ByTime.get(ts as number);
-      if (exact) return exact;
-      let best: FatigueSample | null = null;
-      let bestDist = Infinity;
-      for (const [k, v] of p01ByTime) {
-        const d = Math.abs(k - (ts as number));
-        if (d < bestDist) { bestDist = d; best = v; }
-      }
-      return best;
-    }
-
-    function nearestStress(ts: UTCTimestamp): number {
-      const exact = stressByTime.get(ts as number);
-      if (exact !== undefined) return exact;
-      let best = 0;
-      let bestDist = Infinity;
-      for (const [k, v] of stressByTime) {
-        const d = Math.abs(k - (ts as number));
-        if (d < bestDist) { bestDist = d; best = v; }
-      }
-      return best;
-    }
+    const p01ByTimeRef = new Map<number, FatigueSample>();
 
     chart.subscribeCrosshairMove((param: MouseEventParams<Time>) => {
       if (!tooltip) return;
@@ -363,10 +250,18 @@ export function FatigueChart({ series, runs, parts }: Props) {
       }
 
       const utcTime = param.time as UTCTimestamp;
-      const sample = nearestSample(utcTime);
-      if (!sample) { tooltip.style.display = "none"; return; }
+      const exact = p01ByTimeRef.get(utcTime as number);
+      let best: FatigueSample | null = exact ?? null;
+      if (!best) {
+        let bestDist = Infinity;
+        for (const [k, v] of p01ByTimeRef) {
+          const d = Math.abs(k - (utcTime as number));
+          if (d < bestDist) { bestDist = d; best = v; }
+        }
+      }
+      if (!best) { tooltip.style.display = "none"; return; }
 
-      const stress = nearestStress(utcTime);
+      const sample = best;
       const d = new Date((utcTime as number) * 1000);
       const timeLabel =
         d.toLocaleDateString("en-US", { month: "short", day: "numeric" }) +
@@ -375,31 +270,27 @@ export function FatigueChart({ series, runs, parts }: Props) {
 
       const statusBadge =
         sample.status === "high_stress"
-          ? `<span style="color:#c85a10;font-size:9px;margin-left:4px">⚠ HIGH-STRESS</span>`
+          ? `<span style="color:#B8860B;font-size:9px;margin-left:4px">⚠ HIGH-STRESS</span>`
           : sample.status === "out_of_band"
-            ? `<span style="color:#cc3311;font-size:9px;margin-left:4px">✕ OUT-OF-BAND</span>`
+            ? `<span style="color:#A82020;font-size:9px;margin-left:4px">✕ OUT-OF-BAND</span>`
             : "";
 
       const sigmaFlag =
         sample.stdev > LOGIC.PULSATION_STDEV_KPSI
-          ? `<span style="color:#c85a10;font-size:9px;margin-left:4px">ABOVE LIMIT</span>`
+          ? `<span style="color:#B8860B;font-size:9px;margin-left:4px">ABOVE LIMIT</span>`
           : "";
 
       tooltip.innerHTML = `
-        <div style="color:#5a4a38;font-size:10px;margin-bottom:3px;font-family:monospace;letter-spacing:0.1em">${timeLabel}</div>
+        <div style="color:#787870;font-size:10px;margin-bottom:3px;letter-spacing:0.1em">${timeLabel}</div>
         <div style="display:flex;align-items:center;gap:6px">
-          <span style="color:#e8a020;font-family:monospace">P01</span>
-          <span style="color:#f0dfc0;font-family:monospace">${sample.p01.toFixed(2)} kpsi</span>
+          <span style="color:#C04810">P01</span>
+          <span style="color:#1A1A16">${sample.p01.toFixed(2)} kpsi</span>
           ${statusBadge}
         </div>
         <div style="display:flex;align-items:center;gap:6px">
-          <span style="color:#c85a10;font-family:monospace">&nbsp;σ&nbsp;</span>
-          <span style="color:#f0dfc0;font-family:monospace">${sample.stdev.toFixed(3)} kpsi</span>
+          <span style="color:#B8860B">&nbsp;σ&nbsp;</span>
+          <span style="color:#1A1A16">${sample.stdev.toFixed(3)} kpsi</span>
           ${sigmaFlag}
-        </div>
-        <div style="display:flex;align-items:center;gap:6px;border-top:1px solid #2e2820;margin-top:4px;padding-top:4px">
-          <span style="color:#6ab04c;font-family:monospace">Σ</span>
-          <span style="color:#f0dfc0;font-family:monospace">${stress.toFixed(0)} kpsi-min</span>
         </div>
       `;
 
@@ -409,7 +300,7 @@ export function FatigueChart({ series, runs, parts }: Props) {
       const py = param.point.y as number;
       const w = el.clientWidth;
       const ttW = 210;
-      const ttH = 100;
+      const ttH = 80;
       const left = px + 14 + ttW > w ? px - 14 - ttW : px + 14;
       const top = py + 14 + ttH > el.clientHeight ? py - 14 - ttH : py + 14;
       tooltip.style.left = `${left}px`;
@@ -424,39 +315,79 @@ export function FatigueChart({ series, runs, parts }: Props) {
     });
     ro.observe(el);
 
+    // Store the lookup-map setter so the data-update effect can populate it
+    (el as HTMLDivElement & { __setP01Map: (m: Map<number, FatigueSample>) => void }).__setP01Map = (m) => {
+      p01ByTimeRef.clear();
+      for (const [k, v] of m) p01ByTimeRef.set(k, v);
+    };
+
     return () => {
       ro.disconnect();
       chart.remove();
       chartRef.current = null;
+      p01SeriesRef.current = null;
+      sigmaSeriesRef.current = null;
+      initializedRef.current = false;
     };
-  }, [binned, cumStress, runs, parts]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps — chart created once
+
+  // ── Update data without destroying the chart ──────────────────────────────
+  useEffect(() => {
+    const p01S = p01SeriesRef.current;
+    const sigmaS = sigmaSeriesRef.current;
+    const chart = chartRef.current;
+    const el = containerRef.current;
+    if (!p01S || !sigmaS || !chart || !el || binned.length === 0) return;
+
+    const p01Data = binned.map((s) => ({ time: toUTC(s.ts), value: s.p01 }));
+    const sigmaData = binned.map((s) => ({ time: toUTC(s.ts), value: s.stdev }));
+
+    p01S.setData(p01Data);
+    sigmaS.setData(sigmaData);
+
+    // Update the tooltip lookup map
+    const mapSetter = (el as HTMLDivElement & { __setP01Map?: (m: Map<number, FatigueSample>) => void }).__setP01Map;
+    if (mapSetter) {
+      mapSetter(new Map<number, FatigueSample>(
+        binned.map((s) => [toUTC(s.ts) as number, s]),
+      ));
+    }
+
+    // Update markers
+    createSeriesMarkers(p01S, markers);
+
+    // Only fit content on first render, not on subsequent data updates
+    if (!initializedRef.current) {
+      chart.timeScale().fitContent();
+      initializedRef.current = true;
+    }
+  }, [binned, markers]);
 
   if (active.length === 0 && series.length > 0) {
     return (
-      <div className="flex h-64 items-center justify-center border-2 border-[#2e2820] bg-[#1c1814] font-mono text-sm text-[#5a4a38]">
+      <div className="flex h-64 items-center justify-center border border-[#B0AD9E] bg-[#E5E3DA] text-sm text-[#787870] rounded-sm">
         NO ACTIVE-RUN SAMPLES — UPLOAD VANTAGEPOINT CSV WITH P01 DATA
       </div>
     );
   }
 
   return (
-    <div className="border-2 border-[#2e2820] bg-[#1c1814] p-3">
+    <div className="border border-[#B0AD9E] bg-[#E5E3DA] p-3 rounded-sm">
       {/* Header */}
       <div className="mb-2 flex flex-wrap items-center justify-between gap-2 text-xs">
         <div>
-          <div className="font-orbitron uppercase tracking-[0.18em] text-[#e8a020]">
+          <div className="font-barlow uppercase tracking-[0.18em] text-[#C04810]">
             Fatigue · P01 Pressure + σ Pulsation
           </div>
-          <div className="mt-0.5 font-mono text-[10px] text-[#5a4a38]">
+          <div className="mt-0.5 text-[10px] text-[#787870]">
             Active runs only · scroll to zoom · drag to pan · hover for crosshair
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-3 font-mono text-[10px] text-[#8a7a60]">
-          <LegendSwatch color="#e8a020" label={`P01 (right, kpsi)`} />
-          <LegendSwatch color="rgba(200,90,16,0.75)" label={`σ ${LOGIC.ROLLING_WINDOW_MIN}-min (left, kpsi)`} />
-          <LegendSwatch color="#c85a10" label="High-stress" />
-          <LegendSwatch color="#cc3311" label="Out-of-band" />
-          <LegendGradient label="Cumul. stress (lower pane)" />
+        <div className="flex flex-wrap items-center gap-3 text-[10px] text-[#4A4A42]">
+          <LegendSwatch color="#C04810" label={`P01 (right, kpsi)`} />
+          <LegendSwatch color="rgba(218,165,32,0.75)" label={`σ ${LOGIC.ROLLING_WINDOW_MIN}-min (left, kpsi)`} />
+          <LegendSwatch color="#B8860B" label="High-stress" />
+          <LegendSwatch color="#A82020" label="Out-of-band" />
         </div>
       </div>
 
@@ -471,22 +402,20 @@ export function FatigueChart({ series, runs, parts }: Props) {
             minWidth: 200,
             zIndex: 10,
             pointerEvents: "none",
-            background: "#0e0c0a",
-            border: "1px solid #e8a020",
-            borderRadius: 0,
+            background: "#FAFAF5",
+            border: "1px solid #C04810",
+            borderRadius: "4px",
             padding: "8px 10px",
             lineHeight: "1.55",
             fontSize: 11,
-            fontFamily: "monospace",
-            boxShadow: "0 4px 16px rgba(0,0,0,0.7)",
+            boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
           }}
         />
       </div>
 
-      {/* Pane labels */}
-      <div className="mt-1.5 flex items-center justify-between font-mono text-[9px] text-[#4a3c28]">
-        <span>↑ P01 (amber, right) · σ pulsation (orange, left)</span>
-        <span>↓ Cumulative stress kpsi-min · olive → orange → red</span>
+      {/* Axis labels */}
+      <div className="mt-1.5 text-[9px] text-[#7A7768]">
+        P01 (right axis) · σ pulsation (left axis)
       </div>
     </div>
   );
@@ -496,22 +425,8 @@ function LegendSwatch({ color, label }: { color: string; label: string }) {
   return (
     <span className="inline-flex items-center gap-1.5">
       <span
-        className="inline-block h-2 w-3"
+        className="inline-block h-2 w-3 rounded-sm"
         style={{ background: color }}
-      />
-      {label}
-    </span>
-  );
-}
-
-function LegendGradient({ label }: { label: string }) {
-  return (
-    <span className="inline-flex items-center gap-1.5">
-      <span
-        className="inline-block h-2 w-6"
-        style={{
-          background: "linear-gradient(to right, #6ab04c, #c85a10, #cc3311)",
-        }}
       />
       {label}
     </span>

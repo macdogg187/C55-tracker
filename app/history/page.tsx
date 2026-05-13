@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import type { HistoryRow } from "../api/history/route";
 
@@ -103,6 +103,14 @@ function exportCsv(rows: HistoryRow[]) {
 }
 
 export default function HistoryPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#FAFAF5]" />}>
+      <HistoryContent />
+    </Suspense>
+  );
+}
+
+function HistoryContent() {
   const searchParams = useSearchParams();
   const equipmentId = searchParams.get("eq") ?? "";
 
@@ -154,22 +162,20 @@ export default function HistoryPage() {
   const archivedCount = filtered.filter((r) => r.status === "archived").length;
 
   return (
-    <main className="min-h-screen bg-[#12100e] text-[#f0dfc0]">
+    <main className="min-h-screen bg-[#FAFAF5] text-[#1A1A16]">
       <div className="mx-auto flex w-full max-w-[1500px] flex-col gap-6 px-5 py-6 lg:px-8">
 
-        {/* Page header */}
         <div>
-          <p className="font-orbitron text-xs uppercase tracking-widest text-[#e8a020]">Records</p>
-          <h1 className="mt-1 font-orbitron text-2xl font-semibold text-[#f0dfc0]">MTBF History</h1>
-          <p className="mt-1 font-mono text-sm text-[#5a4a38]">
+          <p className="font-barlow text-xs uppercase tracking-widest text-[#C04810]">Records</p>
+          <h1 className="mt-1 font-barlow text-2xl font-semibold text-[#1A1A16]">MTBF History</h1>
+          <p className="mt-1 text-sm text-[#787870]">
             All lifecycle records — historical Excel imports and in-app entries, active and archived.
           </p>
         </div>
 
-        {/* Controls */}
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative min-w-[220px] flex-1">
-            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#5a4a38]">
+            <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#787870]">
               ⌕
             </span>
             <input
@@ -177,61 +183,60 @@ export default function HistoryPage() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search slot, part, serial, failure mode…"
-              className="w-full border border-[#4a3c28] bg-[#1c1814] py-2 pl-8 pr-3 font-mono text-sm text-[#f0dfc0] placeholder:text-[#4a3c28] focus:border-[#e8a020] focus:outline-none"
+              className="w-full border border-[#7A7768] bg-[#F0EFE8] py-2 pl-8 pr-3 text-sm text-[#1A1A16] placeholder:text-[#7A7768] focus:border-[#C04810] focus:outline-none rounded-sm"
             />
           </div>
 
           {equipmentId && (
-            <label className="flex cursor-pointer items-center gap-2 font-mono text-sm text-[#8a7a60]">
+            <label className="flex cursor-pointer items-center gap-2 text-sm text-[#4A4A42]">
               <input
                 type="checkbox"
                 checked={showOnlyEquipment}
                 onChange={(e) => setShowOnlyEquipment(e.target.checked)}
-                className="accent-[#e8a020]"
+                className="accent-[#C04810]"
               />
               Equipment {equipmentId} only
             </label>
           )}
 
           <div className="ml-auto flex items-center gap-3">
-            <div className="flex gap-2 font-mono text-xs">
-              <span className="border border-[#6ab04c]/60 bg-[#6ab04c]/10 px-2 py-0.5 text-[#6ab04c]">
+            <div className="flex gap-2 text-xs">
+              <span className="border border-[#2B7A3E]/60 bg-[#2B7A3E]/10 px-2 py-0.5 text-[#2B7A3E] rounded-sm">
                 {activeCount} active
               </span>
-              <span className="border border-[#2e2820] bg-[#1c1814] px-2 py-0.5 text-[#5a4a38]">
+              <span className="border border-[#B0AD9E] bg-[#F0EFE8] px-2 py-0.5 text-[#787870] rounded-sm">
                 {archivedCount} archived
               </span>
             </div>
             <button
               onClick={() => exportCsv(filtered)}
               disabled={filtered.length === 0}
-              className="border border-[#4a3c28] bg-[#1c1814] px-3 py-1.5 font-mono text-xs font-medium text-[#8a7a60] transition hover:border-[#8a7a60] hover:text-[#f0dfc0] disabled:opacity-40"
+              className="border border-[#7A7768] bg-[#F0EFE8] px-3 py-1.5 text-xs font-medium text-[#4A4A42] transition hover:border-[#4A4A42] hover:text-[#1A1A16] disabled:opacity-40 rounded-sm"
             >
               Export CSV
             </button>
           </div>
         </div>
 
-        {/* Table */}
         {loading && (
-          <p className="py-12 text-center font-mono text-sm text-[#5a4a38]">Loading records…</p>
+          <p className="py-12 text-center text-sm text-[#787870]">Loading records…</p>
         )}
         {error && (
-          <p className="border border-[#cc3311]/60 bg-[#cc3311]/10 px-4 py-3 font-mono text-sm text-[#ff6644]">
+          <p className="border border-[#A82020]/40 bg-[#A82020]/8 px-4 py-3 text-sm text-[#A82020] rounded-sm">
             Failed to load history: {error}
           </p>
         )}
 
         {!loading && !error && (
-          <div className="overflow-x-auto border-2 border-[#2e2820]">
+          <div className="overflow-x-auto border border-[#B0AD9E] rounded-sm">
             <table className="w-full min-w-[900px] text-sm">
               <thead>
-                <tr className="border-b border-[#2e2820] bg-[#1c1814]">
+                <tr className="border-b border-[#B0AD9E] bg-[#E5E3DA]">
                   {COLUMNS.map((col) => (
                     <th
                       key={col.key}
                       onClick={() => toggleSort(col.key)}
-                      className={`cursor-pointer select-none whitespace-nowrap px-4 py-3 font-mono text-[11px] font-semibold uppercase tracking-widest text-[#4a3c28] hover:text-[#e8a020] ${col.align === "right" ? "text-right" : "text-left"}`}
+                      className={`cursor-pointer select-none whitespace-nowrap px-4 py-3 font-barlow text-[11px] font-semibold uppercase tracking-widest text-[#7A7768] hover:text-[#C04810] ${col.align === "right" ? "text-right" : "text-left"}`}
                     >
                       {col.label}
                       {sortKey === col.key && (
@@ -239,15 +244,15 @@ export default function HistoryPage() {
                       )}
                     </th>
                   ))}
-                  <th className="px-4 py-3 text-left font-mono text-[11px] font-semibold uppercase tracking-widest text-[#4a3c28]">
+                  <th className="px-4 py-3 text-left font-barlow text-[11px] font-semibold uppercase tracking-widest text-[#7A7768]">
                     Notes
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#2e2820]">
+              <tbody className="divide-y divide-[#B0AD9E]">
                 {filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={COLUMNS.length + 1} className="px-4 py-8 text-center font-mono text-[#5a4a38]">
+                    <td colSpan={COLUMNS.length + 1} className="px-4 py-8 text-center text-sm text-[#787870]">
                       No records match your search.
                     </td>
                   </tr>
@@ -255,57 +260,57 @@ export default function HistoryPage() {
                   filtered.map((row) => (
                     <tr
                       key={row.id}
-                      className={`transition hover:bg-[#2e2820]/30 ${
+                      className={`transition hover:bg-[#E5E3DA]/60 ${
                         row.status === "active" ? "" : "opacity-60"
                       }`}
                     >
-                      <td className="whitespace-nowrap px-4 py-2.5 font-mono text-xs text-[#8a7a60]">
+                      <td className="whitespace-nowrap px-4 py-2.5 text-xs text-[#4A4A42]">
                         {row.installation_id}
                       </td>
-                      <td className="whitespace-nowrap px-4 py-2.5 text-[#f0dfc0]">
+                      <td className="whitespace-nowrap px-4 py-2.5 text-[#1A1A16]">
                         {row.part_name || "—"}
                         {row.is_refurb && (
-                          <span className="ml-1.5 bg-[#c85a10]/20 px-1 py-0.5 font-mono text-[9px] uppercase text-[#c85a10]">
+                          <span className="ml-1.5 bg-[#B8860B]/15 px-1 py-0.5 text-[9px] uppercase text-[#B8860B] rounded-sm">
                             refurb
                           </span>
                         )}
                       </td>
-                      <td className="whitespace-nowrap px-4 py-2.5 font-mono text-xs text-[#8a7a60]">
+                      <td className="whitespace-nowrap px-4 py-2.5 text-xs text-[#4A4A42]">
                         {row.serial_number || "—"}
                       </td>
-                      <td className="whitespace-nowrap px-4 py-2.5 font-mono text-xs text-[#5a4a38]">
+                      <td className="whitespace-nowrap px-4 py-2.5 text-xs text-[#787870]">
                         {fmtDate(row.installation_date)}
                       </td>
-                      <td className="whitespace-nowrap px-4 py-2.5 font-mono text-xs text-[#5a4a38]">
+                      <td className="whitespace-nowrap px-4 py-2.5 text-xs text-[#787870]">
                         {fmtDate(row.removal_date)}
                       </td>
-                      <td className="whitespace-nowrap px-4 py-2.5 text-right font-mono text-xs tabular-nums text-[#8a7a60]">
+                      <td className="whitespace-nowrap px-4 py-2.5 text-right text-xs tabular-nums text-[#4A4A42]">
                         {fmtNum(row.active_runtime_minutes)}
                       </td>
-                      <td className="whitespace-nowrap px-4 py-2.5 text-right font-mono text-xs tabular-nums text-[#c85a10]">
+                      <td className="whitespace-nowrap px-4 py-2.5 text-right text-xs tabular-nums text-[#B8860B]">
                         {fmtNum(row.high_stress_minutes)}
                       </td>
                       <td className="whitespace-nowrap px-4 py-2.5 text-xs">
                         {row.failure_mode ? (
-                          <span className="border border-[#2e2820] bg-[#1c1814] px-2 py-0.5 font-mono text-[#8a7a60]">
+                          <span className="border border-[#B0AD9E] bg-[#E5E3DA] px-2 py-0.5 text-xs text-[#4A4A42] rounded-sm">
                             {row.failure_mode}
                           </span>
                         ) : (
-                          <span className="text-[#4a3c28]">—</span>
+                          <span className="text-[#7A7768]">—</span>
                         )}
                       </td>
                       <td className="whitespace-nowrap px-4 py-2.5 text-xs">
                         {row.status === "active" ? (
-                          <span className="border border-[#6ab04c]/60 bg-[#6ab04c]/10 px-2 py-0.5 font-orbitron text-[10px] font-semibold uppercase text-[#6ab04c]">
+                          <span className="border border-[#2B7A3E]/60 bg-[#2B7A3E]/10 px-2 py-0.5 font-barlow text-[10px] font-semibold uppercase text-[#2B7A3E] rounded-sm">
                             active
                           </span>
                         ) : (
-                          <span className="border border-[#2e2820]/60 bg-[#1c1814] px-2 py-0.5 font-mono text-[10px] uppercase text-[#5a4a38]">
+                          <span className="border border-[#B0AD9E]/60 bg-[#E5E3DA] px-2 py-0.5 text-[10px] uppercase text-[#787870] rounded-sm">
                             archived
                           </span>
                         )}
                       </td>
-                      <td className="max-w-[200px] truncate px-4 py-2.5 font-mono text-xs text-[#5a4a38]">
+                      <td className="max-w-[200px] truncate px-4 py-2.5 text-xs text-[#787870]">
                         {row.notes || "—"}
                       </td>
                     </tr>
@@ -314,7 +319,7 @@ export default function HistoryPage() {
               </tbody>
             </table>
             {filtered.length > 0 && (
-              <div className="border-t border-[#2e2820] bg-[#1c1814] px-4 py-2 font-mono text-xs text-[#5a4a38]">
+              <div className="border-t border-[#B0AD9E] bg-[#E5E3DA] px-4 py-2 text-xs text-[#787870]">
                 {filtered.length.toLocaleString()} records
                 {rows.length !== filtered.length && ` of ${rows.length.toLocaleString()} total`}
               </div>

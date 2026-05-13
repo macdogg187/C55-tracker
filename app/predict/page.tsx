@@ -1,12 +1,20 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { FailurePredictionPanel } from "../components/FailurePredictionPanel";
 import { FatigueChart } from "../components/FatigueChart";
 import type { FatigueSample, PipelinePayload, WindowSpan } from "@/lib/analytics";
 
 export default function PredictPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#FAFAF5]" />}>
+      <PredictContent />
+    </Suspense>
+  );
+}
+
+function PredictContent() {
   const searchParams = useSearchParams();
   const equipmentId = searchParams.get("eq") ?? "0091";
 
@@ -47,15 +55,15 @@ export default function PredictPage() {
     [pipelinePayload],
   );
   return (
-    <main className="min-h-screen bg-[#12100e] text-[#f0dfc0]">
+    <main className="min-h-screen bg-[#FAFAF5] text-[#1A1A16]">
       <div className="mx-auto flex w-full max-w-[1500px] flex-col gap-6 px-5 py-6 lg:px-8">
 
         <div>
-          <p className="font-orbitron text-xs uppercase tracking-widest text-[#e8a020]">Analysis</p>
-          <h1 className="mt-1 font-orbitron text-2xl font-semibold text-[#f0dfc0]">Failure Prediction</h1>
-          <p className="mt-1 font-mono text-sm text-[#5a4a38]">
+          <p className="font-barlow text-xs uppercase tracking-widest text-[#C04810]">Analysis</p>
+          <h1 className="mt-1 font-barlow text-2xl font-semibold text-[#1A1A16]">Failure Prediction</h1>
+          <p className="mt-1 text-sm text-[#787870]">
             Equipment{" "}
-            <span className="text-[#e8a020]">{equipmentId}</span>
+            <span className="text-[#C04810]">{equipmentId}</span>
             {" · "}Risk scores combine runtime ratio, high-stress exposure, cumulative pressure stress,
             and inferred failure windows.
           </p>
@@ -72,12 +80,12 @@ export default function PredictPage() {
         />
 
         {fatigue.length > 0 && (
-          <section className="border-2 border-[#2e2820] bg-[#1c1814] p-5">
+          <section className="border border-[#B0AD9E] bg-[#F0EFE8] p-5 rounded-sm shadow-sm">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-              <h2 className="font-orbitron text-sm font-semibold uppercase tracking-widest text-[#e8a020]">
+              <h2 className="font-barlow text-sm font-semibold uppercase tracking-widest text-[#C04810]">
                 Sensor Fatigue Chart
               </h2>
-              <p className="font-mono text-xs text-[#5a4a38]">
+              <p className="text-xs text-[#787870]">
                 P01 pressure + rolling 10-min σ — correlation between high pulsation and HP-thread risk.
               </p>
             </div>
@@ -90,9 +98,9 @@ export default function PredictPage() {
         )}
 
         {fatigue.length === 0 && (
-          <p className="border-2 border-[#2e2820] bg-[#1c1814] px-5 py-6 font-mono text-sm text-[#5a4a38]">
+          <p className="border border-[#B0AD9E] bg-[#F0EFE8] px-5 py-6 text-sm text-[#787870] rounded-sm">
             Upload a VantagePoint CSV on the{" "}
-            <a href={`/?eq=${equipmentId}`} className="text-[#e8a020] hover:underline">
+            <a href={`/?eq=${equipmentId}`} className="text-[#C04810] hover:underline">
               Dashboard
             </a>{" "}
             to enable the fatigue chart.

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   buildSeedPartStatuses,
@@ -20,6 +20,7 @@ import { TemperatureChart } from "./components/TemperatureChart";
 import { MaintenanceLogPanel } from "./components/MaintenanceLogPanel";
 import { DataIngestPanel } from "./components/DataIngestPanel";
 import { SubassemblyGrid } from "./components/SubassemblyGrid";
+import { ReplacePartDialog, type ReplacePartEntry, type ReportFailureEntry } from "./components/ReplacePartDialog";
 import Link from "next/link";
 
 type LifecycleSnapshot = {
@@ -167,6 +168,14 @@ function buildPartStatuses(
 const DEFAULT_EQUIPMENT = "0091";
 
 export default function Home() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#FAFAF5]" />}>
+      <HomeContent />
+    </Suspense>
+  );
+}
+
+function HomeContent() {
   const searchParams = useSearchParams();
   const equipmentId = searchParams.get("eq") ?? DEFAULT_EQUIPMENT;
 
@@ -175,6 +184,7 @@ export default function Home() {
   const [pipelinePayload, setPipelinePayload] = useState<PipelinePayload | null>(null);
   const [pipelineLoaded, setPipelineLoaded] = useState(false);
   const [selectedPartId, setSelectedPartId] = useState<string>("");
+  const [replacePart, setReplacePart] = useState<PartStatus | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -257,24 +267,66 @@ export default function Home() {
     await live.refresh();
   }
 
+  async function handleReplaceSubmit(entry: ReplacePartEntry) {
+    try {
+      const res = await fetch("/api/lifecycle/replace", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          installation_id: entry.installationId,
+          new_serial: entry.newSerial,
+          failure_mode: entry.failureMode ?? undefined,
+          notes: entry.notes || null,
+          timestamp: entry.timestamp,
+        }),
+      });
+      if (!res.ok) {
+        const body = (await res.json().catch(() => ({}))) as { error?: string };
+        throw new Error(body.error ?? `HTTP ${res.status}`);
+      }
+      setReplacePart(null);
+      await live.refresh();
+      try {
+        const pipelineRes = await fetch("/pipeline.json", { cache: "no-store" });
+        if (pipelineRes.ok) setPipelinePayload((await pipelineRes.json()) as PipelinePayload);
+      } catch { /* best-effort */ }
+    } finally {
+      // Dialog closes on success or stays open on error
+    }
+  }
+
+  async function handleReportSubmit(entry: ReportFailureEntry) {
+    const res = await fetch("/api/failure/log", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        installation_id: entry.installationId,
+        failure_mode: entry.failureMode,
+        notes: entry.notes || null,
+        timestamp: entry.timestamp,
+      }),
+    });
+    if (!res.ok) {
+      const body = (await res.json().catch(() => ({}))) as { error?: string };
+      throw new Error(body.error ?? `HTTP ${res.status}`);
+    }
+    setReplacePart(null);
+    await live.refresh();
+  }
+
   const missingParts = parts.filter((p) => p.isSerialized && !p.serialNumber);
   const installedParts = parts.filter((p) =>
     p.isSerialized ? !!p.serialNumber : true,
   );
 
-  // Structural odometers — sorted by wear % (highest → lowest)
   const structuralParts = installedParts.filter((p) => p.isStructural);
-
-  // All non-structural installed parts for the components grid
   const componentParts = installedParts.filter((p) => !p.isStructural);
-
-  // Count parts that need attention
   const needsAttention = installedParts.filter(
     (p) => p.health === "critical" || p.alert === "failure",
   );
 
   return (
-    <main className="min-h-screen bg-[#12100e] text-[#f0dfc0]">
+    <main className="min-h-screen bg-[#FAFAF5] text-[#1A1A16]">
       <div className="mx-auto flex w-full max-w-[1500px] flex-col gap-6 px-5 py-6 lg:px-8">
 
         {/* Status bar */}
@@ -291,14 +343,14 @@ export default function Home() {
 
         {/* Parts needing attention banner */}
         {needsAttention.length > 0 && (
-          <div className="flex items-center justify-between gap-4 border-2 border-[#cc3311]/50 bg-[#cc3311]/10 px-5 py-3.5">
-            <p className="font-mono text-sm text-[#ff6644]">
+          <div className="flex items-center justify-between gap-4 border-2 border-[#A82020]/40 bg-[#A82020]/8 px-5 py-3.5 rounded-sm">
+            <p className="text-sm text-[#A82020]">
               <span className="font-semibold">{needsAttention.length} part{needsAttention.length > 1 ? "s" : ""}</span>
               {" "}need{needsAttention.length === 1 ? "s" : ""} immediate attention.
             </p>
             <Link
               href={`/replace?eq=${equipmentId}`}
-              className="shrink-0 border border-[#cc3311] bg-[#cc3311]/20 px-4 py-1.5 font-orbitron text-xs font-semibold uppercase tracking-wider text-[#ff6644] transition hover:bg-[#cc3311]/30"
+              className="shrink-0 border border-[#A82020] bg-[#A82020]/15 px-4 py-1.5 font-barlow text-xs font-semibold uppercase tracking-wider text-[#A82020] transition hover:bg-[#A82020]/25 rounded-sm"
             >
               Replace Part →
             </Link>
@@ -307,14 +359,14 @@ export default function Home() {
 
         {/* Missing components banner */}
         {missingParts.length > 0 && (
-          <div className="flex items-center justify-between gap-4 border-2 border-[#c85a10]/50 bg-[#c85a10]/10 px-5 py-3.5">
-            <p className="font-mono text-sm text-[#e8a020]">
+          <div className="flex items-center justify-between gap-4 border-2 border-[#B8860B]/40 bg-[#B8860B]/8 px-5 py-3.5 rounded-sm">
+            <p className="text-sm text-[#B8860B]">
               <span className="font-semibold">{missingParts.length} slot{missingParts.length > 1 ? "s" : ""}</span>
               {" "}missing installed part{missingParts.length > 1 ? "s" : ""}.
             </p>
             <Link
               href={`/replace?eq=${equipmentId}`}
-              className="shrink-0 border border-[#e8a020] bg-[#e8a020]/20 px-4 py-1.5 font-orbitron text-xs font-semibold uppercase tracking-wider text-[#e8a020] transition hover:bg-[#e8a020]/30"
+              className="shrink-0 border border-[#B8860B] bg-[#B8860B]/15 px-4 py-1.5 font-barlow text-xs font-semibold uppercase tracking-wider text-[#B8860B] transition hover:bg-[#B8860B]/25 rounded-sm"
             >
               Install Part →
             </Link>
@@ -322,8 +374,8 @@ export default function Home() {
         )}
 
         {/* Process flow */}
-        <section className="border-2 border-[#2e2820] bg-[#1c1814] p-5">
-          <h2 className="mb-3 font-orbitron text-sm font-semibold uppercase tracking-widest text-[#e8a020]">
+        <section className="border border-[#B0AD9E] bg-[#F0EFE8] p-5 rounded-sm shadow-sm">
+          <h2 className="mb-3 font-barlow text-sm font-semibold uppercase tracking-widest text-[#C04810]">
             C55 Sequential Process Flow
           </h2>
           <SequentialFlowchart
@@ -334,12 +386,12 @@ export default function Home() {
         </section>
 
         {/* Sensor / fatigue chart */}
-        <section className="border-2 border-[#2e2820] bg-[#1c1814] p-5">
+        <section className="border border-[#B0AD9E] bg-[#F0EFE8] p-5 rounded-sm shadow-sm">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="font-orbitron text-sm font-semibold uppercase tracking-widest text-[#e8a020]">
+            <h2 className="font-barlow text-sm font-semibold uppercase tracking-widest text-[#C04810]">
               Fatigue Visualization
             </h2>
-            <p className="font-mono text-xs text-[#5a4a38]">
+            <p className="text-xs text-[#787870]">
               P01 pressure + rolling 10-min σ — correlates high pulsation with HP-thread weephole risk.
             </p>
           </div>
@@ -353,19 +405,19 @@ export default function Home() {
         </section>
 
         {/* Seal temperature slope */}
-        <section className="border-2 border-[#2e2820] bg-[#1c1814] p-5">
+        <section className="border border-[#B0AD9E] bg-[#F0EFE8] p-5 rounded-sm shadow-sm">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="font-orbitron text-sm font-semibold uppercase tracking-widest text-[#c85a10]">
+            <h2 className="font-barlow text-sm font-semibold uppercase tracking-widest text-[#B8860B]">
               Seal Temperature Slope
             </h2>
-            <p className="font-mono text-xs text-[#5a4a38]">
+            <p className="text-xs text-[#787870]">
               Max dT/dt across T01–T03 · x-axis = cumulative P01 active runtime
             </p>
           </div>
           <TemperatureChart series={fatigue} />
         </section>
 
-        {/* Structural Odometers — sorted highest % → lowest */}
+        {/* Structural Odometers */}
         {structuralParts.length > 0 && (
           <SubassemblyGrid
             title="Structural Odometers"
@@ -373,11 +425,12 @@ export default function Home() {
             parts={structuralParts}
             selectedId={selectedPart?.id ?? ""}
             onSelect={setSelectedPartId}
+            onReplace={setReplacePart}
             sortByPct
           />
         )}
 
-        {/* All sub-components by zone / type / orientation */}
+        {/* All sub-components by zone */}
         {componentParts.length > 0 && (
           <SubassemblyGrid
             title="Sub-components"
@@ -385,6 +438,7 @@ export default function Home() {
             parts={componentParts}
             selectedId={selectedPart?.id ?? ""}
             onSelect={setSelectedPartId}
+            onReplace={setReplacePart}
           />
         )}
 
@@ -394,6 +448,18 @@ export default function Home() {
           selectedInstallationId={selectedPart?.installationId ?? null}
           onLog={handleLogMaintenance}
         />
+
+        {/* Replace part dialog */}
+        {replacePart && (
+          <ReplacePartDialog
+            part={replacePart}
+            open={!!replacePart}
+            mode="replace"
+            onClose={() => setReplacePart(null)}
+            onSubmit={handleReplaceSubmit}
+            onReport={handleReportSubmit}
+          />
+        )}
 
       </div>
     </main>
@@ -419,23 +485,23 @@ function StatusBar({
         : "connecting…";
 
   return (
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border border-[#2e2820] bg-[#1c1814] px-4 py-2.5 font-mono text-xs text-[#5a4a38]">
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 border border-[#B0AD9E] bg-[#F0EFE8] px-4 py-2.5 text-xs text-[#787870] rounded-sm">
       <span>
         Backend:{" "}
-        <span className={backend === "supabase" ? "text-[#6ab04c]" : "text-[#8a7a60]"}>
+        <span className={backend === "supabase" ? "text-[#2B7A3E]" : "text-[#4A4A42]"}>
           {backendLabel}
         </span>
       </span>
       {snapshotAt && (
         <span>
           Snapshot:{" "}
-          <span className="text-[#8a7a60]">{new Date(snapshotAt).toLocaleTimeString()}</span>
+          <span className="text-[#4A4A42]">{new Date(snapshotAt).toLocaleTimeString()}</span>
         </span>
       )}
       {pipelineLoaded && generatedAt && (
         <span>
           Pipeline:{" "}
-          <span className="text-[#8a7a60]">{new Date(generatedAt).toLocaleTimeString()}</span>
+          <span className="text-[#4A4A42]">{new Date(generatedAt).toLocaleTimeString()}</span>
         </span>
       )}
     </div>
@@ -444,20 +510,20 @@ function StatusBar({
 
 function SummaryStrip({ summary }: { summary: NonNullable<PipelinePayload["summary"]> }) {
   return (
-    <section className="grid gap-3 border-2 border-[#2e2820] bg-[#1c1814] p-4 sm:grid-cols-2 lg:grid-cols-4">
-      <KPI label="Active Runtime" value={`${summary.active_minutes_total} min`} accent="text-[#e8a020]" />
-      <KPI label="High-Stress (σ > 2 kpsi)" value={`${summary.high_stress_minutes_total} min`} accent="text-[#c85a10]" />
-      <KPI label="Off / Maintenance" value={`${summary.off_minutes_total} min`} accent="text-[#8a7a60]" />
-      <KPI label="Out-of-Band (>30 kpsi)" value={`${summary.out_of_band_minutes} min`} accent="text-[#cc3311]" />
+    <section className="grid gap-3 border border-[#B0AD9E] bg-[#F0EFE8] p-4 rounded-sm shadow-sm sm:grid-cols-2 lg:grid-cols-4">
+      <KPI label="Active Runtime" value={`${summary.active_minutes_total} min`} accent="text-[#C04810]" />
+      <KPI label="High-Stress (σ > 2 kpsi)" value={`${summary.high_stress_minutes_total} min`} accent="text-[#B8860B]" />
+      <KPI label="Off / Maintenance" value={`${summary.off_minutes_total} min`} accent="text-[#4A4A42]" />
+      <KPI label="Out-of-Band (>30 kpsi)" value={`${summary.out_of_band_minutes} min`} accent="text-[#A82020]" />
     </section>
   );
 }
 
 function KPI({ label, value, accent }: { label: string; value: string; accent: string }) {
   return (
-    <div className="border border-[#2e2820] bg-[#0e0c0a] p-3">
-      <p className="font-orbitron text-[10px] uppercase tracking-widest text-[#4a3c28]">{label}</p>
-      <p className={`mt-1 font-mono text-xl font-semibold ${accent}`}>{value}</p>
+    <div className="border border-[#B0AD9E] bg-[#E5E3DA] p-3 rounded-sm">
+      <p className="font-barlow text-[10px] uppercase tracking-widest text-[#7A7768]">{label}</p>
+      <p className={`mt-1 text-xl font-semibold ${accent}`}>{value}</p>
     </div>
   );
 }
