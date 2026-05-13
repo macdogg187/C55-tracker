@@ -1,0 +1,670 @@
+
+> c55-tracker@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.4 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://10.0.0.207:3000
+- Environments: .env.local
+✓ Ready in 279ms
+
+headingId called for c55-tracker--glossary-calculations--assumptions returning c55-tracker--glossary-calculations--assumptions
+headingId called for table-of-contents returning table-of-contents
+headingId called for 1-core-logic-constants returning 1-core-logic-constants
+headingId called for 2-sample-status-classification returning 2-sample-status-classification
+headingId called for decision-tree returning decision-tree
+headingId called for status-labels returning status-labels
+headingId called for rolling-stdev-calculation returning rolling-stdev-calculation
+headingId called for 3-pass-detection returning 3-pass-detection
+headingId called for parameters returning parameters
+headingId called for pass-status-values returning pass-status-values
+headingId called for fields-recorded-per-pass returning fields-recorded-per-pass
+headingId called for cumulative-pass-runtime returning cumulative-pass-runtime
+headingId called for 4-production-run-validation returning 4-production-run-validation
+headingId called for run-grouping-parameters returning run-grouping-parameters
+headingId called for run-status-values returning run-status-values
+headingId called for schedule-labeling-logic returning schedule-labeling-logic
+headingId called for window-level-cadence-anomaly returning window-level-cadence-anomaly
+headingId called for 5-lifecycle-metrics-per-part returning 5-lifecycle-metrics-per-part
+headingId called for active_runtime_minutes returning active_runtime_minutes
+headingId called for high_stress_minutes returning high_stress_minutes
+headingId called for cumulative_pressure_stress returning cumulative_pressure_stress
+headingId called for inferred_failures returning inferred_failures
+headingId called for 6-health-badge-classification returning 6-health-badge-classification
+headingId called for decision-tree returning decision-tree-1
+headingId called for health-badge-values returning health-badge-values
+headingId called for alert-values returning alert-values
+headingId called for 7-seal-wear-fraction returning 7-seal-wear-fraction
+headingId called for formula returning formula
+headingId called for interpretation returning interpretation
+headingId called for 8-composite-risk-score returning 8-composite-risk-score
+headingId called for factor-definitions returning factor-definitions
+headingId called for composite-score-formula returning composite-score-formula
+headingId called for risk-band-thresholds returning risk-band-thresholds
+headingId called for eta-to-failure returning eta-to-failure
+headingId called for 9-ml-model-blend returning 9-ml-model-blend
+headingId called for model-components returning model-components
+headingId called for blend-rule returning blend-rule
+headingId called for feature-defaults-when-live-sensor-data-is-unavailable returning feature-defaults-when-live-sensor-data-is-unavailable
+headingId called for 10-part-catalog--all-thresholds returning 10-part-catalog--all-thresholds
+headingId called for cluster-parts returning cluster-parts
+headingId called for pump-parts returning pump-parts
+headingId called for homogenizer-parts returning homogenizer-parts
+headingId called for manifold--instrument-parts returning manifold--instrument-parts
+headingId called for 11-maintenance-event-types returning 11-maintenance-event-types
+headingId called for 12-sensor-signals returning 12-sensor-signals
+headingId called for p01-unit-auto-detection returning p01-unit-auto-detection
+headingId called for 13-installation-id-naming-convention returning 13-installation-id-naming-convention
+headingId called for slot-to-part-code-mappings returning slot-to-part-code-mappings
+headingId called for 14-failure-modes returning 14-failure-modes
+headingId called for appendix--key-assumptions-summary returning appendix--key-assumptions-summary
+ GET /glossary 200 in 587ms (next.js: 251ms, application-code: 336ms)
+[browser] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <ErrorBoundary errorComponent={undefined} errorStyles={undefined} errorScripts={undefined}>
+      <LoadingBoundary name="glossary/" loading={null}>
+        <HTTPAccessFallbackBoundary notFound={undefined} forbidden={undefined} unauthorized={undefined}>
+          <RedirectBoundary>
+            <RedirectErrorBoundary router={{...}}>
+              <InnerLayoutRouter url="/glossary#..." tree={[...]} params={{}} cacheNode={{rsc:{...}, ...}} ...>
+                <SegmentViewNode type="page" pagePath="glossary/p...">
+                  <SegmentTrieNode>
+                  <GlossaryPage>
+                    <main className="min-h-scre...">
+                      <div className="mx-auto w-...">
+                        <GlossaryContent markdown={"# C55 Tr..."}>
+                          <article>
+                            <Markdown remarkPlugins={[...]} components={{h1:function h1, ...}}>
+                              <h1 node={{type:"element", ...}}>
+                                <h1
++                                 id="c55-tracker--glossary-calculations--assumptions-1"
+-                                 id="c55-tracker--glossary-calculations--assumptions"
+                                  className="mb-6 scroll-mt-6 text-3xl font-bold tracking-tight text-zinc-100"
+                                >
++                                 {"C55 Tracker — Glossary, Calculations & Assumptions"}
+                              <p>
+                              <hr>
+                              <h2 node={{type:"element", ...}}>
+                                <h2
++                                 id="table-of-contents-1"
+-                                 id="table-of-contents"
+                                  className="mb-3 mt-10 scroll-mt-6 text-xl font-semibold text-cyan-300 first:mt-0"
+                                >
++                                 Table of Contents
+                              <ol>
+                              <hr>
+                              <h2 node={{type:"element", ...}}>
+                                <h2
++                                 id="1-core-logic-constants-1"
+-                                 id="1-core-logic-constants"
+                                  className="mb-3 mt-10 scroll-mt-6 text-xl font-semibold text-cyan-300 first:mt-0"
+                                >
++                                 1. Core Logic Constants
+                              <p>
+                              <p>
+                              <table>
+                              <blockquote>
+                              <hr>
+                              <h2 node={{type:"element", ...}}>
+                                <h2
++                                 id="2-sample-status-classification-1"
+-                                 id="2-sample-status-classification"
+                                  className="mb-3 mt-10 scroll-mt-6 text-xl font-semibold text-cyan-300 first:mt-0"
+                                >
++                                 2. Sample Status Classification
+                              <p>
+                              <p>
+                              <h3 node={{type:"element", ...}}>
+                                <h3
++                                 id="decision-tree-1"
+-                                 id="decision-tree"
+                                  className="mb-2 mt-6 scroll-mt-6 text-base font-semibold text-zinc-200"
+                                >
++                                 Decision tree
+                              <pre>
+                              <h3 node={{type:"element", ...}}>
+                                <h3
++                                 id="status-labels-1"
+-                                 id="status-labels"
+                                  className="mb-2 mt-6 scroll-mt-6 text-base font-semibold text-zinc-200"
+                                >
++                                 Status labels
+                              <table>
+                              <h3 node={{type:"element", ...}}>
+                                <h3
++                                 id="rolling-stdev-calculation-1"
+-                                 id="rolling-stdev-calculation"
+                                  className="mb-2 mt-6 scroll-mt-6 text-base font-semibold text-zinc-200"
+                                >
++                                 Rolling stdev calculation
+                              <p>
+                              <pre>
+                              <hr>
+                              <h2 node={{type:"element", ...}}>
+                                <h2
++                                 id="3-pass-detection-1"
+-                                 id="3-pass-detection"
+                                  className="mb-3 mt-10 scroll-mt-6 text-xl font-semibold text-cyan-300 first:mt-0"
+                                >
++                                 3. Pass Detection
+                              <p>
+                              <p>
+                              <h3 node={{type:"element", ...}}>
+                                <h3
++                                 id="parameters-1"
+-                                 id="parameters"
+                                  className="mb-2 mt-6 scroll-mt-6 text-base font-semibold text-zinc-200"
+                                >
++                                 Parameters
+                              <table>
+                              <h3 node={{type:"element", ...}}>
+                                <h3
++                                 id="pass-status-values-1"
+-                                 id="pass-status-values"
+                                  className="mb-2 mt-6 scroll-mt-6 text-base font-semibold text-zinc-200"
+                                >
++                                 Pass status values
+                              <table>
+                              <h3 node={{type:"element", ...}}>
+                                <h3
++                                 id="fields-recorded-per-pass-1"
+-                                 id="fields-recorded-per-pass"
+                                  className="mb-2 mt-6 scroll-mt-6 text-base font-semibold text-zinc-200"
+                                >
++                                 Fields recorded per pass
+                              <table>
+                              <h3 node={{type:"element", ...}}>
+                                <h3
++                                 id="cumulative-pass-runtime-1"
+-                                 id="cumulative-pass-runtime"
+                                  className="mb-2 mt-6 scroll-mt-6 text-base font-semibold text-zinc-200"
+                                >
++                                 Cumulative pass runtime
+                              <p>
+                              <ul>
+                              <hr>
+                              <h2 node={{type:"element", ...}}>
+                                <h2
++                                 id="4-production-run-validation-1"
+-                                 id="4-production-run-validation"
+                                  className="mb-3 mt-10 scroll-mt-6 text-xl font-semibold text-cyan-300 first:mt-0"
+                                >
++                                 4. Production Run Validation
+                              <p>
+                              <p>
+                              <h3 node={{type:"element", ...}}>
+                                <h3
++                                 id="run-grouping-parameters-1"
+-                                 id="run-grouping-parameters"
+                                  className="mb-2 mt-6 scroll-mt-6 text-base font-semibold text-zinc-200"
+                                >
++                                 Run grouping parameters
+                              <table>
+                              <h3 node={{type:"element", ...}}>
+                                <h3
++                                 id="run-status-values-1"
+-                                 id="run-status-values"
+                                  className="mb-2 mt-6 scroll-mt-6 text-base font-semibold text-zinc-200"
+                                >
++                                 Run status values
+                              <table>
+                              <h3 node={{type:"element", ...}}>
+                                <h3
++                                 id="schedule-labeling-logic-1"
+-                                 id="schedule-labeling-logic"
+                                  className="mb-2 mt-6 scroll-mt-6 text-base font-semibold text-zinc-200"
+                                >
++                                 Schedule labeling logic
+                              <p>
+                              <pre>
+                              <h3 node={{type:"element", ...}}>
+                                <h3
++                                 id="window-level-cadence-anomaly-1"
+-                                 id="window-level-cadence-anomaly"
+                                  className="mb-2 mt-6 scroll-mt-6 text-base font-semibold text-zinc-200"
+                                >
++                                 Window-level cadence anomaly
+                              <p>
+                              <hr>
+                              <h2 node={{type:"element", ...}}>
+                                <h2
++                                 id="5-lifecycle-metrics-per-part-1"
+-                                 id="5-lifecycle-metrics-per-part"
+                                  className="mb-3 mt-10 scroll-mt-6 text-xl font-semibold text-cyan-300 first:mt-0"
+                                >
++                                 5. Lifecycle Metrics (Per Part)
+                              <p>
+                              <p>
+                              <h3 node={{type:"element", ...}}>
+                                <h3
++                                 id="active_runtime_minutes-1"
+-                                 id="active_runtime_minutes"
+                                  className="mb-2 mt-6 scroll-mt-6 text-base font-semibold text-zinc-200"
+                                >
++                                 active_runtime_minutes
+                              <pre>
+                              <blockquote>
+                              <h3 node={{type:"element", ...}}>
+                                <h3
++                                 id="high_stress_minutes-1"
+-                                 id="high_stress_minutes"
+                                  className="mb-2 mt-6 scroll-mt-6 text-base font-semibold text-zinc-200"
+                                >
++                                 high_stress_minutes
+                              <pre>
+                              <p>
+                              <h3 node={{type:"element", ...}}>
+                                <h3
++                                 id="cumulative_pressure_stress-1"
+-                                 id="cumulative_pressure_stress"
+                                  className="mb-2 mt-6 scroll-mt-6 text-base font-semibold text-zinc-200"
+                                >
++                                 cumulative_pressure_stress
+                              <pre>
+                              <p>
+                              <h3 node={{type:"element", ...}}>
+                                <h3
++                                 id="inferred_failures-1"
+-                                 id="inferred_failures"
+                                  className="mb-2 mt-6 scroll-mt-6 text-base font-semibold text-zinc-200"
+                                >
++                                 inferred_failures
+                              <pre>
+                              <p>
+                              <hr>
+                              <h2 node={{type:"element", ...}}>
+                                <h2
++                                 id="6-health-badge-classification-1"
+-                                 id="6-health-badge-classification"
+                                  className="mb-3 mt-10 scroll-mt-6 text-xl font-semibold text-cyan-300 first:mt-0"
+                                >
++                                 6. Health Badge Classification
+                              <p>
+                              <p>
+                              <h3 node={{type:"element", ...}}>
+                                <h3
++                                 id="decision-tree-3"
+-                                 id="decision-tree-1"
+                                  className="mb-2 mt-6 scroll-mt-6 text-base font-semibold text-zinc-200"
+                                >
++                                 Decision tree
+                              <pre>
+                              <h3 node={{type:"element", ...}}>
+                                <h3
++                                 id="health-badge-values-1"
+-                                 id="health-badge-values"
+                                  className="mb-2 mt-6 scroll-mt-6 text-base font-semibold text-zinc-200"
+                                >
++                                 Health badge values
+                              <table>
+                              <h3 node={{type:"element", ...}}>
+                                <h3
++                                 id="alert-values-1"
+-                                 id="alert-values"
+                                  className="mb-2 mt-6 scroll-mt-6 text-base font-semibold text-zinc-200"
+                                >
++                                 Alert values
+                              <table>
+                              <hr>
+                              <h2 node={{type:"element", ...}}>
+                                <h2
++                                 id="7-seal-wear-fraction-1"
+-                                 id="7-seal-wear-fraction"
+                                  className="mb-3 mt-10 scroll-mt-6 text-xl font-semibold text-cyan-300 first:mt-0"
+                                >
++                                 7. Seal Wear Fraction
+                              <p>
+                              <p>
+                              <h3 node={{type:"element", ...}}>
+                                <h3
++                                 id="formula-1"
+-                                 id="formula"
+                                  className="mb-2 mt-6 scroll-mt-6 text-base font-semibold text-zinc-200"
+                                >
++                                 Formula
+                              <pre>
+                              <h3 node={{type:"element", ...}}>
+                                <h3
++                                 id="interpretation-1"
+-                                 id="interpretation"
+                                  className="mb-2 mt-6 scroll-mt-6 text-base font-semibold text-zinc-200"
+                                >
++                                 Interpretation
+                              <table>
+                              <blockquote>
+                              <hr>
+                              <h2 node={{type:"element", ...}}>
+                                <h2
++                                 id="8-composite-risk-score-1"
+-                                 id="8-composite-risk-score"
+                                  className="mb-3 mt-10 scroll-mt-6 text-xl font-semibold text-cyan-300 first:mt-0"
+                                >
++                                 8. Composite Risk Score
+                              <p>
+                              <p>
+                              <h3 node={{type:"element", ...}}>
+                                <h3
++                                 id="factor-definitions-1"
+-                                 id="factor-definitions"
+                                  className="mb-2 mt-6 scroll-mt-6 text-base font-semibold text-zinc-200"
+                                >
++                                 Factor definitions
+                              <p>
+                              <p>
+                              <pre>
+                              <p>
+                              <p>
+                              <pre>
+                              <p>
+                              <p>
+                              <pre>
+                              <p>
+                              <p>
+                              <pre>
+                              <p>
+                              <p>
+                              <pre>
+                              <p>
+                              <h3 node={{type:"element", ...}}>
+                                <h3
++                                 id="composite-score-formula-1"
+-                                 id="composite-score-formula"
+                                  className="mb-2 mt-6 scroll-mt-6 text-base font-semibold text-zinc-200"
+                                >
++                                 Composite score formula
+                              <pre>
+                              <p>
+                              <h3 node={{type:"element", ...}}>
+                                <h3
++                                 id="risk-band-thresholds-1"
+-                                 id="risk-band-thresholds"
+                                  className="mb-2 mt-6 scroll-mt-6 text-base font-semibold text-zinc-200"
+                                >
++                                 Risk band thresholds
+                              <table>
+                              <h3 node={{type:"element", ...}}>
+                                <h3
++                                 id="eta-to-failure-1"
+-                                 id="eta-to-failure"
+                                  className="mb-2 mt-6 scroll-mt-6 text-base font-semibold text-zinc-200"
+                                >
++                                 ETA-to-failure
+                              <pre>
+                              <hr>
+                              <h2 node={{type:"element", ...}}>
+                                <h2
++                                 id="9-ml-model-blend-1"
+-                                 id="9-ml-model-blend"
+                                  className="mb-3 mt-10 scroll-mt-6 text-xl font-semibold text-cyan-300 first:mt-0"
+                                >
++                                 9. ML Model Blend
+                              <p>
+                              <p>
+                              <h3 node={{type:"element", ...}}>
+                                <h3
++                                 id="model-components-1"
+-                                 id="model-components"
+                                  className="mb-2 mt-6 scroll-mt-6 text-base font-semibold text-zinc-200"
+                                >
++                                 Model components
+                              <table>
+                              <h3 node={{type:"element", ...}}>
+                                <h3
++                                 id="blend-rule-1"
+-                                 id="blend-rule"
+                                  className="mb-2 mt-6 scroll-mt-6 text-base font-semibold text-zinc-200"
+                                >
++                                 Blend rule
+                              <pre>
+                              <p>
+                              <h3 node={{type:"element", ...}}>
+                                <h3
++                                 id="feature-defaults-when-live-sensor-data-is-unavailable-1"
+-                                 id="feature-defaults-when-live-sensor-data-is-unavailable"
+                                  className="mb-2 mt-6 scroll-mt-6 text-base font-semibold text-zinc-200"
+                                >
++                                 Feature defaults (when live sensor data is unavailable)
+                              <p>
+                              <table>
+                              <hr>
+                              <h2 node={{type:"element", ...}}>
+                                <h2
++                                 id="10-part-catalog--all-thresholds-1"
+-                                 id="10-part-catalog--all-thresholds"
+                                  className="mb-3 mt-10 scroll-mt-6 text-xl font-semibold text-cyan-300 first:mt-0"
+                                >
++                                 10. Part Catalog — All Thresholds
+                              <p>
+                              <p>
+                              <h3 node={{type:"element", ...}}>
+                                <h3
++                                 id="cluster-parts-1"
+-                                 id="cluster-parts"
+                                  className="mb-2 mt-6 scroll-mt-6 text-base font-semibold text-zinc-200"
+                                >
++                                 Cluster parts
+                              <table>
+                              <h3 node={{type:"element", ...}}>
+                                <h3
++                                 id="pump-parts-1"
+-                                 id="pump-parts"
+                                  className="mb-2 mt-6 scroll-mt-6 text-base font-semibold text-zinc-200"
+                                >
++                                 Pump parts
+                              <table>
+                              <h3 node={{type:"element", ...}}>
+                                <h3
++                                 id="homogenizer-parts-1"
+-                                 id="homogenizer-parts"
+                                  className="mb-2 mt-6 scroll-mt-6 text-base font-semibold text-zinc-200"
+                                >
++                                 Homogenizer parts
+                              <table>
+                              <h3 node={{type:"element", ...}}>
+                                <h3
++                                 id="manifold--instrument-parts-1"
+-                                 id="manifold--instrument-parts"
+                                  className="mb-2 mt-6 scroll-mt-6 text-base font-semibold text-zinc-200"
+                                >
++                                 {"Manifold & Instrument parts"}
+                              <table>
+                              <blockquote>
+                              <hr>
+                              <h2 node={{type:"element", ...}}>
+                                <h2
++                                 id="11-maintenance-event-types-1"
+-                                 id="11-maintenance-event-types"
+                                  className="mb-3 mt-10 scroll-mt-6 text-xl font-semibold text-cyan-300 first:mt-0"
+                                >
++                                 11. Maintenance Event Types
+                              <p>
+                              <p>
+                              <table>
+                              <hr>
+                              <h2 node={{type:"element", ...}}>
+                                <h2
++                                 id="12-sensor-signals-1"
+-                                 id="12-sensor-signals"
+                                  className="mb-3 mt-10 scroll-mt-6 text-xl font-semibold text-cyan-300 first:mt-0"
+                                >
++                                 12. Sensor Signals
+                              <p>
+                              <p>
+                              <table>
+                              <p>
+                              <h3 node={{type:"element", ...}}>
+                                <h3
++                                 id="p01-unit-auto-detection-1"
+-                                 id="p01-unit-auto-detection"
+                                  className="mb-2 mt-6 scroll-mt-6 text-base font-semibold text-zinc-200"
+                                >
++                                 P01 unit auto-detection
+                              <pre>
+                              <hr>
+                              <h2 node={{type:"element", ...}}>
+                                <h2
++                                 id="13-installation-id-naming-convention-1"
+-                                 id="13-installation-id-naming-convention"
+                                  className="mb-3 mt-10 scroll-mt-6 text-xl font-semibold text-cyan-300 first:mt-0"
+                                >
++                                 13. Installation ID Naming Convention
+                              <p>
+                              <p>
+                              <table>
+                              <p>
+                              <h3 node={{type:"element", ...}}>
+                                <h3
++                                 id="slot-to-part-code-mappings-1"
+-                                 id="slot-to-part-code-mappings"
+                                  className="mb-2 mt-6 scroll-mt-6 text-base font-semibold text-zinc-200"
+                                >
++                                 Slot-to-part-code mappings
+                              <p>
+                              <table>
+                              <p>
+                              <table>
+                              <p>
+                              <table>
+                              <hr>
+                              <h2 node={{type:"element", ...}}>
+                                <h2
++                                 id="14-failure-modes-1"
+-                                 id="14-failure-modes"
+                                  className="mb-3 mt-10 scroll-mt-6 text-xl font-semibold text-cyan-300 first:mt-0"
+                                >
++                                 14. Failure Modes
+                              <p>
+                              <p>
+                              <table>
+                              <blockquote>
+                              <hr>
+                              <h2 node={{type:"element", ...}}>
+                                <h2
++                                 id="appendix--key-assumptions-summary-1"
+-                                 id="appendix--key-assumptions-summary"
+                                  className="mb-3 mt-10 scroll-mt-6 text-xl font-semibold text-cyan-300 first:mt-0"
+                                >
++                                 Appendix — Key Assumptions Summary
+                              ...
+                ...
+              ...
+ 
+headingId called for c55-tracker--glossary-calculations--assumptions returning c55-tracker--glossary-calculations--assumptions
+headingId called for table-of-contents returning table-of-contents
+headingId called for 1-core-logic-constants returning 1-core-logic-constants
+headingId called for 2-sample-status-classification returning 2-sample-status-classification
+headingId called for decision-tree returning decision-tree
+headingId called for status-labels returning status-labels
+headingId called for rolling-stdev-calculation returning rolling-stdev-calculation
+headingId called for 3-pass-detection returning 3-pass-detection
+headingId called for parameters returning parameters
+headingId called for pass-status-values returning pass-status-values
+headingId called for fields-recorded-per-pass returning fields-recorded-per-pass
+headingId called for cumulative-pass-runtime returning cumulative-pass-runtime
+headingId called for 4-production-run-validation returning 4-production-run-validation
+headingId called for run-grouping-parameters returning run-grouping-parameters
+headingId called for run-status-values returning run-status-values
+headingId called for schedule-labeling-logic returning schedule-labeling-logic
+headingId called for window-level-cadence-anomaly returning window-level-cadence-anomaly
+headingId called for 5-lifecycle-metrics-per-part returning 5-lifecycle-metrics-per-part
+headingId called for active_runtime_minutes returning active_runtime_minutes
+headingId called for high_stress_minutes returning high_stress_minutes
+headingId called for cumulative_pressure_stress returning cumulative_pressure_stress
+headingId called for inferred_failures returning inferred_failures
+headingId called for 6-health-badge-classification returning 6-health-badge-classification
+headingId called for decision-tree returning decision-tree-1
+headingId called for health-badge-values returning health-badge-values
+headingId called for alert-values returning alert-values
+headingId called for 7-seal-wear-fraction returning 7-seal-wear-fraction
+headingId called for formula returning formula
+headingId called for interpretation returning interpretation
+headingId called for 8-composite-risk-score returning 8-composite-risk-score
+headingId called for factor-definitions returning factor-definitions
+headingId called for composite-score-formula returning composite-score-formula
+headingId called for risk-band-thresholds returning risk-band-thresholds
+headingId called for eta-to-failure returning eta-to-failure
+headingId called for 9-ml-model-blend returning 9-ml-model-blend
+headingId called for model-components returning model-components
+headingId called for blend-rule returning blend-rule
+headingId called for feature-defaults-when-live-sensor-data-is-unavailable returning feature-defaults-when-live-sensor-data-is-unavailable
+headingId called for 10-part-catalog--all-thresholds returning 10-part-catalog--all-thresholds
+headingId called for cluster-parts returning cluster-parts
+headingId called for pump-parts returning pump-parts
+headingId called for homogenizer-parts returning homogenizer-parts
+headingId called for manifold--instrument-parts returning manifold--instrument-parts
+headingId called for 11-maintenance-event-types returning 11-maintenance-event-types
+headingId called for 12-sensor-signals returning 12-sensor-signals
+headingId called for p01-unit-auto-detection returning p01-unit-auto-detection
+headingId called for 13-installation-id-naming-convention returning 13-installation-id-naming-convention
+headingId called for slot-to-part-code-mappings returning slot-to-part-code-mappings
+headingId called for 14-failure-modes returning 14-failure-modes
+headingId called for appendix--key-assumptions-summary returning appendix--key-assumptions-summary
+ GET /glossary 200 in 172ms (next.js: 6ms, application-code: 166ms)
+headingId called for c55-tracker--glossary-calculations--assumptions returning c55-tracker--glossary-calculations--assumptions
+headingId called for table-of-contents returning table-of-contents
+headingId called for 1-core-logic-constants returning 1-core-logic-constants
+headingId called for 2-sample-status-classification returning 2-sample-status-classification
+headingId called for decision-tree returning decision-tree
+headingId called for status-labels returning status-labels
+headingId called for rolling-stdev-calculation returning rolling-stdev-calculation
+headingId called for 3-pass-detection returning 3-pass-detection
+headingId called for parameters returning parameters
+headingId called for pass-status-values returning pass-status-values
+headingId called for fields-recorded-per-pass returning fields-recorded-per-pass
+headingId called for cumulative-pass-runtime returning cumulative-pass-runtime
+headingId called for 4-production-run-validation returning 4-production-run-validation
+headingId called for run-grouping-parameters returning run-grouping-parameters
+headingId called for run-status-values returning run-status-values
+headingId called for schedule-labeling-logic returning schedule-labeling-logic
+headingId called for window-level-cadence-anomaly returning window-level-cadence-anomaly
+headingId called for 5-lifecycle-metrics-per-part returning 5-lifecycle-metrics-per-part
+headingId called for active_runtime_minutes returning active_runtime_minutes
+headingId called for high_stress_minutes returning high_stress_minutes
+headingId called for cumulative_pressure_stress returning cumulative_pressure_stress
+headingId called for inferred_failures returning inferred_failures
+headingId called for 6-health-badge-classification returning 6-health-badge-classification
+headingId called for decision-tree returning decision-tree-1
+headingId called for health-badge-values returning health-badge-values
+headingId called for alert-values returning alert-values
+headingId called for 7-seal-wear-fraction returning 7-seal-wear-fraction
+headingId called for formula returning formula
+headingId called for interpretation returning interpretation
+headingId called for 8-composite-risk-score returning 8-composite-risk-score
+headingId called for factor-definitions returning factor-definitions
+headingId called for composite-score-formula returning composite-score-formula
+headingId called for risk-band-thresholds returning risk-band-thresholds
+headingId called for eta-to-failure returning eta-to-failure
+headingId called for 9-ml-model-blend returning 9-ml-model-blend
+headingId called for model-components returning model-components
+headingId called for blend-rule returning blend-rule
+headingId called for feature-defaults-when-live-sensor-data-is-unavailable returning feature-defaults-when-live-sensor-data-is-unavailable
+headingId called for 10-part-catalog--all-thresholds returning 10-part-catalog--all-thresholds
+headingId called for cluster-parts returning cluster-parts
+headingId called for pump-parts returning pump-parts
+headingId called for homogenizer-parts returning homogenizer-parts
+headingId called for manifold--instrument-parts returning manifold--instrument-parts
+headingId called for 11-maintenance-event-types returning 11-maintenance-event-types
+headingId called for 12-sensor-signals returning 12-sensor-signals
+headingId called for p01-unit-auto-detection returning p01-unit-auto-detection
+headingId called for 13-installation-id-naming-convention returning 13-installation-id-naming-convention
+headingId called for slot-to-part-code-mappings returning slot-to-part-code-mappings
+headingId called for 14-failure-modes returning 14-failure-modes
+headingId called for appendix--key-assumptions-summary returning appendix--key-assumptions-summary
+ GET /glossary 200 in 162ms (next.js: 8ms, application-code: 154ms)
+✓ Compiled in 572ms
+ GET /glossary 200 in 173ms (next.js: 85ms, application-code: 87ms)
+ GET /glossary 200 in 49ms (next.js: 1830µs, application-code: 47ms)
+ GET /glossary 200 in 34ms (next.js: 1912µs, application-code: 32ms)
+ GET /glossary 200 in 238ms (next.js: 2ms, application-code: 236ms)
+[?25h
