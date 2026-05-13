@@ -295,6 +295,13 @@ async function writePipelineSnapshot(result: TrendsIngestResult): Promise<void> 
     fatigue_series: result.fatigue_series,
     off_windows: result.off_windows,
     high_stress_windows: result.high_stress_windows,
+    runs: result.runs.map((r) => ({
+      run_index: r.run_index,
+      started_at: r.started_at,
+      ended_at: r.ended_at,
+      actual_pass_count: r.actual_pass_count,
+      status: r.status,
+    })),
   };
   try {
     await fs.mkdir(path.dirname(PUBLIC_PIPELINE_PATH), { recursive: true });

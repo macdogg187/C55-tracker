@@ -414,12 +414,20 @@ function toWindowSpan(pair: [number, number]): WindowSpan {
   };
 }
 
+/**
+ * Prefer-active thinning: keep a dense sample of active/high_stress/out_of_band
+ * points (where every measurement counts for fatigue analysis) and fill the
+ * remaining quota with uniformly-strided below_active points for context.
+ *
+ * maxPoints raised to 3000 from the old 1500 so the fatigue chart renders
+ * ~15× more detail during run time on the next upload/pipeline run.
+ */
 function thinSeries(
   times: number[],
   p01: number[],
   stdev: number[],
   status: SensorSample["status"][],
-  maxPoints = 1500,
+  maxPoints = 3000,
 ): { ts: string; p01: number; stdev: number; status: string }[] {
   if (times.length <= maxPoints) {
     return times.map((t, i) => ({
@@ -429,17 +437,46 @@ function thinSeries(
       status: status[i],
     }));
   }
-  const step = Math.max(1, Math.floor(times.length / maxPoints));
-  const out: { ts: string; p01: number; stdev: number; status: string }[] = [];
-  for (let i = 0; i < times.length; i += step) {
-    out.push({
-      ts: new Date(times[i]).toISOString(),
-      p01: p01[i],
-      stdev: stdev[i],
-      status: status[i],
-    });
+
+  // Partition indices into active vs. inactive.
+  const activeIdx: number[] = [];
+  const inactiveIdx: number[] = [];
+  for (let i = 0; i < times.length; i++) {
+    if (status[i] === "below_active") {
+      inactiveIdx.push(i);
+    } else {
+      activeIdx.push(i);
+    }
   }
-  return out;
+
+  // Budget: reserve up to 80% of maxPoints for active samples; fill the rest
+  // with inactive context so the chart can still show the band boundaries.
+  const activeQuota = Math.min(activeIdx.length, Math.floor(maxPoints * 0.8));
+  const inactiveQuota = maxPoints - activeQuota;
+
+  // Thin each bucket uniformly.
+  function strideSelect(indices: number[], quota: number): number[] {
+    if (indices.length <= quota) return indices;
+    const step = indices.length / quota;
+    const out: number[] = [];
+    for (let k = 0; k < quota; k++) {
+      out.push(indices[Math.floor(k * step)]);
+    }
+    return out;
+  }
+
+  const keptActive = strideSelect(activeIdx, activeQuota);
+  const keptInactive = strideSelect(inactiveIdx, inactiveQuota);
+
+  // Merge back in chronological order.
+  const kept = [...keptActive, ...keptInactive].sort((a, b) => a - b);
+
+  return kept.map((i) => ({
+    ts: new Date(times[i]).toISOString(),
+    p01: p01[i],
+    stdev: stdev[i],
+    status: status[i],
+  }));
 }
 
 function overlapMinutes(a0: number, a1: number, b0: number, b1: number): number {

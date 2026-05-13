@@ -47,6 +47,14 @@ export type PartRecord = {
   alert: "inspection" | "failure" | null;
 };
 
+export type RunRecord = {
+  run_index: number;
+  started_at: string;
+  ended_at: string;
+  actual_pass_count: number;
+  status: string;
+};
+
 export type PipelinePayload = {
   generated_at: string;
   sensor_file: string;
@@ -69,6 +77,9 @@ export type PipelinePayload = {
   fatigue_series: FatigueSample[];
   off_windows: WindowSpan[];
   high_stress_windows: WindowSpan[];
+  /** Production runs detected by the pass-detection engine. Present when the
+   *  trends file was ingested via the TypeScript pipeline (browser upload). */
+  runs?: RunRecord[];
 };
 
 // Re-tag a sample with the active rule set; lets the UI overlay

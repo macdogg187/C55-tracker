@@ -501,15 +501,44 @@ def file_sha256(path: Path) -> str:
     return h.hexdigest()
 
 
-def thin_series_for_payload(df: pd.DataFrame, max_points: int = 1500) -> list[dict]:
-    """Down-sample the tagged sensor series for the dashboard."""
-    if len(df) <= max_points:
-        sample = df
-    else:
-        step = max(1, len(df) // max_points)
-        sample = df.iloc[::step].copy()
+def thin_series_for_payload(df: pd.DataFrame, max_points: int = 3000) -> list[dict]:
+    """Down-sample the tagged sensor series for the dashboard.
 
-    sample = sample[["timestamp", "P01", "rolling_stdev", "status"]]
+    Prefer-active strategy: active/high_stress/out_of_band rows are kept at up
+    to 80 % of the quota so the fatigue chart has maximum run-time resolution.
+    The remaining 20 % is filled with uniformly-strided below_active rows to
+    preserve the band-boundary context.
+    """
+    ACTIVE_STATUSES = {"active", "high_stress", "out_of_band"}
+
+    if len(df) <= max_points:
+        sample = df[["timestamp", "P01", "rolling_stdev", "status"]].copy()
+    else:
+        active_mask = df["status"].isin(ACTIVE_STATUSES)
+        active_df = df[active_mask]
+        inactive_df = df[~active_mask]
+
+        active_quota = min(len(active_df), int(max_points * 0.8))
+        inactive_quota = max_points - active_quota
+
+        if len(active_df) <= active_quota:
+            kept_active = active_df
+        else:
+            step = max(1, len(active_df) // active_quota)
+            kept_active = active_df.iloc[::step]
+
+        if len(inactive_df) <= inactive_quota:
+            kept_inactive = inactive_df
+        else:
+            step = max(1, len(inactive_df) // inactive_quota)
+            kept_inactive = inactive_df.iloc[::step]
+
+        sample = (
+            pd.concat([kept_active, kept_inactive])
+            .sort_values("timestamp")
+            [["timestamp", "P01", "rolling_stdev", "status"]]
+        )
+
     return [
         {
             "ts": row.timestamp.isoformat(),
