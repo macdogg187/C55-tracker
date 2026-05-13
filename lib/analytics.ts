@@ -138,6 +138,28 @@ export function sealWearFraction(
   return 0.5 + (0.5 * (activeMinutes - lifeLow)) / Math.max(1, lifeHigh - lifeLow);
 }
 
+// Running integral of pressure stress above the active floor.
+// Returns one { ts, value } point per input sample where value is the
+// cumulative kpsi-min accumulated up to that moment.  Consecutive sample
+// gaps longer than GAP_OFF_MIN are treated as off periods and contribute 0.
+export function computeCumulativeStress(
+  series: FatigueSample[],
+  activeFloor = LOGIC.ACTIVE_BAND_LOW_KPSI,
+): { ts: string; value: number }[] {
+  let cumulative = 0;
+  return series.map((s, i) => {
+    if (i > 0) {
+      const dtMs = new Date(s.ts).getTime() - new Date(series[i - 1].ts).getTime();
+      const dtMin = dtMs / 60_000;
+      // Skip gaps longer than the off-detection threshold (maintenance / off periods).
+      if (dtMin <= LOGIC.GAP_OFF_MIN * 6) {
+        cumulative += Math.max(0, s.p01 - activeFloor) * Math.min(dtMin, LOGIC.GAP_OFF_MIN);
+      }
+    }
+    return { ts: s.ts, value: cumulative };
+  });
+}
+
 // Health badge for the cards
 export function healthFor(p: PartRecord): "nominal" | "watch" | "critical" {
   return p.health;
