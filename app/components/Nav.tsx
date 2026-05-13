@@ -3,11 +3,14 @@
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-const TABS = [
+type Tab = { label: string; href: string; noEq?: boolean };
+
+const TABS: Tab[] = [
   { label: "Dashboard", href: "/" },
   { label: "Replace Part", href: "/replace" },
   { label: "Predictions", href: "/predict" },
   { label: "History", href: "/history" },
+  { label: "Glossary", href: "/glossary", noEq: true },
 ];
 
 const EQUIPMENT_OPTIONS = [
@@ -37,10 +40,11 @@ export function Nav() {
           </span>
           {TABS.map((tab) => {
             const isActive = pathname === tab.href;
+            const href = tab.noEq ? tab.href : `${tab.href}?eq=${eq}`;
             return (
               <Link
                 key={tab.href}
-                href={`${tab.href}?eq=${eq}`}
+                href={href}
                 className={`rounded-md px-3 py-1.5 text-sm font-medium transition ${
                   isActive
                     ? "bg-cyan-900/40 text-cyan-300"
