@@ -1,7 +1,7 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import {
   buildSeedPartStatuses,
   type PartStatus,
@@ -112,6 +112,8 @@ function buildPartStatuses(
   const lifecycleById = new Map<string, LifecycleSnapshot>();
   for (const lc of snapshot?.lifecycles ?? []) {
     if (lc.removal_date || lc.archived_at) continue;
+    // Only include lifecycles for the selected equipment.
+    if (!lc.installation_id.startsWith(`${equipmentId}_`)) continue;
     lifecycleById.set(lc.installation_id, lc);
   }
   const pipelineById = new Map(pipelineParts.map((p) => [p.installation_id, p]));
@@ -178,6 +180,7 @@ export default function Home() {
 
 function HomeContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const equipmentId = searchParams.get("eq") ?? DEFAULT_EQUIPMENT;
 
   const live = useLiveLifecycles();
@@ -186,6 +189,7 @@ function HomeContent() {
   const [pipelineLoaded, setPipelineLoaded] = useState(false);
   const [selectedPartId, setSelectedPartId] = useState<string>("");
   const [replacePart, setReplacePart] = useState<PartStatus | null>(null);
+  const redirectedRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -197,6 +201,17 @@ function HomeContent() {
         if (cancelled) return;
         setPipelinePayload(json);
         setPipelineLoaded(true);
+
+        // Auto-navigate to the equipment that the CSV belongs to.
+        // Only redirect once per mount to avoid loops on re-polls.
+        if (
+          !redirectedRef.current
+          && json.equipment_id
+          && json.equipment_id !== equipmentId
+        ) {
+          redirectedRef.current = true;
+          router.replace(`/?eq=${json.equipment_id}`);
+        }
       } catch {
         // No pipeline yet — slots still render from snapshot.
       }
@@ -207,18 +222,52 @@ function HomeContent() {
       cancelled = true;
       clearInterval(id);
     };
-  }, []);
+  }, [equipmentId, router]);
 
   const snapshot = (live.data as SnapshotResponse | null) ?? null;
   const pipelineParts = useMemo<PartRecord[]>(
-    () => pipelinePayload?.parts ?? [],
-    [pipelinePayload],
+    () => (pipelinePayload?.parts ?? []).filter(
+      (p) => p.installation_id.startsWith(`${equipmentId}_`),
+    ),
+    [pipelinePayload, equipmentId],
   );
-  const fatigue: FatigueSample[] = pipelinePayload?.fatigue_series ?? [];
-  const offWindows: WindowSpan[] = pipelinePayload?.off_windows ?? [];
-  const highStress: WindowSpan[] = pipelinePayload?.high_stress_windows ?? [];
-  const summary = pipelinePayload?.summary ?? null;
-  const events = snapshot?.events ?? [];
+
+  // Pipeline sensor data belongs to a single equipment (the one whose CSV
+  // was last uploaded). Only surface it when the selected equipment matches.
+  const pipelineMatchesEquipment =
+    pipelinePayload?.equipment_id === equipmentId;
+
+  const fatigue: FatigueSample[] = pipelineMatchesEquipment
+    ? (pipelinePayload?.fatigue_series ?? [])
+    : [];
+  const offWindows: WindowSpan[] = pipelineMatchesEquipment
+    ? (pipelinePayload?.off_windows ?? [])
+    : [];
+  const highStress: WindowSpan[] = pipelineMatchesEquipment
+    ? (pipelinePayload?.high_stress_windows ?? [])
+    : [];
+  const summary = pipelineMatchesEquipment
+    ? (pipelinePayload?.summary ?? null)
+    : null;
+
+  // Filter events to the selected equipment's installation IDs.
+  const equipmentInstallIds = useMemo(
+    () =>
+      new Set(
+        snapshot?.slots
+          ?.filter((s) => s.equipment_id === equipmentId)
+          .map((s) => s.installation_id) ?? [],
+      ),
+    [snapshot, equipmentId],
+  );
+  const events = useMemo(
+    () =>
+      (snapshot?.events ?? []).filter(
+        (e) =>
+          !e.installation_id || equipmentInstallIds.has(e.installation_id),
+      ),
+    [snapshot, equipmentInstallIds],
+  );
 
   const parts = useMemo(
     () => buildPartStatuses(equipmentId, snapshot, pipelineParts),
@@ -401,11 +450,11 @@ function HomeContent() {
             highStress={highStress}
             offWindows={offWindows}
             parts={pipelineParts}
-            runs={pipelinePayload?.runs}
+            runs={pipelineMatchesEquipment ? pipelinePayload?.runs : undefined}
           />
           <PrematureStoppageHistogram
             series={fatigue}
-            runs={pipelinePayload?.runs}
+            runs={pipelineMatchesEquipment ? pipelinePayload?.runs : undefined}
           />
         </section>
 

@@ -296,20 +296,24 @@ export interface LifecycleStore {
   }[]>;
 }
 
-// Best-effort: pull "0091" out of a path like "0091_12APR26to12MAY26.csv" or
-// "trends:0091_2026-05.csv". Returns null when no equipment prefix is found.
+// Extract the 4-digit C55 asset ID from the beginning of a trends CSV filename.
+// Convention: all uploaded CSVs start with the asset ID, e.g. "0091_12APR26to12MAY26.csv".
 export function inferEquipmentIdFromSource(source: string | null | undefined): string | null {
   if (!source) return null;
-  const m = source.match(/(?:^|[\s/:_-])(\d{3,5})(?:[_.\s-]|$)/);
+  // Match exactly 4 digits at the beginning of the filename (after stripping
+  // any path or "trends:" prefix). Handles "0091_*.csv", "0938-*.txt", etc.
+  const base = source.replace(/^.*[/:]/, ""); // strip path/prefix
+  const m = base.match(/^(\d{4})[_.\-]/);
   return m ? m[1] : null;
 }
 
 const PUBLIC_PIPELINE_PATH = path.join(process.cwd(), "public", "pipeline.json");
 
-async function writePipelineSnapshot(result: TrendsIngestResult): Promise<void> {
+async function writePipelineSnapshot(result: TrendsIngestResult, equipmentId?: string | null): Promise<void> {
   const payload = {
     generated_at: result.generated_at,
     sensor_file: result.sensor_file,
+    equipment_id: equipmentId ?? inferEquipmentIdFromSource(result.sensor_file) ?? null,
     sensor_sha256: "",
     rows_ingested: result.rows_ingested,
     summary: result.summary,
@@ -728,7 +732,7 @@ class LocalJsonStore implements LifecycleStore {
     }
 
     await writeLocal(snap);
-    await writePipelineSnapshot(input.result);
+    await writePipelineSnapshot(input.result, equipmentId);
 
     return {
       lifecycles_updated: updated,
@@ -1138,7 +1142,7 @@ class SupabaseStore implements LifecycleStore {
       if (!error) anomaliesLogged = anomalyRows.length;
     }
 
-    await writePipelineSnapshot(input.result);
+    await writePipelineSnapshot(input.result, equipmentId);
     return {
       lifecycles_updated: updated,
       events_logged: logged,

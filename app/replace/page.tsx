@@ -81,6 +81,7 @@ function buildParts(
   const lifecycleById = new Map<string, LifecycleSnapshot>();
   for (const lc of snapshot?.lifecycles ?? []) {
     if (lc.removal_date || lc.archived_at) continue;
+    if (!lc.installation_id.startsWith(`${equipmentId}_`)) continue;
     lifecycleById.set(lc.installation_id, lc);
   }
   const pipelineById = new Map(pipelineParts.map((p) => [p.installation_id, p]));
@@ -194,14 +195,18 @@ function ReplaceContent() {
         if (snapRes.ok) setSnapshot((await snapRes.json()) as SnapshotResponse);
         if (pipelineRes?.ok) {
           const payload = (await pipelineRes.json()) as PipelinePayload;
-          setPipelineParts(payload.parts ?? []);
+          setPipelineParts(
+            (payload.parts ?? []).filter(
+              (p) => p.installation_id.startsWith(`${equipmentId}_`),
+            ),
+          );
         }
       } finally {
         setLoading(false);
       }
     }
     void load();
-  }, []);
+  }, [equipmentId]);
 
   const parts = useMemo(
     () => buildParts(equipmentId, snapshot, pipelineParts),

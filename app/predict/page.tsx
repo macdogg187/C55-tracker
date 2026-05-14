@@ -1,7 +1,7 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { FailurePredictionPanel } from "../components/FailurePredictionPanel";
 import { FatigueChart } from "../components/FatigueChart";
 import type { FatigueSample, PipelinePayload, WindowSpan } from "@/lib/analytics";
@@ -16,11 +16,13 @@ export default function PredictPage() {
 
 function PredictContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const equipmentId = searchParams.get("eq") ?? "0091";
 
   const [pipelinePayload, setPipelinePayload] = useState<PipelinePayload | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [refreshKey] = useState(0);
+  const redirectedRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -29,7 +31,17 @@ function PredictContent() {
         const res = await fetch("/pipeline.json", { cache: "no-store" });
         if (!res.ok) return;
         const json = (await res.json()) as PipelinePayload;
-        if (!cancelled) setPipelinePayload(json);
+        if (!cancelled) {
+          setPipelinePayload(json);
+          if (
+            !redirectedRef.current
+            && json.equipment_id
+            && json.equipment_id !== equipmentId
+          ) {
+            redirectedRef.current = true;
+            router.replace(`/predict?eq=${json.equipment_id}`);
+          }
+        }
       } catch {
         // No pipeline yet — predictions still work from lifecycle data.
       }
@@ -40,19 +52,23 @@ function PredictContent() {
       cancelled = true;
       clearInterval(id);
     };
-  }, []);
+  }, [equipmentId, router]);
+
+  // Only surface pipeline sensor data when it matches the selected equipment.
+  const pipelineMatchesEquipment =
+    pipelinePayload?.equipment_id === equipmentId;
 
   const fatigue: FatigueSample[] = useMemo(
-    () => pipelinePayload?.fatigue_series ?? [],
-    [pipelinePayload],
+    () => pipelineMatchesEquipment ? (pipelinePayload?.fatigue_series ?? []) : [],
+    [pipelinePayload, pipelineMatchesEquipment],
   );
   const offWindows: WindowSpan[] = useMemo(
-    () => pipelinePayload?.off_windows ?? [],
-    [pipelinePayload],
+    () => pipelineMatchesEquipment ? (pipelinePayload?.off_windows ?? []) : [],
+    [pipelinePayload, pipelineMatchesEquipment],
   );
   const highStress: WindowSpan[] = useMemo(
-    () => pipelinePayload?.high_stress_windows ?? [],
-    [pipelinePayload],
+    () => pipelineMatchesEquipment ? (pipelinePayload?.high_stress_windows ?? []) : [],
+    [pipelinePayload, pipelineMatchesEquipment],
   );
   return (
     <main className="min-h-screen bg-[#FAFAF5] text-[#1A1A16]">

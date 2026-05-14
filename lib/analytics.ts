@@ -85,6 +85,7 @@ export type RunRecord = {
 export type PipelinePayload = {
   generated_at: string;
   sensor_file: string;
+  equipment_id: string | null;
   sensor_sha256: string;
   rows_ingested: number;
   summary: {
