@@ -17,6 +17,7 @@ import { useLiveLifecycles } from "@/lib/use-live-lifecycles";
 import { SequentialFlowchart } from "./components/SequentialFlowchart";
 import { FatigueChart } from "./components/FatigueChart";
 import { TemperatureChart } from "./components/TemperatureChart";
+import { PrematureStoppageHistogram } from "./components/PrematureStoppageHistogram";
 import { MaintenanceLogPanel } from "./components/MaintenanceLogPanel";
 import { DataIngestPanel } from "./components/DataIngestPanel";
 import { SubassemblyGrid } from "./components/SubassemblyGrid";
@@ -400,6 +401,10 @@ function HomeContent() {
             highStress={highStress}
             offWindows={offWindows}
             parts={pipelineParts}
+            runs={pipelinePayload?.runs}
+          />
+          <PrematureStoppageHistogram
+            series={fatigue}
             runs={pipelinePayload?.runs}
           />
         </section>
