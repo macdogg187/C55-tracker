@@ -13,6 +13,11 @@
     "intra_pass_gap_min": 2
   },
 
+  "stoppage_detection": {
+    "min_dip_duration_min": 3,
+    "dip_ratio_floor": 0.6
+  },
+
   "run_validation": {
     "inter_run_gap_min": 240,
     "long_pass_count": 10,

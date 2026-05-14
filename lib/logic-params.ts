@@ -32,6 +32,11 @@ export type LogicParams = {
     intra_pass_gap_min: number;
   };
 
+  stoppage_detection: {
+    min_dip_duration_min: number;
+    dip_ratio_floor: number;
+  };
+
   run_validation: {
     inter_run_gap_min: number;
     long_pass_count: number;
@@ -84,6 +89,11 @@ export const DEFAULT_LOGIC_PARAMS: LogicParams = {
     min_duration_min: 34,
     max_duration_min: 40,
     intra_pass_gap_min: 2,
+  },
+
+  stoppage_detection: {
+    min_dip_duration_min: 3,
+    dip_ratio_floor: 0.6,
   },
 
   run_validation: {
@@ -186,6 +196,7 @@ function mergeWithDefaults(parsed: Partial<LogicParams>): LogicParams {
     ...DEFAULT_LOGIC_PARAMS,
     ...parsed,
     pass_detection: { ...DEFAULT_LOGIC_PARAMS.pass_detection, ...parsed.pass_detection },
+    stoppage_detection: { ...DEFAULT_LOGIC_PARAMS.stoppage_detection, ...parsed.stoppage_detection },
     run_validation: { ...DEFAULT_LOGIC_PARAMS.run_validation, ...parsed.run_validation },
     risk_score:     { ...DEFAULT_LOGIC_PARAMS.risk_score,     ...parsed.risk_score },
     risk_bands:     { ...DEFAULT_LOGIC_PARAMS.risk_bands,     ...parsed.risk_bands },
