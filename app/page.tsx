@@ -191,6 +191,10 @@ function HomeContent() {
   const [replacePart, setReplacePart] = useState<PartStatus | null>(null);
   const redirectedRef = useRef(false);
 
+  function handleSelectPart(id: string) {
+    setSelectedPartId(id);
+  }
+
   useEffect(() => {
     let cancelled = false;
     async function load() {
@@ -431,7 +435,8 @@ function HomeContent() {
           <SequentialFlowchart
             parts={parts}
             selectedId={selectedPart?.id ?? ""}
-            onSelect={setSelectedPartId}
+            onSelect={handleSelectPart}
+            onDeselect={() => setSelectedPartId("")}
           />
         </section>
 
@@ -475,10 +480,11 @@ function HomeContent() {
         {structuralParts.length > 0 && (
           <SubassemblyGrid
             title="Structural Odometers"
-            subtitle="Sorted highest wear % → lowest · click row to log maintenance"
+            subtitle="Sorted highest wear % → lowest · click to view details"
             parts={structuralParts}
             selectedId={selectedPart?.id ?? ""}
-            onSelect={setSelectedPartId}
+            onSelect={handleSelectPart}
+            onDeselect={() => setSelectedPartId("")}
             onReplace={setReplacePart}
             sortByPct
           />
@@ -491,7 +497,8 @@ function HomeContent() {
             subtitle="Cluster · Pump · Homogenizer · Manifold"
             parts={componentParts}
             selectedId={selectedPart?.id ?? ""}
-            onSelect={setSelectedPartId}
+            onSelect={handleSelectPart}
+            onDeselect={() => setSelectedPartId("")}
             onReplace={setReplacePart}
           />
         )}

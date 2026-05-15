@@ -8,13 +8,14 @@ type Props = {
   selected: boolean;
   onSelect: () => void;
   onReplace?: () => void;
+  onDeselect?: () => void;
 };
 
 function formatHours(min: number) {
   return `${(min / 60).toFixed(1)} h`;
 }
 
-export function PartCard({ part, selected, onSelect, onReplace }: Props) {
+export function PartCard({ part, selected, onSelect, onReplace, onDeselect }: Props) {
   const stateColor =
     part.health === "critical"
       ? "text-[#A82020]"
@@ -39,53 +40,120 @@ export function PartCard({ part, selected, onSelect, onReplace }: Props) {
 
   return (
     <div
-      className={`group flex w-full items-center gap-4 border p-4 text-left transition-all rounded-sm ${
+      className={`group w-full text-left transition-all rounded-sm ${
         selected
-          ? "border-[#C04810] bg-[#F0EFE8] shadow-[0_0_0_1px_rgba(212,96,42,0.2)]"
-          : "border-[#B0AD9E] bg-[#F0EFE8] hover:border-[#7A7768]"
+          ? "border-l-4 border-l-[#C04810] border-t border-r border-b border-t-[#B0AD9E] border-r-[#B0AD9E] border-b-[#B0AD9E] bg-[#FAF5EE] shadow-md"
+          : "border-l-4 border-l-transparent border border-[#B0AD9E] bg-[#F0EFE8] hover:border-l-[#C04810]/40 hover:border-[#7A7768]"
       }`}
     >
-      <button onClick={onSelect} className="flex flex-1 items-center gap-4 text-left">
-        {meter}
-        <div className="min-w-0 space-y-1">
-          <p className="truncate text-sm font-semibold text-[#1A1A16]">
-            {part.partName}
-          </p>
-          <p className="text-[10px] text-[#787870]">
-            {part.installationId}
-            {part.isConsumable && <span className="ml-1 text-[#B8860B]">· consumable</span>}
-            {part.isStructural && <span className="ml-1 text-[#C04810]">· structural</span>}
-          </p>
-          <p className="text-xs text-[#4A4A42]">S/N: {part.serialNumber || "—"}</p>
-          <p className="text-xs text-[#4A4A42]">
-            Active: {formatHours(part.granularRuntimeMinutes)} · σ-stress:{" "}
-            {formatHours(part.highStressMinutes)}
-          </p>
-          <div className="flex items-center gap-2">
-            <span className={`font-barlow text-[10px] font-medium uppercase tracking-wider ${stateColor}`}>
-              {part.health}
-            </span>
-            {part.alert && (
-              <span className={`px-2 py-0.5 font-barlow text-[9px] font-semibold uppercase tracking-wider rounded-sm ${
-                part.alert === "failure"
-                  ? "bg-[#A82020]/15 text-[#A82020]"
-                  : "bg-[#B8860B]/15 text-[#B8860B]"
-              }`}>
-                {part.alert === "failure" ? "Replace Now" : "Inspect Due"}
+      <div className="flex items-center gap-4 p-4">
+        <button onClick={onSelect} className="flex flex-1 items-center gap-4 text-left">
+          {meter}
+          <div className="min-w-0 space-y-1">
+            <p className="truncate text-sm font-semibold text-[#1A1A16]">
+              {part.partName}
+            </p>
+            <p className="text-[10px] text-[#787870]">
+              {part.installationId}
+              {part.isConsumable && <span className="ml-1 text-[#B8860B]">· consumable</span>}
+              {part.isStructural && <span className="ml-1 text-[#C04810]">· structural</span>}
+            </p>
+            <p className="text-xs text-[#4A4A42]">S/N: {part.serialNumber || "—"}</p>
+            <p className="text-xs text-[#4A4A42]">
+              Active: {formatHours(part.granularRuntimeMinutes)} · σ-stress:{" "}
+              {formatHours(part.highStressMinutes)}
+            </p>
+            <div className="flex items-center gap-2">
+              <span className={`font-barlow text-[10px] font-medium uppercase tracking-wider ${stateColor}`}>
+                {part.health}
               </span>
+              {part.alert && (
+                <span className={`px-2 py-0.5 font-barlow text-[9px] font-semibold uppercase tracking-wider rounded-sm ${
+                  part.alert === "failure"
+                    ? "bg-[#A82020]/15 text-[#A82020]"
+                    : "bg-[#B8860B]/15 text-[#B8860B]"
+                }`}>
+                  {part.alert === "failure" ? "Replace Now" : "Inspect Due"}
+                </span>
+              )}
+            </div>
+          </div>
+        </button>
+        {onReplace && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onReplace(); }}
+            className="shrink-0 border border-[#C04810] bg-[#C04810]/10 px-2.5 py-1.5 font-barlow text-[9px] font-semibold uppercase tracking-wider text-[#C04810] transition hover:bg-[#C04810]/20 rounded-sm"
+            title="Replace this part"
+          >
+            Replace
+          </button>
+        )}
+      </div>
+
+      {/* Inline detail popover — expands in-place below the card header */}
+      {selected && (
+        <div className="border-t border-[#B0AD9E] bg-[#E5E3DA] px-4 py-3">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="font-barlow text-[10px] font-semibold uppercase tracking-widest text-[#C04810]">
+              Part Details
+            </span>
+            {onDeselect && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onDeselect(); }}
+                className="flex h-5 w-5 items-center justify-center rounded-sm border border-[#B0AD9E] bg-[#F0EFE8] text-xs text-[#4A4A42] hover:bg-[#E5E3DA] hover:text-[#1A1A16] transition"
+                title="Close details"
+              >
+                ×
+              </button>
             )}
           </div>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
+            <DetailRow label="Installation ID" value={part.installationId} />
+            <DetailRow label="Serial Number" value={part.serialNumber || "—"} />
+            <DetailRow label="Active Runtime" value={formatHours(part.granularRuntimeMinutes)} />
+            <DetailRow label="High-Stress" value={formatHours(part.highStressMinutes)} />
+            <DetailRow label="Cum. Pressure" value={part.cumulativePressureStress.toFixed(1)} />
+            <DetailRow
+              label="Health"
+              value={part.health}
+              accent={stateColor}
+            />
+            {part.expectedMtbfMinutes && (
+              <DetailRow label="Expected MTBF" value={formatHours(part.expectedMtbfMinutes)} />
+            )}
+            {part.inspectionThresholdMin && (
+              <DetailRow label="Inspection At" value={formatHours(part.inspectionThresholdMin)} />
+            )}
+            {part.failureThresholdMin && (
+              <DetailRow label="Failure At" value={formatHours(part.failureThresholdMin)} />
+            )}
+            {part.alert && (
+              <DetailRow
+                label="Alert"
+                value={part.alert === "failure" ? "Replace Now" : "Inspect Due"}
+                accent={part.alert === "failure" ? "text-[#A82020]" : "text-[#B8860B]"}
+              />
+            )}
+          </div>
+          {onReplace && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onReplace(); }}
+              className="mt-2 border border-[#C04810] bg-[#C04810]/10 px-3 py-1 font-barlow text-[9px] font-semibold uppercase tracking-wider text-[#C04810] transition hover:bg-[#C04810]/20 rounded-sm"
+            >
+              Replace Part
+            </button>
+          )}
         </div>
-      </button>
-      {onReplace && (
-        <button
-          onClick={(e) => { e.stopPropagation(); onReplace(); }}
-          className="shrink-0 border border-[#C04810] bg-[#C04810]/10 px-2.5 py-1.5 font-barlow text-[9px] font-semibold uppercase tracking-wider text-[#C04810] transition hover:bg-[#C04810]/20 rounded-sm"
-          title="Replace this part"
-        >
-          Replace
-        </button>
       )}
+    </div>
+  );
+}
+
+function DetailRow({ label, value, accent }: { label: string; value: string; accent?: string }) {
+  return (
+    <div className="flex items-baseline justify-between gap-2">
+      <span className="text-[#7A7768]">{label}</span>
+      <span className={`font-medium ${accent ?? "text-[#1A1A16]"}`}>{value}</span>
     </div>
   );
 }

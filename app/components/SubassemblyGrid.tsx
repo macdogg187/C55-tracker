@@ -7,6 +7,7 @@ type Props = {
   parts: PartStatus[];
   selectedId: string;
   onSelect: (id: string) => void;
+  onDeselect?: () => void;
   onReplace?: (part: PartStatus) => void;
   title: string;
   subtitle?: string;
@@ -44,6 +45,7 @@ function LMRRow({
   parts,
   selectedId,
   onSelect,
+  onDeselect,
   onReplace,
 }: {
   label: string;
@@ -51,6 +53,7 @@ function LMRRow({
   parts: PartStatus[];
   selectedId: string;
   onSelect: (id: string) => void;
+  onDeselect?: () => void;
   onReplace?: (part: PartStatus) => void;
 }) {
   const sorted = sortByOrientation(parts);
@@ -66,6 +69,7 @@ function LMRRow({
           part={p}
           selected={selectedId === p.id}
           onSelect={() => onSelect(p.id)}
+          onDeselect={onDeselect}
           onReplace={onReplace ? () => onReplace(p) : undefined}
         />
         <div />
@@ -93,6 +97,7 @@ function LMRRow({
             part={p}
             selected={selectedId === p.id}
             onSelect={() => onSelect(p.id)}
+            onDeselect={onDeselect}
             onReplace={onReplace ? () => onReplace(p) : undefined}
           />
         );
@@ -131,12 +136,14 @@ function LMRSection({
   partCodeOrder,
   selectedId,
   onSelect,
+  onDeselect,
   onReplace,
 }: {
   parts: PartStatus[];
   partCodeOrder: string[];
   selectedId: string;
   onSelect: (id: string) => void;
+  onDeselect?: () => void;
   onReplace?: (part: PartStatus) => void;
 }) {
   const byCode = new Map<string, PartStatus[]>();
@@ -166,6 +173,7 @@ function LMRSection({
               parts={ps}
               selectedId={selectedId}
               onSelect={onSelect}
+              onDeselect={onDeselect}
               onReplace={onReplace}
             />
           );
@@ -179,6 +187,7 @@ export function SubassemblyGrid({
   parts,
   selectedId,
   onSelect,
+  onDeselect,
   onReplace,
   title,
   subtitle,
@@ -219,6 +228,7 @@ export function SubassemblyGrid({
                     parts={ps}
                     selectedId={selectedId}
                     onSelect={onSelect}
+                    onDeselect={onDeselect}
                     onReplace={onReplace}
                   />
                 ))}
@@ -238,6 +248,7 @@ export function SubassemblyGrid({
                       part={p}
                       selected={selectedId === p.id}
                       onSelect={() => onSelect(p.id)}
+                      onDeselect={onDeselect}
                       onReplace={onReplace ? () => onReplace(p) : undefined}
                     />
                   )),
@@ -294,6 +305,7 @@ export function SubassemblyGrid({
                   partCodeOrder={sec.order}
                   selectedId={selectedId}
                   onSelect={onSelect}
+                  onDeselect={onDeselect}
                   onReplace={onReplace}
                 />
               ) : (
@@ -310,6 +322,7 @@ export function SubassemblyGrid({
                         part={p}
                         selected={selectedId === p.id}
                         onSelect={() => onSelect(p.id)}
+                        onDeselect={onDeselect}
                         onReplace={onReplace ? () => onReplace(p) : undefined}
                       />
                     ))}
