@@ -16,7 +16,7 @@ type Props = {
 
 const ZONE_PART_ORDER: Record<string, string[]> = {
   cluster:     ["ICVB", "HPT", "OCVB", "ICVBS", "OCVBS", "CVBALL", "SPRING"],
-  pump:        ["PLG", "BUS", "PB", "CVBSPB"],
+  pump:        ["PLG", "BUS", "PB", "BSPB"],
   homogenizer: ["HVB", "CSEAT", "IR", "CSTEM"],
   manifold:    ["OM"],
   instrument:  ["TR"],
@@ -72,8 +72,8 @@ function LMRRow({
           onDeselect={onDeselect}
           onReplace={onReplace ? () => onReplace(p) : undefined}
         />
-        <div />
-        <div />
+        <div className="min-h-[100px] rounded-sm" />
+        <div className="min-h-[100px] rounded-sm" />
       </div>
     );
   }
@@ -87,8 +87,10 @@ function LMRRow({
           return (
             <div
               key={orient}
-              className="min-h-[100px] border border-[#B0AD9E]/40 bg-[#E5E3DA]/30 opacity-25 rounded-sm"
-            />
+              className="flex min-h-[100px] items-center justify-center border-2 border-dashed border-[#B8860B]/60 bg-[#E5E3DA]/50 rounded-sm"
+            >
+              <span className="font-barlow text-[10px] uppercase tracking-widest text-[#B8860B]/60">Empty</span>
+            </div>
           );
         }
         return (
@@ -278,8 +280,8 @@ export function SubassemblyGrid({
   const homogenizerParts = byZone.get("homogenizer") ?? [];
 
   const sections = [
-    { key: "cluster",     label: "Cluster",     parts: clusterParts,    order: ZONE_PART_ORDER.cluster },
-    { key: "pump",        label: "Pump",         parts: pumpParts,       order: ZONE_PART_ORDER.pump },
+    { key: "cluster",     label: "Check Valve",     parts: clusterParts,    order: ZONE_PART_ORDER.cluster },
+    { key: "pump",        label: "Pump Body",       parts: pumpParts,       order: ZONE_PART_ORDER.pump },
     { key: "homogenizer", label: "Homogenizer",  parts: homogenizerParts, order: ZONE_PART_ORDER.homogenizer },
     { key: "manifold",    label: "Manifold & Instruments", parts: manifoldParts, order: [...ZONE_PART_ORDER.manifold, ...ZONE_PART_ORDER.instrument] },
   ].filter((s) => s.parts.length > 0);

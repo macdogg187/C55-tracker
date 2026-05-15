@@ -46,10 +46,10 @@ export function PartCard({ part, selected, onSelect, onReplace, onDeselect }: Pr
           : "border-l-4 border-l-transparent border border-[#B0AD9E] bg-[#F0EFE8] hover:border-l-[#C04810]/40 hover:border-[#7A7768]"
       }`}
     >
-      <div className="flex items-center gap-4 p-4">
-        <button onClick={onSelect} className="flex flex-1 items-center gap-4 text-left">
+      <div className="flex items-start gap-3 p-4">
+        <button onClick={onSelect} className="flex flex-1 min-w-0 items-center gap-4 text-left">
           {meter}
-          <div className="min-w-0 space-y-1">
+          <div className="min-w-0 overflow-hidden space-y-1">
             <p className="truncate text-sm font-semibold text-[#1A1A16]">
               {part.partName}
             </p>

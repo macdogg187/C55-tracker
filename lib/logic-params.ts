@@ -137,7 +137,7 @@ export const DEFAULT_LOGIC_PARAMS: LogicParams = {
     PLG:    { expected_mtbf_minutes: 8000 },
     BUS:    { seal_life_low_min: 800, seal_life_high_min: 1200 },
     PB:     { expected_mtbf_minutes: 15000, inspection_threshold_min: 12000, failure_threshold_min: 14500 },
-    CVBSPB: { seal_life_low_min: 800, seal_life_high_min: 1200 },
+    BSPB: { seal_life_low_min: 800, seal_life_high_min: 1200 },
     SPRING: { seal_life_low_min: 800, seal_life_high_min: 1200 },
     HVB:    { expected_mtbf_minutes: 12000 },
     CSEAT:  { expected_mtbf_minutes: 6000 },

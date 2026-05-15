@@ -42,7 +42,7 @@ warnings.filterwarnings("ignore")
 # --------------------------------------------------------------------------- #
 
 CLUSTER_SLOTS = {1: "ICVB", 2: "HPT", 3: "OCVB", 4: "ICVBS", 5: "OCVBS"}
-PUMP_SLOTS    = {1: "PLG", 2: "BUS", 3: "PB", 4: "CVBSPB"}
+PUMP_SLOTS    = {1: "PLG", 2: "BUS", 3: "PB", 4: "BSPB"}
 HEAD_SLOTS    = {1: "HVB", 2: "CSEAT", 3: "IR", 4: "CSTEM"}
 
 PART_CODE_TO_NAME = {
@@ -55,7 +55,7 @@ PART_CODE_TO_NAME = {
     "PLG": "Plunger",
     "BUS": "Backup Support Seal (BUS)",
     "PB": "Pump Body",
-    "CVBSPB": "Check Valve Ball Seat (Pump Body)",
+    "BSPB": "Ball Seat (Pump Body)",
     "SPRING": "Check Valve Spring",
     "HVB": "Homogenizing Valve Body",
     "CSEAT": "Ceramic Seat",
@@ -89,7 +89,7 @@ NAME_ALIASES.update({
     "outlet check valve body": "OCVB",
     "inlet check valve ball seat": "ICVBS",
     "outlet check valve ball seat": "OCVBS",
-    "check valve ball seat (pump body)": "CVBSPB",
+    "ball seat (pump body)": "BSPB",
     "check valve ball": "CVBALL",
     "check valve spring": "SPRING",
     "spring": "SPRING",
@@ -127,11 +127,11 @@ SLOT_RE = re.compile(r"^(?P<eq>\d{3,5})_(?P<slot>[A-Z]{1,2}\d?)$")
 DEFAULT_MTBF: dict[str, int] = {
     "HVB": 12000, "PB": 15000, "HPT": 9000, "ICVB": 10000,
     "OCVB": 11000, "ICVBS": 1000, "OCVBS": 1000, "PLG": 8000,
-    "BUS": 1000, "CVBSPB": 1000, "CVBALL": 1000, "SPRING": 1000,
+    "BUS": 1000, "BSPB": 1000, "CVBALL": 1000, "SPRING": 1000,
     "CSEAT": 6000, "IR": 6000, "CSTEM": 6000, "OM": 18000, "TR": 20000,
 }
 
-CONSUMABLE_CODES = {"ICVBS", "OCVBS", "CVBALL", "BUS", "CVBSPB", "SPRING"}
+CONSUMABLE_CODES = {"ICVBS", "OCVBS", "CVBALL", "BUS", "BSPB", "SPRING"}
 STRUCTURAL_CODES = {"HPT", "PB", "OM"}
 SEAL_LIFE_LOW, SEAL_LIFE_HIGH = 800, 1200
 
@@ -447,7 +447,7 @@ def emit_seed_sql(
             "homogenizer" if code in {"HVB", "CSEAT", "IR", "CSTEM"}
             else "manifold" if code == "OM"
             else "instrument" if code == "TR"
-            else "pump" if code in {"PLG", "BUS", "PB", "CVBSPB"}
+            else "pump" if code in {"PLG", "BUS", "PB", "BSPB"}
             else "cluster"
         )
         is_consumable = code in CONSUMABLE_CODES

@@ -319,7 +319,7 @@ Step 4 — default:
 
 **Source file:** `lib/analytics.ts` `sealWearFraction()` (lines 122–131)
 
-Applies to **consumable** parts only: ICVBS, OCVBS, CVBALL, BUS, CVBSPB,
+Applies to **consumable** parts only: ICVBS, OCVBS, CVBALL, BUS, BSPB,
 SPRING. These are non-serialized seals and balls replaced on a time-based
 schedule rather than inspected individually.
 
@@ -553,7 +553,7 @@ All runtime thresholds are in **minutes of active runtime** (not calendar time).
 | `PLG` | Plunger | pump | No | 8,000 | — | — | — | — |
 | `BUS` | Backup Support Seal (BUS) | pump | **Yes** | — | — | — | 800 | 1,200 |
 | `PB` | Pump Body | pump | No | 15,000 | **12,000** | **14,500** | — | — |
-| `CVBSPB` | Check Valve Ball Seat (Pump Body) | pump | **Yes** | — | — | — | 800 | 1,200 |
+| `BSPB` | Ball Seat (Pump Body) | pump | **Yes** | — | — | — | 800 | 1,200 |
 
 ### Homogenizer parts
 
@@ -675,7 +675,7 @@ Installation IDs follow the pattern `{equipment_id}_{slot_code}`.
 | 1 | PLG |
 | 2 | BUS |
 | 3 | PB |
-| 4 | CVBSPB |
+| 4 | BSPB |
 
 **Homogenizer head slots (H + slot index):**
 

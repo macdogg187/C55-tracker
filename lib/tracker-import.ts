@@ -22,7 +22,7 @@ const CLUSTER_SLOTS: Record<number, string> = {
   1: "ICVB", 2: "HPT", 3: "OCVB", 4: "ICVBS", 5: "OCVBS",
 };
 const PUMP_SLOTS: Record<number, string> = {
-  1: "PLG", 2: "BUS", 3: "PB", 4: "CVBSPB",
+  1: "PLG", 2: "BUS", 3: "PB", 4: "BSPB",
 };
 const HEAD_SLOTS: Record<number, string> = {
   1: "HVB", 2: "CSEAT", 3: "IR", 4: "CSTEM",
@@ -59,7 +59,7 @@ Object.assign(NAME_ALIASES, {
   "outlet check valve body": "OCVB",
   "inlet check valve ball seat": "ICVBS",
   "outlet check valve ball seat": "OCVBS",
-  "check valve ball seat (pump body)": "CVBSPB",
+  "ball seat (pump body)": "BSPB",
   "check valve ball": "CVBALL",
   "check valve spring": "SPRING",
   "spring": "SPRING",

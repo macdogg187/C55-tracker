@@ -23,11 +23,11 @@ type Prediction = {
 const ZONE_BY_PART_CODE: Record<string, "cluster" | "pump"> = {
   ICVB: "cluster", HPT: "cluster", OCVB: "cluster",
   ICVBS: "cluster", OCVBS: "cluster", CVBALL: "cluster", SPRING: "cluster",
-  PLG: "pump", BUS: "pump", PB: "pump", CVBSPB: "pump",
+  PLG: "pump", BUS: "pump", PB: "pump", BSPB: "pump",
 };
 
 const CLUSTER_ORDER = ["ICVB", "HPT", "OCVB", "ICVBS", "OCVBS", "CVBALL", "SPRING"];
-const PUMP_ORDER    = ["PLG", "BUS", "PB", "CVBSPB"];
+const PUMP_ORDER    = ["PLG", "BUS", "PB", "BSPB"];
 const CENTER_ORDER  = ["HVB", "CSEAT", "IR", "CSTEM", "OM", "TR"];
 
 function inferOrientation(id: string): "left" | "middle" | "right" | "center" {

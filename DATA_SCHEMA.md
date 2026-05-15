@@ -199,7 +199,7 @@ Defined in [`lib/analytics.ts`](lib/analytics.ts):
 | `PLG` | Plunger | pump | no | no | — | 8,000 | — | — | — |
 | `BUS` | Backup Support Seal (BUS) | pump | yes | no | — | — | — | — | 800–1,200 |
 | `PB` | Pump Body | pump | no | yes | yes | 15,000 | 12,000 | 14,500 | — |
-| `CVBSPB` | CV Ball Seat (Pump Body) | pump | yes | no | — | — | — | — | 800–1,200 |
+| `BSPB` | Ball Seat (Pump Body) | pump | yes | no | — | — | — | — | 800–1,200 |
 | `HVB` | Homogenizing Valve Body | homogenizer | no | no | yes | 12,000 | — | — | — |
 | `CSEAT` | Ceramic Seat | homogenizer | no | no | — | 6,000 | — | — | — |
 | `IR` | Impact Ring | homogenizer | no | no | — | 6,000 | — | — | — |
@@ -212,7 +212,7 @@ Defined in [`lib/analytics.ts`](lib/analytics.ts):
 Per equipment unit (3 cluster columns × 5 slots + 3 pump columns × 4 slots + 4 head slots + 1 manifold + 1 transducer = **35 slots**):
 
 - **Cluster** (slots 1–5 each): `{EQ}_LC1..LC5`, `{EQ}_MC1..MC5`, `{EQ}_RC1..RC5` → `ICVB, HPT, OCVB, ICVBS, OCVBS`
-- **Pump** (slots 1–4 each): `{EQ}_LP1..LP4`, `{EQ}_MP1..MP4`, `{EQ}_RP1..RP4` → `PLG, BUS, PB, CVBSPB`
+- **Pump** (slots 1–4 each): `{EQ}_LP1..LP4`, `{EQ}_MP1..MP4`, `{EQ}_RP1..RP4` → `PLG, BUS, PB, BSPB`
 - **Homogenizer head** (slots 1–4): `{EQ}_H1..H4` → `HVB, CSEAT, IR, CSTEM`
 - **Outlet manifold**: `{EQ}_O` → `OM`
 - **Transducer**: `{EQ}_T` → `TR`

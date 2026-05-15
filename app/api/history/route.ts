@@ -86,7 +86,7 @@ function derivePartCode(installationId: string): string | null {
   }
   const pump = /^([LMR])P([1-4])$/.exec(slot);
   if (pump) {
-    const codes: Record<string, string> = { "1": "PLG", "2": "BUS", "3": "PB", "4": "CVBSPB" };
+    const codes: Record<string, string> = { "1": "PLG", "2": "BUS", "3": "PB", "4": "BSPB" };
     return codes[pump[2]] ?? null;
   }
   const head = /^H([1-4])$/.exec(slot);

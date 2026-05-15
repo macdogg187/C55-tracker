@@ -187,7 +187,7 @@ function HomeContent() {
 
   const [pipelinePayload, setPipelinePayload] = useState<PipelinePayload | null>(null);
   const [pipelineLoaded, setPipelineLoaded] = useState(false);
-  const [selectedPartId, setSelectedPartId] = useState<string>("");
+  const [selectedPartId, setSelectedPartId] = useState<string | null>("");
   const [replacePart, setReplacePart] = useState<PartStatus | null>(null);
   const redirectedRef = useRef(false);
 
@@ -279,10 +279,11 @@ function HomeContent() {
   );
 
   const selectedPart = useMemo(() => {
-    if (selectedPartId) {
+    if (selectedPartId !== null && selectedPartId !== "") {
       const explicit = parts.find((p) => p.id === selectedPartId);
       if (explicit) return explicit;
     }
+    if (selectedPartId === null) return null;
     return parts.find((p) => p.serialNumber) ?? parts[0];
   }, [parts, selectedPartId]);
 
@@ -436,7 +437,7 @@ function HomeContent() {
             parts={parts}
             selectedId={selectedPart?.id ?? ""}
             onSelect={handleSelectPart}
-            onDeselect={() => setSelectedPartId("")}
+            onDeselect={() => setSelectedPartId(null)}
           />
         </section>
 
@@ -484,7 +485,7 @@ function HomeContent() {
             parts={structuralParts}
             selectedId={selectedPart?.id ?? ""}
             onSelect={handleSelectPart}
-            onDeselect={() => setSelectedPartId("")}
+            onDeselect={() => setSelectedPartId(null)}
             onReplace={setReplacePart}
             sortByPct
           />
@@ -494,11 +495,11 @@ function HomeContent() {
         {componentParts.length > 0 && (
           <SubassemblyGrid
             title="Sub-components"
-            subtitle="Cluster · Pump · Homogenizer · Manifold"
+            subtitle="Check Valve · Pump Body · Homogenizer · Manifold"
             parts={componentParts}
             selectedId={selectedPart?.id ?? ""}
             onSelect={handleSelectPart}
-            onDeselect={() => setSelectedPartId("")}
+            onDeselect={() => setSelectedPartId(null)}
             onReplace={setReplacePart}
           />
         )}

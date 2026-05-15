@@ -123,9 +123,9 @@ export const PART_CATALOG: Record<string, PartCatalogEntry> = {
     inspectionThresholdMin: 12000,
     failureThresholdMin: 14500,
   },
-  CVBSPB: {
-    partCode: "CVBSPB",
-    displayName: "Check Valve Ball Seat (Pump Body)",
+  BSPB: {
+    partCode: "BSPB",
+    displayName: "Ball Seat (Pump Body)",
     category: "pump",
     isConsumable: true,
     isStructural: false,
@@ -208,7 +208,7 @@ const PUMP_SLOTS: Record<number, string> = {
   1: "PLG",
   2: "BUS",
   3: "PB",
-  4: "CVBSPB",
+  4: "BSPB",
 };
 
 // Homogenizer head slot 1..4
